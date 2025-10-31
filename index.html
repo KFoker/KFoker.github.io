@@ -388,7 +388,7 @@
 <body>
     <!-- 粒子背景 -->
     <div id="particles-js"></div>
-
+    
     <!-- 头部导航 -->
     <header>
         <div class="container">
@@ -399,6 +399,7 @@
                 </div>
                 <ul class="nav-links" id="navLinks">
                     <li><a href="index.html">首页</a></li>
+                    <!-- 修正博客链接路径 -->
                     <li><a href="BOKEList/blog.html">博客</a></li>
                     <li><a href="projects.html">项目</a></li>
                     <li><a href="about.html">关于</a></li>
@@ -413,14 +414,15 @@
         <div class="container">
             <h1>探索科技的无限可能</h1>
             <p>分享前沿技术、开发经验与创新思维的个人博客空间。在这里，我们探讨人工智能、Web开发、数据科学和未来科技趋势。</p>
-            <a href="blog.html" class="cta-button">开始阅读</a>
+            <!-- 修正博客链接路径 -->
+            <a href="BOKEList/blog.html" class="cta-button">开始阅读</a>
         </div>
     </section>
 
     <!-- 主要内容区域 -->
     <div class="container">
         <h2 class="section-title">最新文章</h2>
-
+        
         <div class="content-wrapper">
             <!-- 博客文章列表 -->
             <div class="blog-list">
@@ -429,7 +431,7 @@
                     <input type="text" placeholder="搜索文章...">
                     <button><i class="fas fa-search"></i></button>
                 </div>
-
+                
                 <div class="blog-grid">
                     <!-- 博客卡片1 -->
                     <article class="blog-card">
@@ -445,7 +447,7 @@
                             </div>
                         </div>
                     </article>
-
+                    
                     <!-- 博客卡片2 -->
                     <article class="blog-card">
                         <div class="card-img">
@@ -460,7 +462,7 @@
                             </div>
                         </div>
                     </article>
-
+                    
                     <!-- 博客卡片3 -->
                     <article class="blog-card">
                         <div class="card-img">
@@ -477,7 +479,7 @@
                     </article>
                 </div>
             </div>
-
+            
             <!-- 侧边栏 -->
             <aside class="sidebar">
                 <!-- 关于我 -->
@@ -485,19 +487,20 @@
                     <h3>关于作者</h3>
                     <p>一名热爱技术的全栈开发者，专注于AI和Web技术。喜欢分享学习经验和解决复杂问题的思路。</p>
                 </div>
-
+                
                 <!-- 分类 -->
                 <div class="sidebar-widget">
                     <h3>文章分类</h3>
                     <ul class="footer-links">
-                        <li><a href="blog.html?category=ai">人工智能 <span>(12)</span></a></li>
-                        <li><a href="blog.html?category=web">Web开发 <span>(8)</span></a></li>
-                        <li><a href="blog.html?category=data">数据科学 <span>(6)</span></a></li>
-                        <li><a href="blog.html?category=blockchain">区块链 <span>(5)</span></a></li>
-                        <li><a href="blog.html?category=iot">物联网 <span>(4)</span></a></li>
+                        <!-- 修正博客链接路径 -->
+                        <li><a href="BOKEList/blog.html?category=ai">人工智能 <span>(12)</span></a></li>
+                        <li><a href="BOKEList/blog.html?category=web">Web开发 <span>(8)</span></a></li>
+                        <li><a href="BOKEList/blog.html?category=data">数据科学 <span>(6)</span></a></li>
+                        <li><a href="BOKEList/blog.html?category=blockchain">区块链 <span>(5)</span></a></li>
+                        <li><a href="BOKEList/blog.html?category=iot">物联网 <span>(4)</span></a></li>
                     </ul>
                 </div>
-
+                
                 <!-- 标签云 -->
                 <div class="sidebar-widget">
                     <h3>热门标签</h3>
@@ -512,7 +515,7 @@
                         <span class="tag">微服务</span>
                     </div>
                 </div>
-
+                
                 <!-- 最新评论 -->
                 <div class="sidebar-widget">
                     <h3>最新评论</h3>
@@ -530,7 +533,7 @@
             </aside>
         </div>
     </div>
-
+    
     <!-- 页脚 -->
     <footer>
         <div class="container">
@@ -545,18 +548,19 @@
                         <a href="#"><i class="fab fa-youtube"></i></a>
                     </div>
                 </div>
-
+                
                 <div class="footer-column">
                     <h3>快速链接</h3>
                     <ul class="footer-links">
                         <li><a href="index.html">首页</a></li>
-                        <li><a href="blog.html">博客</a></li>
+                        <!-- 修正博客链接路径 -->
+                        <li><a href="BOKEList/blog.html">博客</a></li>
                         <li><a href="projects.html">项目</a></li>
                         <li><a href="about.html">关于我们</a></li>
                         <li><a href="contact.html">联系我们</a></li>
                     </ul>
                 </div>
-
+                
                 <div class="footer-column">
                     <h3>订阅更新</h3>
                     <p>订阅我们的新闻通讯，获取最新技术文章和项目更新。</p>
@@ -566,13 +570,13 @@
                     </form>
                 </div>
             </div>
-
+            
             <div class="copyright">
                 <p>&copy; 2024 TechBlog. 保留所有权利。</p>
             </div>
         </div>
     </footer>
-
+    
     <!-- 引入粒子效果库 -->
     <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
     <script>
@@ -611,20 +615,21 @@
             },
             retina_detect: true
         });
-
+        
         // 移动端菜单切换
         document.getElementById('menuToggle').addEventListener('click', function() {
             document.getElementById('navLinks').classList.toggle('active');
         });
-
+        
         // 搜索功能
         document.querySelector('.search-box button').addEventListener('click', function() {
             const searchTerm = document.querySelector('.search-box input').value;
             if (searchTerm.trim() !== '') {
-                window.location.href = `blog.html?search=${encodeURIComponent(searchTerm)}`;
+                // 修正搜索跳转路径
+                window.location.href = `BOKEList/blog.html?search=${encodeURIComponent(searchTerm)}`;
             }
         });
-
+        
         // 订阅表单处理
         document.getElementById('subscribeForm').addEventListener('submit', function(e) {
             e.preventDefault();
