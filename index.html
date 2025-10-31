@@ -399,11 +399,10 @@
                 </div>
                 <ul class="nav-links" id="navLinks">
                     <li><a href="index.html">首页</a></li>
-                    <!-- 修正博客链接路径 -->
                     <li><a href="BOKEList/blog.html">博客</a></li>
                     <li><a href="Projects/projects.html">项目</a></li>
-                    <li><a href="about.html">关于</a></li>
-                    <li><a href="contact.html">联系</a></li>
+                    <li><a href="GY/about.html">关于</a></li>
+                    <li><a href="GY/contact.html">联系</a></li>
                 </ul>
             </nav>
         </div>
@@ -414,7 +413,6 @@
         <div class="container">
             <h1>探索科技的无限可能</h1>
             <p>分享前沿技术、开发经验与创新思维的个人博客空间。在这里，我们探讨人工智能、Web开发、数据科学和未来科技趋势。</p>
-            <!-- 修正博客链接路径 -->
             <a href="BOKEList/blog.html" class="cta-button">开始阅读</a>
         </div>
     </section>
@@ -492,7 +490,6 @@
                 <div class="sidebar-widget">
                     <h3>文章分类</h3>
                     <ul class="footer-links">
-                        <!-- 修正博客链接路径 -->
                         <li><a href="BOKEList/blog.html?category=ai">人工智能 <span>(12)</span></a></li>
                         <li><a href="BOKEList/blog.html?category=web">Web开发 <span>(8)</span></a></li>
                         <li><a href="BOKEList/blog.html?category=data">数据科学 <span>(6)</span></a></li>
@@ -553,11 +550,10 @@
                     <h3>快速链接</h3>
                     <ul class="footer-links">
                         <li><a href="index.html">首页</a></li>
-                        <!-- 修正博客链接路径 -->
                         <li><a href="BOKEList/blog.html">博客</a></li>
-                        <li><a href="projects.html">项目</a></li>
-                        <li><a href="about.html">关于我们</a></li>
-                        <li><a href="contact.html">联系我们</a></li>
+                        <li><a href="Projects/projects.html">项目</a></li>
+                        <li><a href="GY/about.html">关于我们</a></li>
+                        <li><a href="GY/contact.html">联系我们</a></li>
                     </ul>
                 </div>
                 
@@ -625,7 +621,6 @@
         document.querySelector('.search-box button').addEventListener('click', function() {
             const searchTerm = document.querySelector('.search-box input').value;
             if (searchTerm.trim() !== '') {
-                // 修正搜索跳转路径
                 window.location.href = `BOKEList/blog.html?search=${encodeURIComponent(searchTerm)}`;
             }
         });
@@ -642,4 +637,3 @@
     </script>
 </body>
 </html>
-
