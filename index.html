@@ -12,7 +12,7 @@
             box-sizing: border-box;
             font-family: 'Segoe UI', system-ui, sans-serif;
         }
-
+        
         :root {
             --primary: #00c6ff;
             --secondary: #0072ff;
@@ -21,27 +21,27 @@
             --light: #f0f8ff;
             --gray: #8a8fa3;
         }
-
+        
         body {
             background-color: var(--darker);
             color: var(--light);
             line-height: 1.6;
             overflow-x: hidden;
         }
-
+        
         #particles-js {
             position: fixed;
             width: 100%;
             height: 100%;
             z-index: -1;
         }
-
+        
         .container {
             max-width: 1200px;
             margin: 0 auto;
             padding: 0 20px;
         }
-
+        
         /* 头部导航 */
         header {
             padding: 20px 0;
@@ -52,13 +52,13 @@
             z-index: 1000;
             border-bottom: 1px solid rgba(0, 198, 255, 0.2);
         }
-
+        
         .navbar {
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
-
+        
         .logo {
             font-size: 1.8rem;
             font-weight: 700;
@@ -68,16 +68,16 @@
             color: transparent;
             text-decoration: none;
         }
-
+        
         .nav-links {
             display: flex;
             list-style: none;
         }
-
+        
         .nav-links li {
             margin-left: 30px;
         }
-
+        
         .nav-links a {
             color: var(--light);
             text-decoration: none;
@@ -85,11 +85,11 @@
             transition: all 0.3s ease;
             position: relative;
         }
-
+        
         .nav-links a:hover {
             color: var(--primary);
         }
-
+        
         .nav-links a::after {
             content: '';
             position: absolute;
@@ -100,17 +100,24 @@
             background: var(--primary);
             transition: width 0.3s ease;
         }
-
+        
         .nav-links a:hover::after {
             width: 100%;
         }
-
+        
+        /* 移动端菜单按钮 */
+        .menu-toggle {
+            display: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+        
         /* 英雄区域 */
         .hero {
             padding: 100px 0 50px;
             text-align: center;
         }
-
+        
         .hero h1 {
             font-size: 3.5rem;
             margin-bottom: 20px;
@@ -119,14 +126,14 @@
             background-clip: text;
             color: transparent;
         }
-
+        
         .hero p {
             font-size: 1.2rem;
             max-width: 700px;
             margin: 0 auto 30px;
             color: var(--gray);
         }
-
+        
         .cta-button {
             display: inline-block;
             padding: 12px 30px;
@@ -138,26 +145,26 @@
             transition: all 0.3s ease;
             box-shadow: 0 5px 15px rgba(0, 198, 255, 0.4);
         }
-
+        
         .cta-button:hover {
             transform: translateY(-3px);
             box-shadow: 0 8px 20px rgba(0, 198, 255, 0.6);
         }
-
+        
         /* 博客内容区域 */
         .section-title {
             text-align: center;
             margin: 60px 0 40px;
             font-size: 2.2rem;
         }
-
+        
         .blog-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
             gap: 30px;
             margin-bottom: 60px;
         }
-
+        
         .blog-card {
             background: rgba(10, 10, 22, 0.7);
             border-radius: 10px;
@@ -165,13 +172,13 @@
             transition: all 0.3s ease;
             border: 1px solid rgba(0, 198, 255, 0.1);
         }
-
+        
         .blog-card:hover {
             transform: translateY(-10px);
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
             border-color: rgba(0, 198, 255, 0.3);
         }
-
+        
         .card-img {
             height: 200px;
             background: linear-gradient(45deg, var(--primary), var(--secondary));
@@ -181,22 +188,22 @@
             font-size: 2.5rem;
             color: white;
         }
-
+        
         .card-content {
             padding: 20px;
         }
-
+        
         .card-content h3 {
             margin-bottom: 10px;
             font-size: 1.4rem;
         }
-
+        
         .card-content p {
             color: var(--gray);
             margin-bottom: 15px;
             font-size: 0.95rem;
         }
-
+        
         .card-meta {
             display: flex;
             justify-content: space-between;
@@ -205,37 +212,37 @@
             border-top: 1px solid rgba(255, 255, 255, 0.1);
             padding-top: 15px;
         }
-
+        
         /* 侧边栏 */
         .content-wrapper {
             display: grid;
             grid-template-columns: 2fr 1fr;
             gap: 40px;
         }
-
+        
         .sidebar {
             background: rgba(10, 10, 22, 0.7);
             border-radius: 10px;
             padding: 25px;
             border: 1px solid rgba(0, 198, 255, 0.1);
         }
-
+        
         .sidebar-widget {
             margin-bottom: 30px;
         }
-
+        
         .sidebar-widget h3 {
             margin-bottom: 15px;
             padding-bottom: 10px;
             border-bottom: 1px solid rgba(0, 198, 255, 0.3);
         }
-
+        
         .tags {
             display: flex;
             flex-wrap: wrap;
             gap: 10px;
         }
-
+        
         .tag {
             background: rgba(0, 198, 255, 0.1);
             padding: 5px 12px;
@@ -243,12 +250,36 @@
             font-size: 0.85rem;
             transition: all 0.3s ease;
         }
-
+        
         .tag:hover {
             background: rgba(0, 198, 255, 0.3);
             cursor: pointer;
         }
-
+        
+        /* 搜索框 */
+        .search-box {
+            display: flex;
+            margin-bottom: 20px;
+        }
+        
+        .search-box input {
+            flex: 1;
+            padding: 10px 15px;
+            border: 1px solid rgba(0, 198, 255, 0.3);
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 5px 0 0 5px;
+            color: white;
+        }
+        
+        .search-box button {
+            background: var(--primary);
+            border: none;
+            padding: 0 15px;
+            border-radius: 0 5px 5px 0;
+            cursor: pointer;
+            color: white;
+        }
+        
         /* 页脚 */
         footer {
             background: rgba(5, 5, 16, 0.9);
@@ -256,43 +287,43 @@
             margin-top: 60px;
             border-top: 1px solid rgba(0, 198, 255, 0.2);
         }
-
+        
         .footer-content {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 40px;
             margin-bottom: 40px;
         }
-
+        
         .footer-column h3 {
             margin-bottom: 20px;
             font-size: 1.3rem;
         }
-
+        
         .footer-links {
             list-style: none;
         }
-
+        
         .footer-links li {
             margin-bottom: 10px;
         }
-
+        
         .footer-links a {
             color: var(--gray);
             text-decoration: none;
             transition: all 0.3s ease;
         }
-
+        
         .footer-links a:hover {
             color: var(--primary);
             padding-left: 5px;
         }
-
+        
         .social-links {
             display: flex;
             gap: 15px;
         }
-
+        
         .social-links a {
             display: flex;
             align-items: center;
@@ -304,12 +335,12 @@
             color: var(--light);
             transition: all 0.3s ease;
         }
-
+        
         .social-links a:hover {
             background: var(--primary);
             transform: translateY(-3px);
         }
-
+        
         .copyright {
             text-align: center;
             padding-top: 20px;
@@ -317,22 +348,38 @@
             color: var(--gray);
             font-size: 0.9rem;
         }
-
+        
         /* 响应式设计 */
         @media (max-width: 768px) {
             .content-wrapper {
                 grid-template-columns: 1fr;
             }
-
+            
             .hero h1 {
                 font-size: 2.5rem;
             }
-
+            
             .nav-links {
                 display: none;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                width: 100%;
+                background: rgba(10, 10, 22, 0.95);
+                flex-direction: column;
+                padding: 20px 0;
+                text-align: center;
             }
-
-            .mobile-menu {
+            
+            .nav-links.active {
+                display: flex;
+            }
+            
+            .nav-links li {
+                margin: 10px 0;
+            }
+            
+            .menu-toggle {
                 display: block;
             }
         }
@@ -341,39 +388,48 @@
 <body>
     <!-- 粒子背景 -->
     <div id="particles-js"></div>
-
+    
     <!-- 头部导航 -->
     <header>
         <div class="container">
             <nav class="navbar">
-                <a href="#" class="logo">TechBlog</a>
-                <ul class="nav-links">
-                    <li><a href="#">首页</a></li>
-                    <li><a href="#">博客</a></li>
-                    <li><a href="#">项目</a></li>
-                    <li><a href="#">关于</a></li>
-                    <li><a href="#">联系</a></li>
+                <a href="index.html" class="logo">TechBlog</a>
+                <div class="menu-toggle" id="menuToggle">
+                    <i class="fas fa-bars"></i>
+                </div>
+                <ul class="nav-links" id="navLinks">
+                    <li><a href="index.html">首页</a></li>
+                    <li><a href="blog.html">博客</a></li>
+                    <li><a href="projects.html">项目</a></li>
+                    <li><a href="about.html">关于</a></li>
+                    <li><a href="contact.html">联系</a></li>
                 </ul>
             </nav>
         </div>
     </header>
-
+    
     <!-- 英雄区域 -->
     <section class="hero">
         <div class="container">
             <h1>探索科技的无限可能</h1>
             <p>分享前沿技术、开发经验与创新思维的个人博客空间。在这里，我们探讨人工智能、Web开发、数据科学和未来科技趋势。</p>
-            <a href="#" class="cta-button">开始阅读</a>
+            <a href="blog.html" class="cta-button">开始阅读</a>
         </div>
     </section>
-
+    
     <!-- 主要内容区域 -->
     <div class="container">
         <h2 class="section-title">最新文章</h2>
-
+        
         <div class="content-wrapper">
             <!-- 博客文章列表 -->
             <div class="blog-list">
+                <!-- 搜索框 -->
+                <div class="search-box">
+                    <input type="text" placeholder="搜索文章...">
+                    <button><i class="fas fa-search"></i></button>
+                </div>
+                
                 <div class="blog-grid">
                     <!-- 博客卡片1 -->
                     <article class="blog-card">
@@ -389,7 +445,7 @@
                             </div>
                         </div>
                     </article>
-
+                    
                     <!-- 博客卡片2 -->
                     <article class="blog-card">
                         <div class="card-img">
@@ -404,7 +460,7 @@
                             </div>
                         </div>
                     </article>
-
+                    
                     <!-- 博客卡片3 -->
                     <article class="blog-card">
                         <div class="card-img">
@@ -421,7 +477,7 @@
                     </article>
                 </div>
             </div>
-
+            
             <!-- 侧边栏 -->
             <aside class="sidebar">
                 <!-- 关于我 -->
@@ -429,19 +485,19 @@
                     <h3>关于作者</h3>
                     <p>一名热爱技术的全栈开发者，专注于AI和Web技术。喜欢分享学习经验和解决复杂问题的思路。</p>
                 </div>
-
+                
                 <!-- 分类 -->
                 <div class="sidebar-widget">
                     <h3>文章分类</h3>
                     <ul class="footer-links">
-                        <li><a href="#">人工智能 <span>(12)</span></a></li>
-                        <li><a href="#">Web开发 <span>(8)</span></a></li>
-                        <li><a href="#">数据科学 <span>(6)</span></a></li>
-                        <li><a href="#">区块链 <span>(5)</span></a></li>
-                        <li><a href="#">物联网 <span>(4)</span></a></li>
+                        <li><a href="blog.html?category=ai">人工智能 <span>(12)</span></a></li>
+                        <li><a href="blog.html?category=web">Web开发 <span>(8)</span></a></li>
+                        <li><a href="blog.html?category=data">数据科学 <span>(6)</span></a></li>
+                        <li><a href="blog.html?category=blockchain">区块链 <span>(5)</span></a></li>
+                        <li><a href="blog.html?category=iot">物联网 <span>(4)</span></a></li>
                     </ul>
                 </div>
-
+                
                 <!-- 标签云 -->
                 <div class="sidebar-widget">
                     <h3>热门标签</h3>
@@ -456,10 +512,25 @@
                         <span class="tag">微服务</span>
                     </div>
                 </div>
+                
+                <!-- 最新评论 -->
+                <div class="sidebar-widget">
+                    <h3>最新评论</h3>
+                    <div class="recent-comments">
+                        <div class="comment-item">
+                            <p><strong>张三</strong> 在 <a href="#">人工智能在2024年的发展趋势分析</a></p>
+                            <p class="comment-excerpt">这篇文章非常有深度，让我对AI的未来有了新的认识...</p>
+                        </div>
+                        <div class="comment-item">
+                            <p><strong>李四</strong> 在 <a href="#">Web3.0技术栈全解析</a></p>
+                            <p class="comment-excerpt">感谢分享，这些实践建议对我帮助很大！</p>
+                        </div>
+                    </div>
+                </div>
             </aside>
         </div>
     </div>
-
+    
     <!-- 页脚 -->
     <footer>
         <div class="container">
@@ -474,34 +545,34 @@
                         <a href="#"><i class="fab fa-youtube"></i></a>
                     </div>
                 </div>
-
+                
                 <div class="footer-column">
                     <h3>快速链接</h3>
                     <ul class="footer-links">
-                        <li><a href="#">首页</a></li>
-                        <li><a href="#">关于我们</a></li>
-                        <li><a href="#">博客文章</a></li>
-                        <li><a href="#">项目展示</a></li>
-                        <li><a href="#">联系我们</a></li>
+                        <li><a href="index.html">首页</a></li>
+                        <li><a href="blog.html">博客</a></li>
+                        <li><a href="projects.html">项目</a></li>
+                        <li><a href="about.html">关于我们</a></li>
+                        <li><a href="contact.html">联系我们</a></li>
                     </ul>
                 </div>
-
+                
                 <div class="footer-column">
                     <h3>订阅更新</h3>
                     <p>订阅我们的新闻通讯，获取最新技术文章和项目更新。</p>
-                    <form>
-                        <input type="email" placeholder="您的电子邮箱" style="width: 100%; padding: 10px; margin: 10px 0; border-radius: 5px; border: 1px solid rgba(0,198,255,0.3); background: rgba(255,255,255,0.1); color: white;">
+                    <form id="subscribeForm">
+                        <input type="email" id="email" placeholder="您的电子邮箱" style="width: 100%; padding: 10px; margin: 10px 0; border-radius: 5px; border: 1px solid rgba(0,198,255,0.3); background: rgba(255,255,255,0.1); color: white;">
                         <button type="submit" style="width: 100%; padding: 10px; background: linear-gradient(90deg, var(--primary), var(--secondary)); border: none; border-radius: 5px; color: white; cursor: pointer;">订阅</button>
                     </form>
                 </div>
             </div>
-
+            
             <div class="copyright">
                 <p>&copy; 2024 TechBlog. 保留所有权利。</p>
             </div>
         </div>
     </footer>
-
+    
     <!-- 引入粒子效果库 -->
     <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
     <script>
@@ -539,6 +610,29 @@
                 }
             },
             retina_detect: true
+        });
+        
+        // 移动端菜单切换
+        document.getElementById('menuToggle').addEventListener('click', function() {
+            document.getElementById('navLinks').classList.toggle('active');
+        });
+        
+        // 搜索功能
+        document.querySelector('.search-box button').addEventListener('click', function() {
+            const searchTerm = document.querySelector('.search-box input').value;
+            if (searchTerm.trim() !== '') {
+                window.location.href = `blog.html?search=${encodeURIComponent(searchTerm)}`;
+            }
+        });
+        
+        // 订阅表单处理
+        document.getElementById('subscribeForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            if (email) {
+                alert(`感谢订阅！我们将向 ${email} 发送更新通知。`);
+                document.getElementById('email').value = '';
+            }
         });
     </script>
 </body>
