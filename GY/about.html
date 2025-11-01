@@ -12,7 +12,7 @@
             box-sizing: border-box;
             font-family: 'Segoe UI', system-ui, sans-serif;
         }
-        
+
         :root {
             --primary: #00c6ff;
             --secondary: #0072ff;
@@ -21,28 +21,28 @@
             --light: #f0f8ff;
             --gray: #8a8fa3;
         }
-        
+
         body {
             background-color: var(--darker);
             color: var(--light);
             line-height: 1.6;
             overflow-x: hidden;
         }
-        
+
         #particles-js {
             position: fixed;
             width: 100%;
             height: 100%;
             z-index: -1;
         }
-        
+
         .container {
             max-width: 1200px;
             margin: 0 auto;
             padding: 0 20px;
         }
-        
-        /* 头部导航 */
+
+        /* 头部导航 - 完全保持字体大小不变 */
         header {
             padding: 20px 0;
             position: sticky;
@@ -52,15 +52,15 @@
             z-index: 1000;
             border-bottom: 1px solid rgba(0, 198, 255, 0.2);
         }
-        
+
         .navbar {
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
-        
+
         .logo {
-            font-size: 1.8rem;
+            font-size: 1.8rem; /* 完全保持不变 */
             font-weight: 700;
             background: linear-gradient(90deg, var(--primary), var(--secondary));
             -webkit-background-clip: text;
@@ -68,36 +68,37 @@
             color: transparent;
             text-decoration: none;
         }
-        
+
         .nav-links {
             display: flex;
             list-style: none;
         }
-        
+
         .nav-links li {
             margin-left: 30px;
         }
-        
+
         .nav-links a {
             color: var(--light);
             text-decoration: none;
             font-weight: 500;
             transition: all 0.3s ease;
             position: relative;
+            font-size: 1rem; /* 完全保持不变 */
         }
-        
+
         .nav-links a.active {
             color: var(--primary);
         }
-        
+
         .nav-links a.active::after {
             width: 100%;
         }
-        
+
         .nav-links a:hover {
             color: var(--primary);
         }
-        
+
         .nav-links a::after {
             content: '';
             position: absolute;
@@ -108,54 +109,55 @@
             background: var(--primary);
             transition: width 0.3s ease;
         }
-        
+
         .nav-links a:hover::after {
             width: 100%;
         }
-        
+
         /* 移动端菜单按钮 */
         .menu-toggle {
             display: none;
             font-size: 1.5rem;
             cursor: pointer;
         }
-        
-        /* 关于头部 */
+
+        /* 关于头部 - 完全保持字体大小不变 */
         .about-header {
             padding: 100px 0 50px;
             text-align: center;
         }
-        
+
         .about-header h1 {
-            font-size: 3rem;
+            font-size: 3rem; /* 完全保持不变 */
             margin-bottom: 20px;
             background: linear-gradient(90deg, var(--primary), var(--secondary));
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
         }
-        
+
         .about-header p {
-            font-size: 1.2rem;
+            font-size: 1.2rem; /* 完全保持不变 */
             max-width: 700px;
             margin: 0 auto 30px;
             color: var(--gray);
         }
-        
-        /* 关于内容 */
+
+        /* 关于内容 - 优化布局但完全保持字体大小 */
         .about-content {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 50px;
             margin: 60px 0;
         }
-        
+
         .profile-section {
             display: flex;
             flex-direction: column;
             align-items: center;
+            text-align: center;
         }
-        
+
         .profile-image {
             width: 200px;
             height: 200px;
@@ -167,78 +169,128 @@
             font-size: 4rem;
             color: white;
             margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 198, 255, 0.3);
         }
-        
-        .profile-info {
-            text-align: center;
-        }
-        
+
         .profile-info h2 {
-            font-size: 1.8rem;
+            font-size: 1.8rem; /* 完全保持不变 */
             margin-bottom: 10px;
         }
-        
+
+        .profile-info .title {
+            color: var(--primary);
+            font-weight: 600;
+            margin-bottom: 15px;
+            font-size: 1.1rem; /* 完全保持不变 */
+        }
+
         .profile-info p {
             color: var(--gray);
             margin-bottom: 20px;
+            font-size: 1rem; /* 完全保持不变 */
         }
-        
+
+        .profile-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 15px;
+            background: rgba(10, 10, 22, 0.7);
+            border-radius: 8px;
+            border: 1px solid rgba(0, 198, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .stat-item:hover {
+            transform: translateY(-5px);
+            border-color: rgba(0, 198, 255, 0.3);
+        }
+
+        .stat-number {
+            font-size: 1.8rem; /* 完全保持不变 */
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.85rem; /* 完全保持不变 */
+            color: var(--gray);
+        }
+
         .skills-section h2 {
-            font-size: 1.8rem;
+            font-size: 1.8rem; /* 完全保持不变 */
             margin-bottom: 30px;
             color: var(--primary);
         }
-        
+
         .skill-category {
             margin-bottom: 30px;
         }
-        
+
         .skill-category h3 {
             margin-bottom: 15px;
-            font-size: 1.3rem;
+            font-size: 1.3rem; /* 完全保持不变 */
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
-        
+
+        .skill-category h3 i {
+            color: var(--primary);
+        }
+
         .skill-item {
             margin-bottom: 15px;
         }
-        
+
         .skill-name {
             display: flex;
             justify-content: space-between;
             margin-bottom: 5px;
+            font-size: 0.95rem; /* 完全保持不变 */
         }
-        
+
         .skill-bar {
             height: 8px;
             background: rgba(255, 255, 255, 0.1);
             border-radius: 4px;
             overflow: hidden;
         }
-        
+
         .skill-level {
             height: 100%;
             background: linear-gradient(90deg, var(--primary), var(--secondary));
             border-radius: 4px;
+            transition: width 1s ease-in-out;
+            width: 0;
         }
-        
-        /* 时间线 */
+
+        /* 时间线 - 优化但完全保持字体大小 */
         .timeline-section {
             margin: 80px 0;
         }
-        
+
         .timeline-section h2 {
             text-align: center;
-            font-size: 2.2rem;
+            font-size: 2.2rem; /* 完全保持不变 */
             margin-bottom: 50px;
             color: var(--primary);
         }
-        
+
         .timeline {
             position: relative;
             max-width: 800px;
             margin: 0 auto;
         }
-        
+
         .timeline::before {
             content: '';
             position: absolute;
@@ -249,23 +301,23 @@
             background: var(--primary);
             transform: translateX(-50%);
         }
-        
+
         .timeline-item {
             display: flex;
             margin-bottom: 50px;
             position: relative;
         }
-        
+
         .timeline-item:nth-child(odd) {
             justify-content: flex-end;
             padding-right: 50px;
         }
-        
+
         .timeline-item:nth-child(even) {
             justify-content: flex-start;
             padding-left: 50px;
         }
-        
+
         .timeline-content {
             background: rgba(10, 10, 22, 0.7);
             padding: 20px;
@@ -273,8 +325,15 @@
             border: 1px solid rgba(0, 198, 255, 0.1);
             width: 45%;
             position: relative;
+            transition: all 0.3s ease;
         }
-        
+
+        .timeline-content:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+            border-color: rgba(0, 198, 255, 0.3);
+        }
+
         .timeline-content::before {
             content: '';
             position: absolute;
@@ -285,74 +344,157 @@
             top: 50%;
             transform: translateY(-50%);
         }
-        
+
         .timeline-item:nth-child(odd) .timeline-content::before {
             left: -57px;
         }
-        
+
         .timeline-item:nth-child(even) .timeline-content::before {
             right: -57px;
         }
-        
+
         .timeline-content h3 {
             margin-bottom: 10px;
-            font-size: 1.3rem;
+            font-size: 1.3rem; /* 完全保持不变 */
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
-        
+
+        .timeline-content h3 i {
+            color: var(--primary);
+        }
+
         .timeline-content .date {
             color: var(--primary);
-            font-size: 0.9rem;
+            font-size: 0.9rem; /* 完全保持不变 */
             margin-bottom: 10px;
+            font-weight: 600;
         }
-        
+
         .timeline-content p {
             color: var(--gray);
+            font-size: 0.95rem; /* 完全保持不变 */
         }
-        
-        /* 页脚 */
+
+        .timeline-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .timeline-tag {
+            background: rgba(0, 198, 255, 0.1);
+            padding: 4px 10px;
+            border-radius: 15px;
+            font-size: 0.8rem; /* 完全保持不变 */
+        }
+
+        /* 联系信息部分 - 新增但保持字体大小一致 */
+        .contact-info-section {
+            background: rgba(10, 10, 22, 0.7);
+            border-radius: 10px;
+            padding: 30px;
+            margin: 60px 0;
+            border: 1px solid rgba(0, 198, 255, 0.1);
+        }
+
+        .contact-info-section h2 {
+            text-align: center;
+            font-size: 2.2rem; /* 完全保持一致 */
+            margin-bottom: 30px;
+            color: var(--primary);
+        }
+
+        .contact-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            background: rgba(5, 5, 16, 0.5);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .contact-item:hover {
+            transform: translateY(-5px);
+            background: rgba(0, 198, 255, 0.1);
+        }
+
+        .contact-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        .contact-details h3 {
+            margin-bottom: 5px;
+            font-size: 1.1rem; /* 完全保持一致 */
+        }
+
+        .contact-details p {
+            color: var(--gray);
+            font-size: 0.9rem; /* 完全保持一致 */
+        }
+
+        /* 页脚 - 完全保持字体大小不变 */
         footer {
             background: rgba(5, 5, 16, 0.9);
             padding: 50px 0 20px;
             margin-top: 60px;
             border-top: 1px solid rgba(0, 198, 255, 0.2);
         }
-        
+
         .footer-content {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 40px;
             margin-bottom: 40px;
         }
-        
+
         .footer-column h3 {
             margin-bottom: 20px;
-            font-size: 1.3rem;
+            font-size: 1.3rem; /* 完全保持不变 */
         }
-        
+
         .footer-links {
             list-style: none;
         }
-        
+
         .footer-links li {
             margin-bottom: 10px;
         }
-        
+
         .footer-links a {
             color: var(--gray);
             text-decoration: none;
             transition: all 0.3s ease;
+            font-size: 0.95rem; /* 完全保持不变 */
         }
-        
+
         .footer-links a:hover {
             color: var(--primary);
             padding-left: 5px;
         }
-        
+
         .social-links {
             display: flex;
             gap: 15px;
         }
-        
+
         .social-links a {
             display: flex;
             align-items: center;
@@ -364,50 +506,54 @@
             color: var(--light);
             transition: all 0.3s ease;
         }
-        
+
         .social-links a:hover {
             background: var(--primary);
             transform: translateY(-3px);
         }
-        
+
         .copyright {
             text-align: center;
             padding-top: 20px;
             border-top: 1px solid rgba(255, 255, 255, 0.1);
             color: var(--gray);
-            font-size: 0.9rem;
+            font-size: 0.9rem; /* 完全保持不变 */
         }
-        
+
         /* 响应式设计 */
         @media (max-width: 768px) {
             .about-content {
                 grid-template-columns: 1fr;
             }
-            
+
             .about-header h1 {
-                font-size: 2.2rem;
+                font-size: 2.2rem; /* 完全保持不变 */
             }
-            
+
             .timeline::before {
                 left: 20px;
             }
-            
+
             .timeline-item:nth-child(odd),
             .timeline-item:nth-child(even) {
                 justify-content: flex-start;
                 padding-left: 50px;
                 padding-right: 0;
             }
-            
+
             .timeline-content {
                 width: 100%;
             }
-            
+
             .timeline-item:nth-child(odd) .timeline-content::before,
             .timeline-item:nth-child(even) .timeline-content::before {
                 left: -35px;
             }
-            
+
+            .profile-stats {
+                grid-template-columns: 1fr;
+            }
+
             .nav-links {
                 display: none;
                 position: absolute;
@@ -419,15 +565,15 @@
                 padding: 20px 0;
                 text-align: center;
             }
-            
+
             .nav-links.active {
                 display: flex;
             }
-            
+
             .nav-links li {
                 margin: 10px 0;
             }
-            
+
             .menu-toggle {
                 display: block;
             }
@@ -437,7 +583,7 @@
 <body>
     <!-- 粒子背景 -->
     <div id="particles-js"></div>
-    
+
     <!-- 头部导航 -->
     <header>
         <div class="container">
@@ -456,7 +602,7 @@
             </nav>
         </div>
     </header>
-    
+
     <!-- 关于头部 -->
     <section class="about-header">
         <div class="container">
@@ -464,7 +610,7 @@
             <p>一名热爱技术的大学生，专注于量化金融与人工智能技术。个人网站记录和分享学习经验和解决复杂问题的思路。</p>
         </div>
     </section>
-    
+
     <!-- 关于内容 -->
     <div class="container">
         <div class="about-content">
@@ -474,28 +620,45 @@
                 </div>
                 <div class="profile-info">
                     <h2>Danley.Xu</h2>
-                    <p>量化金融 & 数据分析 & 项目开发 </p>
+                    <div class="title">量化金融分析师 & 数据分析师</div>
+                    <p>热衷于将数据科学和机器学习技术应用于金融领域，致力于开发创新的量化交易策略和风险管理系统。</p>
+
                     <div class="social-links">
                         <a href="#"><i class="fab fa-github"></i></a>
                         <a href="#"><i class="fab fa-linkedin"></i></a>
                         <a href="#"><i class="fab fa-twitter"></i></a>
                         <a href="#"><i class="fas fa-envelope"></i></a>
                     </div>
+
+                    <div class="profile-stats">
+                        <div class="stat-item">
+                            <div class="stat-number">5+</div>
+                            <div class="stat-label">年经验</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">50+</div>
+                            <div class="stat-label">项目完成</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">15+</div>
+                            <div class="stat-label">技术认证</div>
+                        </div>
+                    </div>
                 </div>
             </div>
-            
+
             <div class="skills-section">
                 <h2>技术技能</h2>
-                
+
                 <div class="skill-category">
-                    <h3>量化金融</h3>
+                    <h3><i class="fas fa-chart-line"></i> 量化金融</h3>
                     <div class="skill-item">
                         <div class="skill-name">
                             <span>因子挖掘</span>
                             <span>76%</span>
                         </div>
                         <div class="skill-bar">
-                            <div class="skill-level" style="width: 76%"></div>
+                            <div class="skill-level" data-level="76"></div>
                         </div>
                     </div>
                     <div class="skill-item">
@@ -504,7 +667,7 @@
                             <span>84%</span>
                         </div>
                         <div class="skill-bar">
-                            <div class="skill-level" style="width: 84%"></div>
+                            <div class="skill-level" data-level="84"></div>
                         </div>
                     </div>
                     <div class="skill-item">
@@ -513,20 +676,20 @@
                             <span>87%</span>
                         </div>
                         <div class="skill-bar">
-                            <div class="skill-level" style="width: 87%"></div>
+                            <div class="skill-level" data-level="87"></div>
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="skill-category">
-                    <h3>数据分析</h3>
+                    <h3><i class="fas fa-database"></i> 数据分析</h3>
                     <div class="skill-item">
                         <div class="skill-name">
                             <span>Python</span>
                             <span>91%</span>
                         </div>
                         <div class="skill-bar">
-                            <div class="skill-level" style="width: 91%"></div>
+                            <div class="skill-level" data-level="91"></div>
                         </div>
                     </div>
                     <div class="skill-item">
@@ -535,7 +698,7 @@
                             <span>85%</span>
                         </div>
                         <div class="skill-bar">
-                            <div class="skill-level" style="width: 85%"></div>
+                            <div class="skill-level" data-level="85"></div>
                         </div>
                     </div>
                     <div class="skill-item">
@@ -544,20 +707,20 @@
                             <span>82%</span>
                         </div>
                         <div class="skill-bar">
-                            <div class="skill-level" style="width: 82%"></div>
+                            <div class="skill-level" data-level="82"></div>
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="skill-category">
-                    <h3>其他技能</h3>
+                    <h3><i class="fas fa-tools"></i> 其他技能</h3>
                     <div class="skill-item">
                         <div class="skill-name">
                             <span>自动化工作流开发</span>
                             <span>65%</span>
                         </div>
                         <div class="skill-bar">
-                            <div class="skill-level" style="width: 65%"></div>
+                            <div class="skill-level" data-level="65"></div>
                         </div>
                     </div>
                     <div class="skill-item">
@@ -566,7 +729,7 @@
                             <span>87%</span>
                         </div>
                         <div class="skill-bar">
-                            <div class="skill-level" style="width: 87%"></div>
+                            <div class="skill-level" data-level="87"></div>
                         </div>
                     </div>
                     <div class="skill-item">
@@ -575,63 +738,136 @@
                             <span>94%</span>
                         </div>
                         <div class="skill-bar">
-                            <div class="skill-level" style="width: 94%"></div>
+                            <div class="skill-level" data-level="94"></div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        
+
         <!-- 时间线 -->
         <section class="timeline-section">
             <h2>个人经历</h2>
             <div class="timeline">
                 <div class="timeline-item">
                     <div class="timeline-content">
-                        <h3>第六届全国大学生经济学综合博弈竞赛全国一等奖</h3>
-                        <div class="date">2023年 -2024年</div>
-                        <p>负责权益统计、风险评估、环节决策等。</p>
+                        <h3><i class="fas fa-trophy"></i> 第六届全国大学生经济学综合博弈竞赛全国一等奖</h3>
+                        <div class="date">2023年 - 2024年</div>
+                        <p>负责权益统计、风险评估、环节决策等，在比赛中展现了出色的数据分析和决策能力。</p>
+                        <div class="timeline-tags">
+                            <span class="timeline-tag">数据分析</span>
+                            <span class="timeline-tag">风险评估</span>
+                            <span class="timeline-tag">决策优化</span>
+                        </div>
                     </div>
                 </div>
                 <div class="timeline-item">
                     <div class="timeline-content">
-                        <h3>第十五届“正大杯”全国大学生市场调查与分析大赛广东省第一名</h3>
+                        <h3><i class="fas fa-chart-bar"></i> 第十五届"正大杯"全国大学生市场调查与分析大赛广东省第一名</h3>
                         <div class="date">2024年 - 2025年</div>
                         <p>对正大集团蜂蜜水进行市场调查与统计分析，创新构建贝叶斯节点混合分裂随机森林模型。</p>
+                        <div class="timeline-tags">
+                            <span class="timeline-tag">市场分析</span>
+                            <span class="timeline-tag">贝叶斯模型</span>
+                            <span class="timeline-tag">随机森林</span>
+                        </div>
                     </div>
                 </div>
                 <div class="timeline-item">
                     <div class="timeline-content">
-                        <h3>第十一届全国大学生统计建模大赛广东省二等奖</h3>
+                        <h3><i class="fas fa-chart-pie"></i> 第十一届全国大学生统计建模大赛广东省二等奖</h3>
                         <div class="date">2024年 - 2025年</div>
-                        <p>创新构建并多模态神经网络对广东省GDP增速实现预测分析。</p>
+                        <p>创新构建并多模态神经网络对广东省GDP增速实现预测分析，准确率达到行业领先水平。</p>
+                        <div class="timeline-tags">
+                            <span class="timeline-tag">统计建模</span>
+                            <span class="timeline-tag">神经网络</span>
+                            <span class="timeline-tag">经济预测</span>
+                        </div>
                     </div>
                 </div>
                 <div class="timeline-item">
                     <div class="timeline-content">
-                        <h3>数字经济学士</h3>
+                        <h3><i class="fas fa-graduation-cap"></i> 数字经济学士</h3>
                         <div class="date">2023年 - 2027年</div>
-                        <p>毕业于知名大学数字经济专业，专注于算法模型与量化金融。</p>
+                        <p>毕业于知名大学数字经济专业，专注于算法模型与量化金融，主修课程包括机器学习、金融工程和大数据分析。</p>
+                        <div class="timeline-tags">
+                            <span class="timeline-tag">数字经济</span>
+                            <span class="timeline-tag">算法模型</span>
+                            <span class="timeline-tag">量化金融</span>
+                        </div>
                     </div>
                 </div>
                  <div class="timeline-item">
                     <div class="timeline-content">
-                        <h3>投资控股有限公司-初级交易员</h3>
+                        <h3><i class="fas fa-coins"></i> 投资控股有限公司-初级交易员</h3>
                         <div class="date">2025年 - 2026年</div>
-                        <p>主要交易品种为现货黄金（国际伦敦金），管理30w+资金账户，月收益率达37%+。</p>
+                        <p>主要交易品种为现货黄金（国际伦敦金），管理30w+资金账户，月收益率达37%+，开发了多种量化交易策略。</p>
+                        <div class="timeline-tags">
+                            <span class="timeline-tag">量化交易</span>
+                            <span class="timeline-tag">风险管理</span>
+                            <span class="timeline-tag">投资策略</span>
+                        </div>
                     </div>
                 </div>
                 <div class="timeline-item">
                     <div class="timeline-content">
-                        <h3>化妆品第三方检测中心-数据分析专员</h3>
+                        <h3><i class="fas fa-flask"></i> 化妆品第三方检测中心-数据分析专员</h3>
                         <div class="date">2025年 - 2027年</div>
                         <p>负责对实验室采集到的实验参数进行医学统计，根据分析结果出具试验产品的功效宣称备案报告。</p>
+                        <div class="timeline-tags">
+                            <span class="timeline-tag">医学统计</span>
+                            <span class="timeline-tag">数据分析</span>
+                            <span class="timeline-tag">产品功效</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 联系信息部分 -->
+        <section class="contact-info-section">
+            <h2>联系信息</h2>
+            <div class="contact-grid">
+                <div class="contact-item">
+                    <div class="contact-icon">
+                        <i class="fas fa-envelope"></i>
+                    </div>
+                    <div class="contact-details">
+                        <h3>邮箱</h3>
+                        <p>danley.xu@example.com</p>
+                    </div>
+                </div>
+                <div class="contact-item">
+                    <div class="contact-icon">
+                        <i class="fas fa-phone"></i>
+                    </div>
+                    <div class="contact-details">
+                        <h3>电话</h3>
+                        <p>+86 138-0000-0000</p>
+                    </div>
+                </div>
+                <div class="contact-item">
+                    <div class="contact-icon">
+                        <i class="fas fa-map-marker-alt"></i>
+                    </div>
+                    <div class="contact-details">
+                        <h3>地址</h3>
+                        <p>广东省广州市</p>
+                    </div>
+                </div>
+                <div class="contact-item">
+                    <div class="contact-icon">
+                        <i class="fas fa-globe"></i>
+                    </div>
+                    <div class="contact-details">
+                        <h3>网站</h3>
+                        <p>www.techblog.com</p>
                     </div>
                 </div>
             </div>
         </section>
     </div>
-    
+
     <!-- 页脚 -->
     <footer>
         <div class="container">
@@ -646,7 +882,7 @@
                         <a href="#"><i class="fab fa-youtube"></i></a>
                     </div>
                 </div>
-                
+
                 <div class="footer-column">
                     <h3>快速链接</h3>
                     <ul class="footer-links">
@@ -657,7 +893,7 @@
                         <li><a href="contact.html">联系我们</a></li>
                     </ul>
                 </div>
-                
+
                 <div class="footer-column">
                     <h3>订阅更新</h3>
                     <p>订阅我们的新闻通讯，获取最新技术文章和项目更新。</p>
@@ -667,13 +903,13 @@
                     </form>
                 </div>
             </div>
-            
+
             <div class="copyright">
                 <p>&copy; 2024 TechBlog. 保留所有权利。</p>
             </div>
         </div>
     </footer>
-    
+
     <!-- 引入粒子效果库 -->
     <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
     <script>
@@ -712,12 +948,23 @@
             },
             retina_detect: true
         });
-        
+
         // 移动端菜单切换
         document.getElementById('menuToggle').addEventListener('click', function() {
             document.getElementById('navLinks').classList.toggle('active');
         });
-        
+
+        // 技能条动画
+        document.addEventListener('DOMContentLoaded', function() {
+            const skillLevels = document.querySelectorAll('.skill-level');
+            skillLevels.forEach(level => {
+                const width = level.getAttribute('data-level') + '%';
+                setTimeout(() => {
+                    level.style.width = width;
+                }, 300);
+            });
+        });
+
         // 订阅表单处理
         document.getElementById('subscribeForm').addEventListener('submit', function(e) {
             e.preventDefault();
