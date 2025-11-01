@@ -20,6 +20,7 @@
             --darker: #050510;
             --light: #f0f8ff;
             --gray: #8a8fa3;
+            --success: #00d26a;
         }
         
         body {
@@ -166,6 +167,23 @@
             cursor: pointer;
             transition: all 0.3s ease;
             font-size: 0.9rem;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .filter-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .filter-btn:hover::before {
+            left: 100%;
         }
         
         .filter-btn.active, .filter-btn:hover {
@@ -200,12 +218,30 @@
             overflow: hidden;
             transition: all 0.3s ease;
             border: 1px solid rgba(0, 198, 255, 0.1);
+            position: relative;
+            cursor: pointer;
         }
         
         .project-card:hover {
             transform: translateY(-10px);
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
             border-color: rgba(0, 198, 255, 0.3);
+        }
+        
+        .project-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, transparent, rgba(0, 198, 255, 0.05), transparent);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .project-card:hover::before {
+            opacity: 1;
         }
         
         .project-image {
@@ -216,10 +252,24 @@
             justify-content: center;
             font-size: 2.5rem;
             color: white;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .project-image::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.1);
         }
         
         .project-content {
             padding: 20px;
+            position: relative;
+            z-index: 1;
         }
         
         .project-content h3 {
@@ -245,6 +295,12 @@
             padding: 4px 10px;
             border-radius: 15px;
             font-size: 0.8rem;
+            transition: all 0.3s ease;
+        }
+        
+        .tech-tag:hover {
+            background: rgba(0, 198, 255, 0.2);
+            transform: translateY(-2px);
         }
         
         .project-links {
@@ -265,10 +321,28 @@
             text-decoration: none;
             font-size: 0.9rem;
             transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .project-link::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .project-link:hover::before {
+            left: 100%;
         }
         
         .project-link:hover {
             background: var(--primary);
+            transform: translateY(-2px);
         }
         
         .project-link.demo {
@@ -277,6 +351,15 @@
         
         .project-link.demo:hover {
             background: var(--secondary);
+        }
+        
+        .project-link.code {
+            background: rgba(0, 210, 106, 0.1);
+            border-color: rgba(0, 210, 106, 0.3);
+        }
+        
+        .project-link.code:hover {
+            background: var(--success);
         }
         
         /* 页脚 */
@@ -382,11 +465,85 @@
                 display: block;
             }
         }
+        
+        /* 音效控制 */
+        .sound-control {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: rgba(0, 198, 255, 0.1);
+            border: 1px solid rgba(0, 198, 255, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 100;
+            transition: all 0.3s ease;
+        }
+        
+        .sound-control:hover {
+            background: var(--primary);
+            transform: scale(1.1);
+        }
+        
+        .sound-control i {
+            font-size: 1.2rem;
+        }
+        
+        /* 通知提示 */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            background: rgba(10, 10, 22, 0.9);
+            border-left: 4px solid var(--primary);
+            border-radius: 5px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            transform: translateX(120%);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+        
+        .notification-content {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .notification-icon {
+            color: var(--primary);
+            font-size: 1.2rem;
+        }
+        
+        .notification-message {
+            font-size: 0.9rem;
+        }
     </style>
 </head>
 <body>
     <!-- 粒子背景 -->
     <div id="particles-js"></div>
+    
+    <!-- 音效控制 -->
+    <div class="sound-control" id="soundControl">
+        <i class="fas fa-volume-up"></i>
+    </div>
+    
+    <!-- 通知提示 -->
+    <div class="notification" id="notification">
+        <div class="notification-content">
+            <i class="fas fa-info-circle notification-icon"></i>
+            <span class="notification-message" id="notificationMessage">操作成功！</span>
+        </div>
+    </div>
     
     <!-- 头部导航 -->
     <header>
@@ -438,23 +595,27 @@
         </div>
         
         <div class="projects-grid" id="projectsGrid">
-            <!-- 项目1 -->
+            <!-- 项目1 - 记忆卡片游戏 -->
             <div class="project-card" data-category="web" data-date="2024-03-01">
                 <div class="project-image">
-                    <i class="fas fa-shopping-cart"></i>
+                    <i class="fas fa-gamepad"></i>
                 </div>
                 <div class="project-content">
-                    <h3>智能电商平台</h3>
-                    <p>基于React和Node.js构建的全栈电商平台，包含用户认证、商品管理、支付集成和推荐系统。</p>
+                    <h3>记忆卡片匹配游戏</h3>
+                    <p>一个基于Web的互动记忆游戏，测试您的观察力和记忆力。具有多种难度级别和精美的视觉效果。</p>
                     <div class="project-tech">
-                        <span class="tech-tag">React</span>
-                        <span class="tech-tag">Node.js</span>
-                        <span class="tech-tag">MongoDB</span>
-                        <span class="tech-tag">Stripe API</span>
+                        <span class="tech-tag">HTML5</span>
+                        <span class="tech-tag">CSS3</span>
+                        <span class="tech-tag">JavaScript</span>
+                        <span class="tech-tag">响应式设计</span>
                     </div>
                     <div class="project-links">
-                        <a href="#" class="project-link demo"><i class="fas fa-external-link-alt"></i> 在线演示</a>
-                        <a href="#" class="project-link"><i class="fab fa-github"></i> 源代码</a>
+                        <a href="Game/Game1/index.html" class="project-link demo" data-action="demo">
+                            <i class="fas fa-external-link-alt"></i> 在线演示
+                        </a>
+                        <a href="Game/Game1/detail.html#source-code" class="project-link code" data-action="code">
+                            <i class="fab fa-github"></i> 源代码
+                        </a>
                     </div>
                 </div>
             </div>
@@ -474,8 +635,12 @@
                         <span class="tech-tag">Transformer</span>
                     </div>
                     <div class="project-links">
-                        <a href="#" class="project-link demo"><i class="fas fa-external-link-alt"></i> 在线演示</a>
-                        <a href="#" class="project-link"><i class="fab fa-github"></i> 源代码</a>
+                        <a href="#" class="project-link demo" data-action="demo">
+                            <i class="fas fa-external-link-alt"></i> 在线演示
+                        </a>
+                        <a href="#" class="project-link code" data-action="code">
+                            <i class="fab fa-github"></i> 源代码
+                        </a>
                     </div>
                 </div>
             </div>
@@ -495,8 +660,12 @@
                         <span class="tech-tag">Chart.js</span>
                     </div>
                     <div class="project-links">
-                        <a href="#" class="project-link"><i class="fab fa-app-store"></i> App Store</a>
-                        <a href="#" class="project-link"><i class="fab fa-github"></i> 源代码</a>
+                        <a href="#" class="project-link demo" data-action="demo">
+                            <i class="fab fa-app-store"></i> App Store
+                        </a>
+                        <a href="#" class="project-link code" data-action="code">
+                            <i class="fab fa-github"></i> 源代码
+                        </a>
                     </div>
                 </div>
             </div>
@@ -516,8 +685,12 @@
                         <span class="tech-tag">CI/CD</span>
                     </div>
                     <div class="project-links">
-                        <a href="#" class="project-link demo"><i class="fas fa-external-link-alt"></i> 在线演示</a>
-                        <a href="#" class="project-link"><i class="fab fa-github"></i> 源代码</a>
+                        <a href="#" class="project-link demo" data-action="demo">
+                            <i class="fas fa-external-link-alt"></i> 在线演示
+                        </a>
+                        <a href="#" class="project-link code" data-action="code">
+                            <i class="fab fa-github"></i> 源代码
+                        </a>
                     </div>
                 </div>
             </div>
@@ -537,8 +710,12 @@
                         <span class="tech-tag">WebSocket</span>
                     </div>
                     <div class="project-links">
-                        <a href="#" class="project-link demo"><i class="fas fa-external-link-alt"></i> 在线演示</a>
-                        <a href="#" class="project-link"><i class="fab fa-github"></i> 源代码</a>
+                        <a href="#" class="project-link demo" data-action="demo">
+                            <i class="fas fa-external-link-alt"></i> 在线演示
+                        </a>
+                        <a href="#" class="project-link code" data-action="code">
+                            <i class="fab fa-github"></i> 源代码
+                        </a>
                     </div>
                 </div>
             </div>
@@ -558,8 +735,12 @@
                         <span class="tech-tag">Flask</span>
                     </div>
                     <div class="project-links">
-                        <a href="#" class="project-link demo"><i class="fas fa-external-link-alt"></i> 在线演示</a>
-                        <a href="#" class="project-link"><i class="fab fa-github"></i> 源代码</a>
+                        <a href="#" class="project-link demo" data-action="demo">
+                            <i class="fas fa-external-link-alt"></i> 在线演示
+                        </a>
+                        <a href="#" class="project-link code" data-action="code">
+                            <i class="fab fa-github"></i> 源代码
+                        </a>
                     </div>
                 </div>
             </div>
@@ -653,21 +834,72 @@
             document.getElementById('navLinks').classList.toggle('active');
         });
         
+        // 音效系统
+        const soundEnabled = { value: true };
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        
+        // 创建音效
+        function createSound(frequency, duration, type = 'sine') {
+            if (!soundEnabled.value) return;
+            
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.value = frequency;
+            oscillator.type = type;
+            
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + duration);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + duration);
+        }
+        
+        // 音效控制
+        document.getElementById('soundControl').addEventListener('click', function() {
+            soundEnabled.value = !soundEnabled.value;
+            this.innerHTML = soundEnabled.value ? 
+                '<i class="fas fa-volume-up"></i>' : 
+                '<i class="fas fa-volume-mute"></i>';
+            
+            // 播放状态切换音效
+            if (soundEnabled.value) {
+                createSound(523.25, 0.1); // C5
+                createSound(659.25, 0.2); // E5
+            }
+            
+            showNotification('音效' + (soundEnabled.value ? '已开启' : '已关闭'));
+        });
+        
         // 项目筛选功能
         document.querySelectorAll('.filter-btn').forEach(btn => {
             btn.addEventListener('click', function() {
+                // 播放点击音效
+                createSound(392, 0.1); // G4
+                
                 // 更新按钮状态
                 document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
                 this.classList.add('active');
                 
                 const filter = this.dataset.filter;
                 filterProjects(filter);
+                
+                showNotification('已筛选: ' + this.textContent);
             });
         });
         
         // 排序功能
         document.getElementById('sortSelect').addEventListener('change', function() {
+            // 播放选择音效
+            createSound(440, 0.1); // A4
+            
             sortProjects(this.value);
+            
+            const optionText = this.options[this.selectedIndex].text;
+            showNotification('已排序: ' + optionText);
         });
         
         // 项目筛选函数
@@ -676,8 +908,17 @@
             projects.forEach(project => {
                 if (category === 'all' || project.dataset.category === category) {
                     project.style.display = 'block';
+                    // 添加显示动画
+                    setTimeout(() => {
+                        project.style.opacity = '1';
+                        project.style.transform = 'translateY(0)';
+                    }, 100);
                 } else {
-                    project.style.display = 'none';
+                    project.style.opacity = '0';
+                    project.style.transform = 'translateY(20px)';
+                    setTimeout(() => {
+                        project.style.display = 'none';
+                    }, 300);
                 }
             });
         }
@@ -699,7 +940,72 @@
             });
             
             // 清空网格并重新添加排序后的项目
-            projects.forEach(project => grid.appendChild(project));
+            projects.forEach(project => {
+                grid.appendChild(project);
+                // 添加排序动画
+                project.style.transform = 'scale(0.9)';
+                setTimeout(() => {
+                    project.style.transform = 'scale(1)';
+                }, 200);
+            });
+        }
+        
+        // 项目链接交互
+        document.querySelectorAll('.project-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                // 播放点击音效
+                createSound(523.25, 0.2); // C5
+                
+                const action = this.dataset.action;
+                
+                if (action === 'demo') {
+                    // 在线演示 - 直接跳转
+                    // 这里不需要阻止默认行为，让浏览器正常跳转
+                    showNotification('正在跳转到演示页面...');
+                } else if (action === 'code') {
+                    // 源代码 - 跳转到详情页的源代码部分
+                    e.preventDefault();
+                    const href = this.getAttribute('href');
+                    window.location.href = href;
+                    showNotification('正在跳转到源代码部分...');
+                }
+            });
+        });
+        
+        // 项目卡片点击事件
+        document.querySelectorAll('.project-card').forEach(card => {
+            card.addEventListener('click', function(e) {
+                // 确保点击的不是链接
+                if (!e.target.closest('.project-link')) {
+                    // 播放点击音效
+                    createSound(659.25, 0.2); // E5
+                    
+                    // 跳转到项目详情页
+                    const projectTitle = this.querySelector('h3').textContent;
+                    let detailPage = 'project-detail.html';
+                    
+                    // 特殊处理游戏项目
+                    if (projectTitle.includes('记忆卡片')) {
+                        detailPage = 'Game/Game1/detail.html';
+                    }
+                    
+                    window.location.href = detailPage;
+                    showNotification('正在查看项目详情...');
+                }
+            });
+        });
+        
+        // 显示通知
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            const messageElement = document.getElementById('notificationMessage');
+            
+            messageElement.textContent = message;
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
         }
         
         // 订阅表单处理
@@ -707,9 +1013,28 @@
             e.preventDefault();
             const email = document.getElementById('email').value;
             if (email) {
-                alert(`感谢订阅！我们将向 ${email} 发送更新通知。`);
+                // 播放成功音效
+                createSound(523.25, 0.1); // C5
+                createSound(659.25, 0.2); // E5
+                createSound(783.99, 0.3); // G5
+                
+                showNotification(`感谢订阅！我们将向 ${email} 发送更新通知。`);
                 document.getElementById('email').value = '';
             }
+        });
+        
+        // 页面加载完成后的初始化
+        window.addEventListener('load', function() {
+            // 播放加载完成音效
+            if (soundEnabled.value) {
+                createSound(523.25, 0.1); // C5
+                createSound(659.25, 0.2); // E5
+            }
+            
+            // 显示欢迎通知
+            setTimeout(() => {
+                showNotification('欢迎浏览我的项目作品！');
+            }, 1000);
         });
     </script>
 </body>
