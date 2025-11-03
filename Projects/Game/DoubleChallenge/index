@@ -1,0 +1,1399 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>双重挑战 - 反应与躲避游戏 | TechBlog</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+
+        :root {
+            --primary: #00c6ff;
+            --secondary: #0072ff;
+            --dark: #0a0a16;
+            --darker: #050510;
+            --light: #f0f8ff;
+            --gray: #8a8fa3;
+            --success: #00d26a;
+            --warning: #ffaa00;
+            --danger: #ff4757;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--darker), var(--dark));
+            color: var(--light);
+            line-height: 1.6;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        #particles-js {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* 游戏头部 */
+        .game-header {
+            text-align: center;
+            padding: 80px 0 40px;
+            position: relative;
+        }
+
+        .game-header h1 {
+            font-size: 3.2rem;
+            margin-bottom: 20px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 2px 10px rgba(0, 198, 255, 0.3);
+        }
+
+        .game-header p {
+            color: var(--gray);
+            max-width: 700px;
+            margin: 0 auto 30px;
+            font-size: 1.2rem;
+        }
+
+        /* 游戏控制面板 */
+        .game-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(10, 10, 22, 0.7);
+            padding: 20px;
+            border-radius: 15px;
+            margin: 30px 0;
+            border: 1px solid rgba(0, 198, 255, 0.2);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .stats {
+            display: flex;
+            gap: 30px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 10px 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            min-width: 100px;
+            border: 1px solid rgba(0, 198, 255, 0.1);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--gray);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .difficulty-selector {
+            display: flex;
+            gap: 10px;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 5px;
+            border-radius: 10px;
+        }
+
+        .difficulty-btn {
+            padding: 10px 20px;
+            background: transparent;
+            border: none;
+            border-radius: 8px;
+            color: var(--light);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .difficulty-btn.active {
+            background: var(--primary);
+            box-shadow: 0 3px 10px rgba(0, 198, 255, 0.3);
+        }
+
+        .game-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .action-btn {
+            padding: 12px 20px;
+            background: rgba(0, 198, 255, 0.1);
+            border: 1px solid rgba(0, 198, 255, 0.3);
+            border-radius: 8px;
+            color: var(--light);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+        }
+
+        .action-btn:hover {
+            background: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 198, 255, 0.3);
+        }
+
+        /* 游戏区域 */
+        .game-area {
+            position: relative;
+            width: 100%;
+            height: 500px;
+            background: rgba(10, 10, 22, 0.5);
+            border-radius: 15px;
+            margin: 40px 0;
+            overflow: hidden;
+            border: 1px solid rgba(0, 198, 255, 0.1);
+        }
+
+        .player {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            border-radius: 5px;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            transition: left 0.1s;
+            box-shadow: 0 0 10px rgba(0, 198, 255, 0.7);
+            z-index: 10;
+        }
+
+        .target {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(45deg, var(--danger), #ff2e4b);
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-weight: bold;
+            box-shadow: 0 0 15px rgba(255, 65, 108, 0.7);
+            animation: pulse 1.5s infinite;
+            z-index: 5;
+        }
+
+        .obstacle {
+            position: absolute;
+            width: 60px;
+            height: 20px;
+            background: linear-gradient(45deg, #8e2de2, #4a00e0);
+            top: 0;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(142, 45, 226, 0.7);
+            z-index: 5;
+        }
+
+        .powerup {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 1.2rem;
+            z-index: 5;
+            animation: float 3s infinite ease-in-out;
+        }
+
+        .powerup.slow {
+            background: linear-gradient(45deg, var(--warning), #ff8800);
+            box-shadow: 0 0 10px rgba(255, 170, 0, 0.7);
+        }
+
+        .powerup.shield {
+            background: linear-gradient(45deg, var(--success), #00b358);
+            box-shadow: 0 0 10px rgba(0, 210, 106, 0.7);
+        }
+
+        /* 进度条 */
+        .progress-container {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            margin: 15px 0;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            border-radius: 3px;
+            transition: width 0.5s ease;
+            width: 0;
+        }
+
+        /* 游戏结束弹窗 */
+        .game-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.4s ease;
+        }
+
+        .game-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .game-modal {
+            background: linear-gradient(135deg, var(--dark), var(--darker));
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 450px;
+            width: 90%;
+            border: 1px solid rgba(0, 198, 255, 0.3);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5);
+            transform: scale(0.8) translateY(50px);
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .game-modal::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+        }
+
+        .game-overlay.active .game-modal {
+            transform: scale(1) translateY(0);
+        }
+
+        .game-modal h2 {
+            font-size: 2.2rem;
+            margin-bottom: 15px;
+            color: var(--primary);
+        }
+
+        .game-modal p {
+            margin-bottom: 25px;
+            color: var(--gray);
+            font-size: 1.1rem;
+        }
+
+        .modal-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin: 25px 0;
+        }
+
+        .modal-stat {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .modal-stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 5px;
+        }
+
+        .modal-stat-label {
+            font-size: 0.85rem;
+            color: var(--gray);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .modal-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+        }
+
+        .modal-btn.primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .modal-btn.secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--light);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .modal-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 198, 255, 0.4);
+        }
+
+        /* 导航链接 */
+        .nav-links {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 40px 0;
+            flex-wrap: wrap;
+        }
+
+        .nav-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 25px;
+            background: rgba(0, 198, 255, 0.1);
+            border: 1px solid rgba(0, 198, 255, 0.3);
+            border-radius: 8px;
+            color: var(--light);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .nav-link:hover {
+            background: var(--primary);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 198, 255, 0.3);
+        }
+
+        /* 音效控制 */
+        .sound-control {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: rgba(0, 198, 255, 0.1);
+            border: 1px solid rgba(0, 198, 255, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 100;
+            transition: all 0.3s ease;
+        }
+
+        .sound-control:hover {
+            background: var(--primary);
+            transform: scale(1.1);
+        }
+
+        .sound-control i {
+            font-size: 1.2rem;
+        }
+
+        /* 特殊效果 */
+        .combo {
+            position: absolute;
+            color: var(--warning);
+            font-weight: bold;
+            font-size: 1.5rem;
+            animation: floatUp 1s forwards;
+            display: none;
+            z-index: 20;
+        }
+
+        .level-up {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 3rem;
+            color: var(--success);
+            font-weight: bold;
+            text-shadow: 0 0 10px rgba(0, 255, 136, 0.7);
+            animation: zoomInOut 1.5s forwards;
+            display: none;
+            z-index: 5;
+        }
+
+        .shield-effect {
+            position: absolute;
+            width: 70px;
+            height: 70px;
+            border: 3px solid var(--success);
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            animation: pulseShield 1.5s infinite;
+            display: none;
+            z-index: 9;
+        }
+
+        /* 动画效果 */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0); }
+        }
+
+        @keyframes floatUp {
+            0% { transform: translateY(0); opacity: 1; }
+            100% { transform: translateY(-50px); opacity: 0; }
+        }
+
+        @keyframes zoomInOut {
+            0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+            50% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(1); opacity: 0; }
+        }
+
+        @keyframes pulseShield {
+            0% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+            50% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.7; }
+            100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+        }
+
+        /* 能力指示器 */
+        .powerup-indicators {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .powerup-indicator {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .powerup-indicator.active::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+        }
+
+        .powerup-indicator.slow.active::after {
+            background: var(--warning);
+            box-shadow: 0 0 5px var(--warning);
+        }
+
+        .powerup-indicator.shield.active::after {
+            background: var(--success);
+            box-shadow: 0 0 5px var(--success);
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .game-controls {
+                flex-direction: column;
+                gap: 20px;
+                text-align: center;
+            }
+
+            .stats {
+                order: 2;
+                width: 100%;
+                justify-content: center;
+            }
+
+            .difficulty-selector {
+                order: 1;
+                justify-content: center;
+            }
+
+            .game-actions {
+                order: 3;
+                justify-content: center;
+                width: 100%;
+            }
+
+            .game-area {
+                height: 400px;
+            }
+
+            .player {
+                width: 40px;
+                height: 40px;
+            }
+
+            .target {
+                width: 35px;
+                height: 35px;
+            }
+
+            .obstacle {
+                width: 50px;
+                height: 18px;
+            }
+
+            .game-header h1 {
+                font-size: 2.2rem;
+            }
+
+            .modal-stats {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .modal-actions {
+                flex-direction: column;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .game-area {
+                height: 350px;
+            }
+
+            .player {
+                width: 35px;
+                height: 35px;
+            }
+
+            .target {
+                width: 30px;
+                height: 30px;
+            }
+
+            .obstacle {
+                width: 45px;
+                height: 15px;
+            }
+
+            .game-header h1 {
+                font-size: 1.8rem;
+            }
+
+            .stat-value {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 粒子背景 -->
+    <div id="particles-js"></div>
+
+    <!-- 音效控制 -->
+    <div class="sound-control" id="soundControl">
+        <i class="fas fa-volume-up"></i>
+    </div>
+
+    <div class="container">
+        <!-- 游戏头部 -->
+        <section class="game-header">
+            <h1>双重挑战</h1>
+            <p>反应速度 + 躲避技巧 = 极限挑战！控制底部的方块，点击目标获得分数，同时躲避障碍物。</p>
+
+            <!-- 进度条 -->
+            <div class="progress-container">
+                <div class="progress-bar" id="progressBar" style="width: 0%"></div>
+            </div>
+        </section>
+
+        <!-- 游戏控制面板 -->
+        <div class="game-controls">
+            <div class="stats">
+                <div class="stat-item">
+                    <div class="stat-value" id="score">0</div>
+                    <div class="stat-label">得分</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="comboCount">0</div>
+                    <div class="stat-label">连击</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="level">1</div>
+                    <div class="stat-label">等级</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="lives">3</div>
+                    <div class="stat-label">生命</div>
+                </div>
+            </div>
+
+            <div class="difficulty-selector">
+                <button class="difficulty-btn active" data-difficulty="easy">简单</button>
+                <button class="difficulty-btn" data-difficulty="medium">中等</button>
+                <button class="difficulty-btn" data-difficulty="hard">困难</button>
+            </div>
+
+            <div class="game-actions">
+                <button class="action-btn" id="startBtn">
+                    <i class="fas fa-play"></i> 开始游戏
+                </button>
+                <button class="action-btn" id="restartBtn">
+                    <i class="fas fa-redo"></i> 重新开始
+                </button>
+            </div>
+        </div>
+
+        <!-- 能力指示器 -->
+        <div class="powerup-indicators">
+            <div class="powerup-indicator slow" id="slowIndicator" title="减速能力"></div>
+            <div class="powerup-indicator shield" id="shieldIndicator" title="护盾能力"></div>
+        </div>
+
+        <!-- 游戏区域 -->
+        <div class="game-area" id="gameArea">
+            <div class="player" id="player"></div>
+            <div class="shield-effect" id="shieldEffect"></div>
+            <div class="game-overlay" id="gameOverlay">
+                <div class="game-modal">
+                    <h2>游戏结束!</h2>
+                    <p>您的最终得分</p>
+
+                    <div class="modal-stats">
+                        <div class="modal-stat">
+                            <div class="modal-stat-value" id="finalScore">0</div>
+                            <div class="modal-stat-label">得分</div>
+                        </div>
+                        <div class="modal-stat">
+                            <div class="modal-stat-value" id="finalLevel">1</div>
+                            <div class="modal-stat-label">等级</div>
+                        </div>
+                        <div class="modal-stat">
+                            <div class="modal-stat-value" id="finalCombo">0</div>
+                            <div class="modal-stat-label">最高连击</div>
+                        </div>
+                    </div>
+
+                    <div class="modal-actions">
+                        <button class="modal-btn secondary" id="playAgainBtn">再玩一次</button>
+                        <button class="modal-btn primary" id="changeDifficultyBtn">更换难度</button>
+                    </div>
+                </div>
+            </div>
+            <div class="level-up" id="levelUp">等级提升!</div>
+        </div>
+
+        <!-- 导航链接 -->
+        <div class="nav-links">
+            <a href="detail.html" class="nav-link">
+                <i class="fas fa-info-circle"></i> 查看项目详情
+            </a>
+            <a href="../projects.html" class="nav-link">
+                <i class="fas fa-arrow-left"></i> 返回项目列表
+            </a>
+        </div>
+    </div>
+
+    <!-- 引入粒子效果库 -->
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <script>
+        // 游戏配置
+        const gameConfig = {
+            difficulties: {
+                easy: {
+                    targetSpawnRate: 1500,
+                    obstacleSpawnRate: 2000,
+                    gameSpeed: 2,
+                    powerupSpawnRate: 10000
+                },
+                medium: {
+                    targetSpawnRate: 1200,
+                    obstacleSpawnRate: 1500,
+                    gameSpeed: 3,
+                    powerupSpawnRate: 15000
+                },
+                hard: {
+                    targetSpawnRate: 800,
+                    obstacleSpawnRate: 1000,
+                    gameSpeed: 4,
+                    powerupSpawnRate: 20000
+                }
+            },
+            currentDifficulty: 'easy',
+            score: 0,
+            combo: 0,
+            level: 1,
+            lives: 3,
+            playerX: 0,
+            targets: [],
+            obstacles: [],
+            powerups: [],
+            gameActive: false,
+            timerInterval: null,
+            animationId: null,
+            lastTargetSpawn: 0,
+            lastObstacleSpawn: 0,
+            lastPowerupSpawn: 0,
+            gameSpeed: 2,
+            targetSpawnRate: 1500,
+            obstacleSpawnRate: 2000,
+            powerupSpawnRate: 10000,
+            maxCombo: 0,
+            shieldActive: false,
+            slowActive: false,
+            soundEnabled: true
+        };
+
+        // DOM元素
+        const gameArea = document.getElementById('gameArea');
+        const player = document.getElementById('player');
+        const scoreElement = document.getElementById('score');
+        const comboCountElement = document.getElementById('comboCount');
+        const levelElement = document.getElementById('level');
+        const livesElement = document.getElementById('lives');
+        const progressBar = document.getElementById('progressBar');
+        const startBtn = document.getElementById('startBtn');
+        const restartBtn = document.getElementById('restartBtn');
+        const gameOverlay = document.getElementById('gameOverlay');
+        const finalScore = document.getElementById('finalScore');
+        const finalLevel = document.getElementById('finalLevel');
+        const finalCombo = document.getElementById('finalCombo');
+        const playAgainBtn = document.getElementById('playAgainBtn');
+        const changeDifficultyBtn = document.getElementById('changeDifficultyBtn');
+        const levelUpElement = document.getElementById('levelUp');
+        const shieldEffect = document.getElementById('shieldEffect');
+        const soundControl = document.getElementById('soundControl');
+        const slowIndicator = document.getElementById('slowIndicator');
+        const shieldIndicator = document.getElementById('shieldIndicator');
+
+        // 音频上下文
+        let audioContext;
+        try {
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        } catch (e) {
+            console.log('Web Audio API is not supported in this browser');
+            gameConfig.soundEnabled = false;
+            soundControl.style.display = 'none';
+        }
+
+        // 初始化游戏
+        function initGame() {
+            // 重置游戏状态
+            gameConfig.score = 0;
+            gameConfig.combo = 0;
+            gameConfig.level = 1;
+            gameConfig.lives = 3;
+            gameConfig.targets = [];
+            gameConfig.obstacles = [];
+            gameConfig.powerups = [];
+            gameConfig.maxCombo = 0;
+            gameConfig.shieldActive = false;
+            gameConfig.slowActive = false;
+
+            // 更新难度设置
+            const difficulty = gameConfig.difficulties[gameConfig.currentDifficulty];
+            gameConfig.gameSpeed = difficulty.gameSpeed;
+            gameConfig.targetSpawnRate = difficulty.targetSpawnRate;
+            gameConfig.obstacleSpawnRate = difficulty.obstacleSpawnRate;
+            gameConfig.powerupSpawnRate = difficulty.powerupSpawnRate;
+
+            // 更新UI
+            updateStats();
+            progressBar.style.width = '0%';
+
+            // 重置玩家位置
+            gameConfig.playerX = gameArea.offsetWidth / 2 - player.offsetWidth / 2;
+            player.style.left = gameConfig.playerX + 'px';
+
+            // 清除所有游戏元素
+            clearGameElements();
+
+            // 隐藏游戏结束界面
+            gameOverlay.classList.remove('active');
+
+            // 重置能力指示器
+            slowIndicator.classList.remove('active');
+            shieldIndicator.classList.remove('active');
+            shieldEffect.style.display = 'none';
+        }
+
+        // 清除游戏元素
+        function clearGameElements() {
+            // 移除所有目标和障碍物
+            document.querySelectorAll('.target, .obstacle, .powerup, .combo').forEach(el => {
+                if (el.parentNode) {
+                    el.parentNode.removeChild(el);
+                }
+            });
+        }
+
+        // 更新游戏统计信息
+        function updateStats() {
+            scoreElement.textContent = gameConfig.score;
+            comboCountElement.textContent = gameConfig.combo;
+            levelElement.textContent = gameConfig.level;
+            livesElement.textContent = gameConfig.lives;
+        }
+
+        // 开始游戏
+        function startGame() {
+            if (gameConfig.gameActive) return;
+
+            initGame();
+            gameConfig.gameActive = true;
+            gameConfig.lastTargetSpawn = performance.now();
+            gameConfig.lastObstacleSpawn = performance.now();
+            gameConfig.lastPowerupSpawn = performance.now();
+
+            // 开始游戏循环
+            gameLoop();
+        }
+
+        // 生成目标
+        function spawnTarget(timestamp) {
+            if (timestamp - gameConfig.lastTargetSpawn > gameConfig.targetSpawnRate) {
+                const target = document.createElement('div');
+                target.className = 'target';
+
+                // 随机位置（但不要离边缘太近）
+                const maxX = gameArea.offsetWidth - target.offsetWidth - 20;
+                const x = 20 + Math.random() * maxX;
+                const y = 20 + Math.random() * (gameArea.offsetHeight / 2);
+
+                target.style.left = x + 'px';
+                target.style.top = y + 'px';
+
+                // 目标上的数字（得分值）
+                const points = Math.min(5 + gameConfig.level, 15);
+                target.textContent = points;
+                target.dataset.points = points;
+
+                // 添加点击事件
+                target.addEventListener('click', hitTarget);
+
+                gameArea.appendChild(target);
+                gameConfig.targets.push({
+                    element: target,
+                    x: x,
+                    y: y
+                });
+
+                gameConfig.lastTargetSpawn = timestamp;
+
+                // 逐渐减少生成间隔
+                gameConfig.targetSpawnRate = Math.max(500, gameConfig.targetSpawnRate - 10);
+            }
+        }
+
+        // 生成障碍物
+        function spawnObstacle(timestamp) {
+            if (timestamp - gameConfig.lastObstacleSpawn > gameConfig.obstacleSpawnRate) {
+                const obstacle = document.createElement('div');
+                obstacle.className = 'obstacle';
+
+                const x = Math.random() * (gameArea.offsetWidth - obstacle.offsetWidth);
+                obstacle.style.left = x + 'px';
+                obstacle.style.top = '0px';
+
+                gameArea.appendChild(obstacle);
+                gameConfig.obstacles.push({
+                    element: obstacle,
+                    x: x,
+                    y: 0,
+                    speed: gameConfig.gameSpeed + Math.random() * 2
+                });
+
+                gameConfig.lastObstacleSpawn = timestamp;
+
+                // 逐渐减少生成间隔
+                gameConfig.obstacleSpawnRate = Math.max(800, gameConfig.obstacleSpawnRate - 15);
+            }
+        }
+
+        // 生成能力道具
+        function spawnPowerup(timestamp) {
+            if (timestamp - gameConfig.lastPowerupSpawn > gameConfig.powerupSpawnRate) {
+                const powerup = document.createElement('div');
+                const powerupType = Math.random() > 0.5 ? 'slow' : 'shield';
+                powerup.className = `powerup ${powerupType}`;
+                powerup.innerHTML = `<i class="fas fa-${powerupType === 'slow' ? 'clock' : 'shield-alt'}"></i>`;
+                powerup.dataset.type = powerupType;
+
+                const x = 20 + Math.random() * (gameArea.offsetWidth - 40);
+                const y = 20 + Math.random() * (gameArea.offsetHeight / 2);
+
+                powerup.style.left = x + 'px';
+                powerup.style.top = y + 'px';
+
+                // 添加点击事件
+                powerup.addEventListener('click', collectPowerup);
+
+                gameArea.appendChild(powerup);
+                gameConfig.powerups.push({
+                    element: powerup,
+                    x: x,
+                    y: y,
+                    type: powerupType
+                });
+
+                gameConfig.lastPowerupSpawn = timestamp;
+            }
+        }
+
+        // 击中目标
+        function hitTarget(e) {
+            if (!gameConfig.gameActive) return;
+
+            const target = e.target;
+            const points = parseInt(target.dataset.points);
+
+            gameConfig.score += points;
+            gameConfig.combo++;
+
+            // 更新最高连击
+            if (gameConfig.combo > gameConfig.maxCombo) {
+                gameConfig.maxCombo = gameConfig.combo;
+            }
+
+            // 连击奖励
+            if (gameConfig.combo >= 5) {
+                const bonus = Math.floor(gameConfig.combo / 5) * 5;
+                gameConfig.score += bonus;
+
+                // 显示连击效果
+                const comboElement = document.createElement('div');
+                comboElement.className = 'combo';
+                comboElement.textContent = `${gameConfig.combo} 连击! +${bonus}`;
+                comboElement.style.left = (parseInt(target.style.left) + 20) + 'px';
+                comboElement.style.top = (parseInt(target.style.top) + 20) + 'px';
+                gameArea.appendChild(comboElement);
+
+                comboElement.style.display = 'block';
+
+                setTimeout(() => {
+                    if (comboElement.parentNode) {
+                        gameArea.removeChild(comboElement);
+                    }
+                }, 1000);
+            }
+
+            // 检查等级提升
+            const newLevel = Math.floor(gameConfig.score / 100) + 1;
+            if (newLevel > gameConfig.level) {
+                gameConfig.level = newLevel;
+                showLevelUp();
+
+                // 每升一级增加游戏速度
+                gameConfig.gameSpeed += 0.5;
+            }
+
+            updateStats();
+            playSound('hit');
+
+            // 移除目标
+            gameArea.removeChild(target);
+            gameConfig.targets = gameConfig.targets.filter(t => t.element !== target);
+        }
+
+        // 收集能力道具
+        function collectPowerup(e) {
+            if (!gameConfig.gameActive) return;
+
+            const powerup = e.target.closest('.powerup');
+            const type = powerup.dataset.type;
+
+            if (type === 'slow') {
+                activateSlow();
+            } else if (type === 'shield') {
+                activateShield();
+            }
+
+            playSound('powerup');
+
+            // 移除能力道具
+            gameArea.removeChild(powerup);
+            gameConfig.powerups = gameConfig.powerups.filter(p => p.element !== powerup);
+        }
+
+        // 激活减速能力
+        function activateSlow() {
+            if (gameConfig.slowActive) return;
+
+            gameConfig.slowActive = true;
+            slowIndicator.classList.add('active');
+
+            // 减速效果持续5秒
+            const originalSpeed = gameConfig.gameSpeed;
+            gameConfig.gameSpeed = Math.max(1, gameConfig.gameSpeed * 0.5);
+
+            setTimeout(() => {
+                gameConfig.slowActive = false;
+                slowIndicator.classList.remove('active');
+                gameConfig.gameSpeed = originalSpeed;
+            }, 5000);
+        }
+
+        // 激活护盾能力
+        function activateShield() {
+            if (gameConfig.shieldActive) return;
+
+            gameConfig.shieldActive = true;
+            shieldIndicator.classList.add('active');
+            shieldEffect.style.display = 'block';
+
+            // 护盾效果持续5秒
+            setTimeout(() => {
+                gameConfig.shieldActive = false;
+                shieldIndicator.classList.remove('active');
+                shieldEffect.style.display = 'none';
+            }, 5000);
+        }
+
+        // 移动障碍物
+        function moveObstacles() {
+            for (let i = gameConfig.obstacles.length - 1; i >= 0; i--) {
+                const obstacle = gameConfig.obstacles[i];
+                obstacle.y += obstacle.speed;
+                obstacle.element.style.top = obstacle.y + 'px';
+
+                // 检查是否击中玩家
+                if (checkCollision(obstacle, {
+                    x: gameConfig.playerX,
+                    y: gameArea.offsetHeight - player.offsetHeight - 10,
+                    width: player.offsetWidth,
+                    height: player.offsetHeight
+                })) {
+                    // 如果护盾激活，只消耗护盾
+                    if (gameConfig.shieldActive) {
+                        gameConfig.shieldActive = false;
+                        shieldIndicator.classList.remove('active');
+                        shieldEffect.style.display = 'none';
+                        playSound('shieldBlock');
+                    } else {
+                        // 击中玩家
+                        hitPlayer();
+                    }
+
+                    gameArea.removeChild(obstacle.element);
+                    gameConfig.obstacles.splice(i, 1);
+                    continue;
+                }
+
+                // 移除超出屏幕的障碍物
+                if (obstacle.y > gameArea.offsetHeight) {
+                    gameArea.removeChild(obstacle.element);
+                    gameConfig.obstacles.splice(i, 1);
+                }
+            }
+        }
+
+        // 检查碰撞
+        function checkCollision(obj1, obj2) {
+            return obj1.x < obj2.x + obj2.width &&
+                   obj1.x + obj1.element.offsetWidth > obj2.x &&
+                   obj1.y < obj2.y + obj2.height &&
+                   obj1.y + obj1.element.offsetHeight > obj2.y;
+        }
+
+        // 玩家被击中
+        function hitPlayer() {
+            gameConfig.lives--;
+            gameConfig.combo = 0; // 连击重置
+            updateStats();
+            playSound('hitPlayer');
+
+            // 玩家闪烁效果
+            player.style.background = 'linear-gradient(45deg, var(--danger), #ff6666)';
+            setTimeout(() => {
+                player.style.background = 'linear-gradient(45deg, var(--primary), var(--secondary))';
+            }, 300);
+
+            if (gameConfig.lives <= 0) {
+                gameOver();
+            }
+        }
+
+        // 显示等级提升动画
+        function showLevelUp() {
+            levelUpElement.textContent = `等级 ${gameConfig.level}!`;
+            levelUpElement.style.display = 'block';
+            playSound('levelUp');
+
+            setTimeout(() => {
+                levelUpElement.style.display = 'none';
+            }, 1500);
+        }
+
+        // 游戏结束
+        function gameOver() {
+            gameConfig.gameActive = false;
+            cancelAnimationFrame(gameConfig.animationId);
+
+            // 更新最终统计
+            finalScore.textContent = gameConfig.score;
+            finalLevel.textContent = gameConfig.level;
+            finalCombo.textContent = gameConfig.maxCombo;
+
+            // 显示游戏结束界面
+            gameOverlay.classList.add('active');
+            playSound('gameOver');
+        }
+
+        // 游戏循环
+        function gameLoop(timestamp) {
+            if (!gameConfig.gameActive) return;
+
+            spawnTarget(timestamp);
+            spawnObstacle(timestamp);
+            spawnPowerup(timestamp);
+            moveObstacles();
+
+            // 更新进度条
+            const progress = (gameConfig.score % 100) || 0;
+            progressBar.style.width = `${progress}%`;
+
+            gameConfig.animationId = requestAnimationFrame(gameLoop);
+        }
+
+        // 播放音效
+        function playSound(type) {
+            if (!gameConfig.soundEnabled || !audioContext) return;
+
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+
+            let frequency, duration;
+
+            switch (type) {
+                case 'hit':
+                    frequency = 523.25; // C5
+                    duration = 0.1;
+                    break;
+                case 'hitPlayer':
+                    frequency = 392; // G4
+                    duration = 0.3;
+                    break;
+                case 'powerup':
+                    frequency = 659.25; // E5
+                    duration = 0.2;
+                    break;
+                case 'levelUp':
+                    // 播放一个简单的升级旋律
+                    playMelody([523.25, 659.25, 783.99]);
+                    return;
+                case 'shieldBlock':
+                    frequency = 880; // A5
+                    duration = 0.2;
+                    break;
+                case 'gameOver':
+                    // 播放一个简单的失败旋律
+                    playMelody([392, 349.23, 329.63]);
+                    return;
+                default:
+                    frequency = 440; // A4
+                    duration = 0.1;
+            }
+
+            oscillator.frequency.value = frequency;
+            oscillator.type = 'sine';
+
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + duration);
+
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + duration);
+        }
+
+        // 播放旋律
+        function playMelody(frequencies) {
+            if (!gameConfig.soundEnabled || !audioContext) return;
+
+            let time = audioContext.currentTime;
+
+            frequencies.forEach((freq, index) => {
+                setTimeout(() => {
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+
+                    oscillator.frequency.value = freq;
+                    oscillator.type = 'sine';
+
+                    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.2);
+
+                    oscillator.start(audioContext.currentTime);
+                    oscillator.stop(audioContext.currentTime + 0.2);
+                }, index * 200);
+            });
+        }
+
+        // 事件监听器
+        document.querySelectorAll('.difficulty-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelector('.difficulty-btn.active').classList.remove('active');
+                this.classList.add('active');
+                gameConfig.currentDifficulty = this.dataset.difficulty;
+                initGame();
+                playSound('hit');
+            });
+        });
+
+        startBtn.addEventListener('click', startGame);
+
+        restartBtn.addEventListener('click', function() {
+            if (gameConfig.gameActive) {
+                cancelAnimationFrame(gameConfig.animationId);
+            }
+            initGame();
+            playSound('hit');
+        });
+
+        playAgainBtn.addEventListener('click', function() {
+            gameOverlay.classList.remove('active');
+            startGame();
+        });
+
+        changeDifficultyBtn.addEventListener('click', function() {
+            gameOverlay.classList.remove('active');
+            initGame();
+        });
+
+        // 鼠标移动控制玩家
+        gameArea.addEventListener('mousemove', (e) => {
+            if (!gameConfig.gameActive) return;
+
+            const rect = gameArea.getBoundingClientRect();
+            let x = e.clientX - rect.left - player.offsetWidth / 2;
+
+            // 限制在游戏区域内
+            if (x < 0) x = 0;
+            if (x > gameArea.offsetWidth - player.offsetWidth) {
+                x = gameArea.offsetWidth - player.offsetWidth;
+            }
+
+            gameConfig.playerX = x;
+            player.style.left = x + 'px';
+        });
+
+        // 键盘控制（备用）
+        document.addEventListener('keydown', (e) => {
+            if (!gameConfig.gameActive) return;
+
+            const playerWidth = player.offsetWidth;
+            const gameWidth = gameArea.offsetWidth;
+
+            if (e.key === 'ArrowLeft' || e.key === 'a') {
+                gameConfig.playerX = Math.max(0, gameConfig.playerX - 20);
+            } else if (e.key === 'ArrowRight' || e.key === 'd') {
+                gameConfig.playerX = Math.min(gameWidth - playerWidth, gameConfig.playerX + 20);
+            }
+
+            player.style.left = gameConfig.playerX + 'px';
+        });
+
+        // 音效控制
+        soundControl.addEventListener('click', function() {
+            gameConfig.soundEnabled = !gameConfig.soundEnabled;
+            this.innerHTML = gameConfig.soundEnabled ?
+                '<i class="fas fa-volume-up"></i>' :
+                '<i class="fas fa-volume-mute"></i>';
+
+            // 播放状态切换音效
+            if (gameConfig.soundEnabled) {
+                playSound('hit');
+            }
+        });
+
+        // 初始化粒子背景
+        particlesJS("particles-js", {
+            particles: {
+                number: { value: 80, density: { enable: true, value_area: 800 } },
+                color: { value: "#00c6ff" },
+                shape: { type: "circle" },
+                opacity: { value: 0.5, random: true },
+                size: { value: 3, random: true },
+                line_linked: {
+                    enable: true,
+                    distance: 150,
+                    color: "#00c6ff",
+                    opacity: 0.2,
+                    width: 1
+                },
+                move: {
+                    enable: true,
+                    speed: 2,
+                    direction: "none",
+                    random: true,
+                    straight: false,
+                    out_mode: "out",
+                    bounce: false
+                }
+            },
+            interactivity: {
+                detect_on: "canvas",
+                events: {
+                    onhover: { enable: true, mode: "repulse" },
+                    onclick: { enable: true, mode: "push" },
+                    resize: true
+                }
+            },
+            retina_detect: true
+        });
+
+        // 初始化游戏
+        initGame();
+    </script>
+</body>
+</html>
