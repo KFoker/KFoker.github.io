@@ -1,1 +1,1460 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Excel数据分析与可视化平台</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.2/papaparse.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
 
+        :root {
+            --primary: #00c6ff;
+            --secondary: #0072ff;
+            --dark: #0a0a16;
+            --darker: #050510;
+            --light: #f0f8ff;
+            --gray: #8a8fa3;
+            --success: #00d26a;
+            --warning: #ffcc00;
+            --danger: #ff4757;
+            --neon-blue: #00f3ff;
+            --neon-purple: #b300ff;
+            --neon-pink: #ff00cc;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--darker), var(--dark));
+            color: var(--light);
+            line-height: 1.6;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* 头部导航 */
+        header {
+            padding: 20px 0;
+            position: sticky;
+            top: 0;
+            background-color: rgba(10, 10, 22, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            border-bottom: 1px solid rgba(0, 198, 255, 0.2);
+        }
+
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+        }
+
+        .nav-links li {
+            margin-left: 30px;
+        }
+
+        .nav-links a {
+            color: var(--light);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-links a.active {
+            color: var(--primary);
+        }
+
+        .nav-links a.active::after {
+            width: 100%;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--primary);
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        /* 主内容区 */
+        .main-content {
+            padding: 30px 0;
+        }
+
+        .page-title {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .page-title h1 {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .page-title p {
+            color: var(--gray);
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* 布局 */
+        .dashboard-layout {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 20px;
+            height: calc(100vh - 180px);
+        }
+
+        /* 控制面板 */
+        .control-panel {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .panel-section {
+            margin-bottom: 25px;
+        }
+
+        .panel-title {
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .panel-title i {
+            font-size: 1rem;
+        }
+
+        /* 上传区域 */
+        .upload-area {
+            border: 2px dashed rgba(0, 198, 255, 0.3);
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+
+        .upload-area:hover, .upload-area.dragover {
+            border-color: var(--primary);
+            background: rgba(0, 198, 255, 0.05);
+        }
+
+        .upload-icon {
+            font-size: 2.5rem;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        .upload-text {
+            font-size: 0.9rem;
+            color: var(--gray);
+        }
+
+        #file-input {
+            display: none;
+        }
+
+        /* 字段列表 */
+        .fields-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .field-item {
+            background: rgba(0, 198, 255, 0.05);
+            border: 1px solid rgba(0, 198, 255, 0.2);
+            border-radius: 5px;
+            padding: 10px 15px;
+            cursor: move;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: all 0.3s ease;
+        }
+
+        .field-item:hover {
+            background: rgba(0, 198, 255, 0.1);
+            transform: translateX(5px);
+        }
+
+        .field-name {
+            font-weight: 500;
+        }
+
+        .field-type {
+            font-size: 0.8rem;
+            color: var(--gray);
+            background: rgba(0, 0, 0, 0.3);
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+
+        /* 图表配置 */
+        .chart-config {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            padding: 15px;
+        }
+
+        .config-item {
+            margin-bottom: 15px;
+        }
+
+        .config-label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+            color: var(--gray);
+        }
+
+        .config-select, .config-input {
+            width: 100%;
+            padding: 8px 10px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            color: var(--light);
+        }
+
+        .drop-zone {
+            min-height: 40px;
+            border: 1px dashed rgba(0, 198, 255, 0.3);
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 10px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+
+        .drop-field {
+            background: rgba(0, 198, 255, 0.1);
+            border-radius: 3px;
+            padding: 5px 8px;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .drop-field i {
+            cursor: pointer;
+            font-size: 0.7rem;
+        }
+
+        /* 可视化区域 */
+        .visualization-area {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chart-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .chart-title {
+            font-size: 1.5rem;
+            color: var(--primary);
+        }
+
+        .chart-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .chart-btn {
+            background: rgba(0, 198, 255, 0.1);
+            border: 1px solid rgba(0, 198, 255, 0.3);
+            border-radius: 5px;
+            padding: 8px 15px;
+            color: var(--light);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .chart-btn:hover {
+            background: rgba(0, 198, 255, 0.2);
+        }
+
+        .chart-container {
+            flex: 1;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            padding: 20px;
+            position: relative;
+        }
+
+        .chart-placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: var(--gray);
+            text-align: center;
+        }
+
+        .chart-placeholder i {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 1024px) {
+            .dashboard-layout {
+                grid-template-columns: 1fr;
+                height: auto;
+            }
+
+            .control-panel {
+                order: 2;
+            }
+
+            .visualization-area {
+                order: 1;
+                min-height: 500px;
+            }
+        }
+
+        /* 加载动画 */
+        .loader {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 8px;
+            z-index: 10;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .loader-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(0, 198, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--primary);
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* 标签页 */
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* 统计信息 */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-card {
+            background: rgba(0, 198, 255, 0.05);
+            border-radius: 5px;
+            padding: 15px;
+        }
+
+        .stat-title {
+            font-size: 0.8rem;
+            color: var(--gray);
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        /* 科技感图表样式 */
+        .tech-chart {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .tech-chart::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--neon-blue), transparent);
+            animation: scanline 3s linear infinite;
+        }
+
+        @keyframes scanline {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .chart-grid {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
+                linear-gradient(rgba(0, 198, 255, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 198, 255, 0.05) 1px, transparent 1px);
+            background-size: 20px 20px;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- 头部导航 -->
+    <header>
+        <div class="container">
+            <nav class="navbar">
+                <a href="index.html" class="logo">TechBlog</a>
+                <ul class="nav-links">
+                    <li><a href="index.html">首页</a></li>
+                    <li><a href="blog.html">博客</a></li>
+                    <li><a href="projects.html">项目</a></li>
+                    <li><a href="about.html">关于</a></li>
+                    <li><a href="contact.html">联系</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- 主内容区 -->
+    <div class="container main-content">
+        <div class="page-title">
+            <h1>Excel数据分析与可视化平台</h1>
+            <p>上传Excel文件，通过拖拽字段自动生成交互式可视化图表</p>
+        </div>
+
+        <div class="dashboard-layout">
+            <!-- 控制面板 -->
+            <div class="control-panel">
+                <div class="panel-section">
+                    <h3 class="panel-title"><i class="fas fa-file-upload"></i> 数据上传</h3>
+                    <div class="upload-area" id="upload-area">
+                        <div class="upload-icon">
+                            <i class="fas fa-file-excel"></i>
+                        </div>
+                        <div class="upload-text">
+                            <p>点击或拖放Excel文件到此区域</p>
+                            <p>支持 .xlsx, .xls 格式</p>
+                        </div>
+                        <input type="file" id="file-input" accept=".xlsx, .xls">
+                    </div>
+                    <div id="file-info" class="upload-text"></div>
+                </div>
+
+                <div class="panel-section">
+                    <h3 class="panel-title"><i class="fas fa-list"></i> 数据字段</h3>
+                    <div class="fields-list" id="fields-list">
+                        <div class="chart-placeholder">
+                            <i class="fas fa-table"></i>
+                            <p>上传Excel文件后，字段将显示在这里</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel-section">
+                    <h3 class="panel-title"><i class="fas fa-chart-bar"></i> 图表配置</h3>
+                    <div class="chart-config">
+                        <div class="config-item">
+                            <label class="config-label">图表类型</label>
+                            <select class="config-select" id="chart-type">
+                                <option value="bar">柱状图</option>
+                                <option value="line">折线图</option>
+                                <option value="pie">饼图</option>
+                                <option value="doughnut">环形图</option>
+                                <option value="scatter">散点图</option>
+                                <option value="radar">雷达图</option>
+                            </select>
+                        </div>
+
+                        <div class="config-item">
+                            <label class="config-label">X轴字段</label>
+                            <div class="drop-zone" id="x-axis-drop">
+                                <span class="drop-field" style="display: none;"></span>
+                            </div>
+                        </div>
+
+                        <div class="config-item">
+                            <label class="config-label">Y轴字段</label>
+                            <div class="drop-zone" id="y-axis-drop">
+                                <span class="drop-field" style="display: none;"></span>
+                            </div>
+                        </div>
+
+                        <div class="config-item">
+                            <label class="config-label">分组字段</label>
+                            <div class="drop-zone" id="group-drop">
+                                <span class="drop-field" style="display: none;"></span>
+                            </div>
+                        </div>
+
+                        <div class="config-item">
+                            <label class="config-label">图表标题</label>
+                            <input type="text" class="config-input" id="chart-title" placeholder="输入图表标题">
+                        </div>
+
+                        <button class="chart-btn" id="generate-chart" style="width: 100%; margin-top: 10px;">
+                            <i class="fas fa-sync-alt"></i> 生成图表
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 可视化区域 -->
+            <div class="visualization-area">
+                <div class="tabs">
+                    <div class="tab active" data-tab="visualization">可视化图表</div>
+                    <div class="tab" data-tab="statistics">统计分析</div>
+                    <div class="tab" data-tab="data">数据预览</div>
+                </div>
+
+                <!-- 可视化图表标签页 -->
+                <div class="tab-content active" id="visualization-tab">
+                    <div class="chart-area">
+                        <div class="chart-header">
+                            <h2 class="chart-title" id="active-chart-title">数据分析图表</h2>
+                            <div class="chart-actions">
+                                <button class="chart-btn" id="export-png">
+                                    <i class="fas fa-download"></i> 导出PNG
+                                </button>
+                                <button class="chart-btn" id="export-data">
+                                    <i class="fas fa-file-export"></i> 导出数据
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="chart-container tech-chart">
+                            <div class="chart-grid"></div>
+                            <div class="chart-placeholder" id="chart-placeholder">
+                                <i class="fas fa-chart-bar"></i>
+                                <p>请上传Excel文件并配置图表参数</p>
+                                <p>将左侧字段拖拽到相应区域来创建图表</p>
+                            </div>
+                            <canvas id="chart-canvas" style="display: none;"></canvas>
+                            <div class="loader" id="chart-loader">
+                                <div class="loader-spinner"></div>
+                                <p>正在生成图表...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 统计分析标签页 -->
+                <div class="tab-content" id="statistics-tab">
+                    <div class="panel-title"><i class="fas fa-calculator"></i> 描述性统计</div>
+                    <div class="stats-grid" id="stats-grid">
+                        <!-- 统计信息将通过JavaScript动态生成 -->
+                    </div>
+
+                    <div class="panel-title" style="margin-top: 30px;"><i class="fas fa-table"></i> 详细统计</div>
+                    <div class="table-container" style="overflow-x: auto; margin-top: 15px;">
+                        <table class="data-table" id="stats-table" style="width: 100%;">
+                            <!-- 统计表格将通过JavaScript动态生成 -->
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 数据预览标签页 -->
+                <div class="tab-content" id="data-tab">
+                    <div class="panel-title"><i class="fas fa-table"></i> 数据预览</div>
+                    <div class="table-container" style="overflow-x: auto; margin-top: 15px; max-height: 500px; overflow-y: auto;">
+                        <table class="data-table" id="data-preview-table" style="width: 100%;">
+                            <!-- 数据表格将通过JavaScript动态生成 -->
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 全局变量
+        let uploadedData = null;
+        let currentChart = null;
+        let fields = [];
+
+        // DOM元素
+        const fileInput = document.getElementById('file-input');
+        const uploadArea = document.getElementById('upload-area');
+        const fileInfo = document.getElementById('file-info');
+        const fieldsList = document.getElementById('fields-list');
+        const chartTypeSelect = document.getElementById('chart-type');
+        const xAxisDrop = document.getElementById('x-axis-drop');
+        const yAxisDrop = document.getElementById('y-axis-drop');
+        const groupDrop = document.getElementById('group-drop');
+        const chartTitleInput = document.getElementById('chart-title');
+        const generateChartBtn = document.getElementById('generate-chart');
+        const chartCanvas = document.getElementById('chart-canvas');
+        const chartPlaceholder = document.getElementById('chart-placeholder');
+        const chartLoader = document.getElementById('chart-loader');
+        const activeChartTitle = document.getElementById('active-chart-title');
+        const statsGrid = document.getElementById('stats-grid');
+        const statsTable = document.getElementById('stats-table');
+        const dataPreviewTable = document.getElementById('data-preview-table');
+
+        // 标签页功能
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                // 移除所有活跃状态
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+                // 添加当前活跃状态
+                this.classList.add('active');
+                document.getElementById(`${this.dataset.tab}-tab`).classList.add('active');
+            });
+        });
+
+        // 文件上传处理
+        uploadArea.addEventListener('click', () => fileInput.click());
+
+        fileInput.addEventListener('change', handleFileUpload);
+
+        // 拖放功能
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            uploadArea.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            uploadArea.addEventListener(eventName, () => uploadArea.classList.add('dragover'), false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            uploadArea.addEventListener(eventName, () => uploadArea.classList.remove('dragover'), false);
+        });
+
+        uploadArea.addEventListener('drop', handleDrop, false);
+
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            fileInput.files = files;
+            handleFileUpload();
+        }
+
+        // 处理文件上传
+        function handleFileUpload() {
+            const file = fileInput.files[0];
+            if (!file) return;
+
+            fileInfo.textContent = `已选择: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`;
+            chartLoader.style.display = 'flex';
+
+            // 使用SheetJS读取Excel文件
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, {type: 'array'});
+
+                    // 获取第一个工作表
+                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const jsonData = XLSX.utils.sheet_to_json(firstSheet, {header: 1});
+
+                    // 处理数据
+                    processUploadedData(jsonData);
+                } catch (error) {
+                    console.error('Error reading Excel file:', error);
+                    fileInfo.innerHTML = `<span style="color: var(--danger)">文件读取错误: ${error.message}</span>`;
+                    chartLoader.style.display = 'none';
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        // 处理上传的数据
+        function processUploadedData(data) {
+            if (data.length < 2) {
+                fileInfo.innerHTML = '<span style="color: var(--danger)">数据格式错误: 文件必须包含表头和数据行</span>';
+                chartLoader.style.display = 'none';
+                return;
+            }
+
+            const headers = data[0];
+            const rows = data.slice(1).filter(row => row.length > 0);
+
+            // 存储上传的数据
+            uploadedData = {
+                headers: headers,
+                rows: rows
+            };
+
+            // 分析字段类型
+            analyzeFields(headers, rows);
+
+            // 更新字段列表
+            updateFieldsList();
+
+            // 更新数据预览
+            updateDataPreview();
+
+            // 更新统计分析
+            updateStatistics();
+
+            chartLoader.style.display = 'none';
+            fileInfo.innerHTML = `<span style="color: var(--success)">数据加载成功! 发现 ${headers.length} 个字段, ${rows.length} 行数据</span>`;
+        }
+
+        // 分析字段类型
+        function analyzeFields(headers, rows) {
+            fields = headers.map((header, index) => {
+                const values = rows.map(row => row[index]).filter(val => val !== undefined && val !== null && val !== '');
+
+                if (values.length === 0) {
+                    return {
+                        name: header,
+                        type: 'unknown',
+                        index: index
+                    };
+                }
+
+                // 检查是否为数值型
+                const numericValues = values.filter(val => !isNaN(parseFloat(val)) && isFinite(val));
+                const numericRatio = numericValues.length / values.length;
+
+                if (numericRatio > 0.8) {
+                    return {
+                        name: header,
+                        type: 'numeric',
+                        index: index,
+                        values: values.map(val => parseFloat(val))
+                    };
+                }
+
+                // 检查是否为日期型
+                const dateValues = values.filter(val => !isNaN(Date.parse(val)));
+                const dateRatio = dateValues.length / values.length;
+
+                if (dateRatio > 0.7) {
+                    return {
+                        name: header,
+                        type: 'date',
+                        index: index,
+                        values: values
+                    };
+                }
+
+                // 默认为分类数据
+                return {
+                    name: header,
+                    type: 'categorical',
+                    index: index,
+                    values: values
+                };
+            });
+        }
+
+        // 更新字段列表
+        function updateFieldsList() {
+            fieldsList.innerHTML = '';
+
+            fields.forEach(field => {
+                const fieldItem = document.createElement('div');
+                fieldItem.className = 'field-item';
+                fieldItem.draggable = true;
+                fieldItem.dataset.fieldName = field.name;
+                fieldItem.dataset.fieldType = field.type;
+
+                fieldItem.innerHTML = `
+                    <span class="field-name">${field.name}</span>
+                    <span class="field-type">${field.type}</span>
+                `;
+
+                // 添加拖拽事件
+                fieldItem.addEventListener('dragstart', handleDragStart);
+
+                fieldsList.appendChild(fieldItem);
+            });
+        }
+
+        // 处理拖拽开始
+        function handleDragStart(e) {
+            e.dataTransfer.setData('text/plain', JSON.stringify({
+                name: this.dataset.fieldName,
+                type: this.dataset.fieldType
+            }));
+        }
+
+        // 设置拖放区域
+        setupDropZone(xAxisDrop, 'x');
+        setupDropZone(yAxisDrop, 'y');
+        setupDropZone(groupDrop, 'group');
+
+        function setupDropZone(dropZone, type) {
+            dropZone.addEventListener('dragover', e => {
+                e.preventDefault();
+                dropZone.style.borderColor = 'var(--primary)';
+                dropZone.style.backgroundColor = 'rgba(0, 198, 255, 0.05)';
+            });
+
+            dropZone.addEventListener('dragleave', () => {
+                dropZone.style.borderColor = 'rgba(0, 198, 255, 0.3)';
+                dropZone.style.backgroundColor = 'transparent';
+            });
+
+            dropZone.addEventListener('drop', e => {
+                e.preventDefault();
+                dropZone.style.borderColor = 'rgba(0, 198, 255, 0.3)';
+                dropZone.style.backgroundColor = 'transparent';
+
+                const fieldData = JSON.parse(e.dataTransfer.getData('text/plain'));
+
+                // 检查是否已存在该字段
+                const existingField = dropZone.querySelector('.drop-field');
+                if (existingField) {
+                    existingField.remove();
+                }
+
+                // 添加字段到拖放区域
+                const fieldElement = document.createElement('span');
+                fieldElement.className = 'drop-field';
+                fieldElement.innerHTML = `
+                    ${fieldData.name}
+                    <i class="fas fa-times" data-field-type="${type}"></i>
+                `;
+
+                fieldElement.querySelector('i').addEventListener('click', function() {
+                    this.parentElement.remove();
+                    updateDropZoneState(dropZone);
+                });
+
+                dropZone.appendChild(fieldElement);
+                updateDropZoneState(dropZone);
+            });
+        }
+
+        function updateDropZoneState(dropZone) {
+            const hasField = dropZone.querySelector('.drop-field') !== null;
+            if (!hasField) {
+                const placeholder = document.createElement('span');
+                placeholder.className = 'drop-field';
+                placeholder.style.display = 'none';
+                dropZone.appendChild(placeholder);
+            }
+        }
+
+        // 生成图表
+        generateChartBtn.addEventListener('click', generateChart);
+
+        function generateChart() {
+            if (!uploadedData) {
+                alert('请先上传Excel文件');
+                return;
+            }
+
+            const xFieldElement = xAxisDrop.querySelector('.drop-field:not([style*="display: none"])');
+            const yFieldElement = yAxisDrop.querySelector('.drop-field:not([style*="display: none"])');
+
+            if (!xFieldElement || !yFieldElement) {
+                alert('请至少设置X轴和Y轴字段');
+                return;
+            }
+
+            const xFieldName = xFieldElement.textContent.trim();
+            const yFieldName = yFieldElement.textContent.trim();
+            const groupFieldElement = groupDrop.querySelector('.drop-field:not([style*="display: none"])');
+            const groupFieldName = groupFieldElement ? groupFieldElement.textContent.trim() : null;
+
+            const chartType = chartTypeSelect.value;
+            const chartTitle = chartTitleInput.value || `${yFieldName} 相对于 ${xFieldName}`;
+
+            chartLoader.style.display = 'flex';
+            chartPlaceholder.style.display = 'none';
+
+            // 模拟图表生成延迟
+            setTimeout(() => {
+                try {
+                    createChart(xFieldName, yFieldName, groupFieldName, chartType, chartTitle);
+                    chartLoader.style.display = 'none';
+                    chartCanvas.style.display = 'block';
+                    activeChartTitle.textContent = chartTitle;
+                } catch (error) {
+                    console.error('Error generating chart:', error);
+                    chartLoader.style.display = 'none';
+                    chartPlaceholder.style.display = 'flex';
+                    chartPlaceholder.innerHTML = `
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <p>图表生成错误</p>
+                        <p>${error.message}</p>
+                    `;
+                }
+            }, 1000);
+        }
+
+        // 创建图表
+        function createChart(xField, yField, groupField, type, title) {
+            const ctx = chartCanvas.getContext('2d');
+
+            // 如果已存在图表，先销毁
+            if (currentChart) {
+                currentChart.destroy();
+            }
+
+            // 获取字段索引
+            const xFieldIndex = uploadedData.headers.indexOf(xField);
+            const yFieldIndex = uploadedData.headers.indexOf(yField);
+            const groupFieldIndex = groupField ? uploadedData.headers.indexOf(groupField) : -1;
+
+            if (xFieldIndex === -1 || yFieldIndex === -1) {
+                throw new Error('字段不存在于数据中');
+            }
+
+            // 准备图表数据
+            let labels = [];
+            let datasets = [];
+
+            if (groupFieldIndex !== -1) {
+                // 分组数据
+                const groups = {};
+
+                uploadedData.rows.forEach(row => {
+                    const groupValue = row[groupFieldIndex] || '未分组';
+                    if (!groups[groupValue]) {
+                        groups[groupValue] = [];
+                    }
+                    groups[groupValue].push(row);
+                });
+
+                // 生成颜色
+                const groupColors = generateTechColors(Object.keys(groups).length);
+
+                Object.keys(groups).forEach((group, index) => {
+                    const groupData = groups[group];
+                    const data = [];
+
+                    // 根据X轴字段分组并计算Y轴字段的聚合值
+                    const xValues = {};
+
+                    groupData.forEach(row => {
+                        const xValue = row[xFieldIndex];
+                        const yValue = parseFloat(row[yFieldIndex]);
+
+                        if (!isNaN(yValue)) {
+                            if (!xValues[xValue]) {
+                                xValues[xValue] = [];
+                            }
+                            xValues[xValue].push(yValue);
+                        }
+                    });
+
+                    // 计算每个X值的平均值
+                    Object.keys(xValues).forEach(xValue => {
+                        const values = xValues[xValue];
+                        const avg = values.reduce((a, b) => a + b, 0) / values.length;
+                        data.push(avg);
+                    });
+
+                    if (labels.length === 0) {
+                        labels = Object.keys(xValues);
+                    }
+
+                    datasets.push({
+                        label: group,
+                        data: data,
+                        backgroundColor: groupColors[index].background,
+                        borderColor: groupColors[index].border,
+                        borderWidth: 2,
+                        borderRadius: type === 'bar' ? 5 : 0,
+                        borderDash: type === 'line' ? [5, 5] : [],
+                        pointBackgroundColor: groupColors[index].point,
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2,
+                        pointRadius: 6,
+                        pointHoverRadius: 8
+                    });
+                });
+            } else {
+                // 非分组数据
+                const dataMap = {};
+
+                uploadedData.rows.forEach(row => {
+                    const xValue = row[xFieldIndex];
+                    const yValue = parseFloat(row[yFieldIndex]);
+
+                    if (!isNaN(yValue)) {
+                        if (!dataMap[xValue]) {
+                            dataMap[xValue] = [];
+                        }
+                        dataMap[xValue].push(yValue);
+                    }
+                });
+
+                labels = Object.keys(dataMap);
+                const data = labels.map(label => {
+                    const values = dataMap[label];
+                    return values.reduce((a, b) => a + b, 0) / values.length;
+                });
+
+                const colors = generateTechColors(1)[0];
+
+                datasets = [{
+                    label: yField,
+                    data: data,
+                    backgroundColor: colors.background,
+                    borderColor: colors.border,
+                    borderWidth: 2,
+                    borderRadius: type === 'bar' ? 5 : 0,
+                    borderDash: type === 'line' ? [5, 5] : [],
+                    pointBackgroundColor: colors.point,
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2,
+                    pointRadius: 6,
+                    pointHoverRadius: 8
+                }];
+            }
+
+            // 根据图表类型调整配置
+            let chartConfig = {
+                type: type,
+                data: {
+                    labels: labels,
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: title,
+                            font: {
+                                size: 18,
+                                weight: 'bold'
+                            },
+                            color: '#00f3ff',
+                            padding: 20
+                        },
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                color: '#f0f8ff',
+                                font: {
+                                    size: 12
+                                },
+                                padding: 15,
+                                usePointStyle: true,
+                                pointStyle: 'circle'
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            titleColor: '#00f3ff',
+                            bodyColor: '#f0f8ff',
+                            borderColor: '#00c6ff',
+                            borderWidth: 1,
+                            cornerRadius: 5,
+                            displayColors: true,
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.dataset.label}: ${context.parsed.y}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                color: 'rgba(0, 198, 255, 0.1)',
+                                borderColor: 'rgba(0, 198, 255, 0.3)'
+                            },
+                            ticks: {
+                                color: '#8a8fa3'
+                            },
+                            title: {
+                                display: true,
+                                text: xField,
+                                color: '#00c6ff',
+                                font: {
+                                    size: 14,
+                                    weight: 'bold'
+                                }
+                            }
+                        },
+                        y: {
+                            grid: {
+                                color: 'rgba(0, 198, 255, 0.1)',
+                                borderColor: 'rgba(0, 198, 255, 0.3)'
+                            },
+                            ticks: {
+                                color: '#8a8fa3'
+                            },
+                            title: {
+                                display: true,
+                                text: yField,
+                                color: '#00c6ff',
+                                font: {
+                                    size: 14,
+                                    weight: 'bold'
+                                }
+                            }
+                        }
+                    },
+                    animation: {
+                        duration: 1000,
+                        easing: 'easeOutQuart'
+                    },
+                    elements: {
+                        line: {
+                            tension: 0.3
+                        }
+                    }
+                }
+            };
+
+            // 针对特定图表类型的配置
+            if (type === 'pie' || type === 'doughnut') {
+                chartConfig.options.scales = {};
+                chartConfig.options.plugins.legend.position = 'right';
+            }
+
+            if (type === 'radar') {
+                chartConfig.options.scales = {
+                    r: {
+                        angleLines: {
+                            color: 'rgba(0, 198, 255, 0.2)'
+                        },
+                        grid: {
+                            color: 'rgba(0, 198, 255, 0.1)'
+                        },
+                        pointLabels: {
+                            color: '#8a8fa3'
+                        },
+                        ticks: {
+                            color: '#8a8fa3',
+                            backdropColor: 'transparent'
+                        }
+                    }
+                };
+            }
+
+            // 创建图表
+            currentChart = new Chart(ctx, chartConfig);
+        }
+
+        // 生成科技感颜色
+        function generateTechColors(count) {
+            const colors = [];
+            const hueStep = 360 / count;
+
+            // 科技感颜色方案
+            const techColors = [
+                { background: 'rgba(0, 243, 255, 0.7)', border: 'rgb(0, 243, 255)', point: 'rgb(0, 243, 255)' },
+                { background: 'rgba(179, 0, 255, 0.7)', border: 'rgb(179, 0, 255)', point: 'rgb(179, 0, 255)' },
+                { background: 'rgba(255, 0, 204, 0.7)', border: 'rgb(255, 0, 204)', point: 'rgb(255, 0, 204)' },
+                { background: 'rgba(0, 198, 255, 0.7)', border: 'rgb(0, 198, 255)', point: 'rgb(0, 198, 255)' },
+                { background: 'rgba(0, 114, 255, 0.7)', border: 'rgb(0, 114, 255)', point: 'rgb(0, 114, 255)' },
+                { background: 'rgba(0, 210, 106, 0.7)', border: 'rgb(0, 210, 106)', point: 'rgb(0, 210, 106)' }
+            ];
+
+            for (let i = 0; i < count; i++) {
+                colors.push(techColors[i % techColors.length]);
+            }
+
+            return colors;
+        }
+
+        // 更新数据预览
+        function updateDataPreview() {
+            if (!uploadedData) return;
+
+            let tableHTML = '<thead><tr>';
+            uploadedData.headers.forEach(header => {
+                tableHTML += `<th>${header}</th>`;
+            });
+            tableHTML += '</tr></thead><tbody>';
+
+            // 只显示前20行数据
+            uploadedData.rows.slice(0, 20).forEach(row => {
+                tableHTML += '<tr>';
+                uploadedData.headers.forEach((_, index) => {
+                    tableHTML += `<td>${row[index] || ''}</td>`;
+                });
+                tableHTML += '</tr>';
+            });
+
+            tableHTML += '</tbody>';
+            dataPreviewTable.innerHTML = tableHTML;
+        }
+
+        // 更新统计分析
+        function updateStatistics() {
+            if (!uploadedData) return;
+
+            // 基本统计信息
+            statsGrid.innerHTML = `
+                <div class="stat-card">
+                    <div class="stat-title">总记录数</div>
+                    <div class="stat-value">${uploadedData.rows.length}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">字段数量</div>
+                    <div class="stat-value">${uploadedData.headers.length}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">数值字段</div>
+                    <div class="stat-value">${fields.filter(f => f.type === 'numeric').length}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">分类字段</div>
+                    <div class="stat-value">${fields.filter(f => f.type === 'categorical').length}</div>
+                </div>
+            `;
+
+            // 详细统计表格
+            let statsTableHTML = '<thead><tr><th>字段名</th><th>类型</th><th>非空值</th><th>平均值</th><th>中位数</th><th>标准差</th><th>最小值</th><th>最大值</th></tr></thead><tbody>';
+
+            fields.forEach(field => {
+                if (field.type === 'numeric' && field.values) {
+                    const values = field.values.filter(v => !isNaN(v));
+                    const mean = values.reduce((a, b) => a + b, 0) / values.length;
+                    const sorted = [...values].sort((a, b) => a - b);
+                    const median = sorted.length % 2 === 0
+                        ? (sorted[sorted.length/2 - 1] + sorted[sorted.length/2]) / 2
+                        : sorted[Math.floor(sorted.length/2)];
+                    const std = Math.sqrt(values.reduce((sq, n) => sq + Math.pow(n - mean, 2), 0) / values.length);
+                    const min = Math.min(...values);
+                    const max = Math.max(...values);
+
+                    statsTableHTML += `
+                        <tr>
+                            <td>${field.name}</td>
+                            <td>${field.type}</td>
+                            <td>${values.length}</td>
+                            <td>${mean.toFixed(2)}</td>
+                            <td>${median.toFixed(2)}</td>
+                            <td>${std.toFixed(2)}</td>
+                            <td>${min.toFixed(2)}</td>
+                            <td>${max.toFixed(2)}</td>
+                        </tr>
+                    `;
+                } else {
+                    statsTableHTML += `
+                        <tr>
+                            <td>${field.name}</td>
+                            <td>${field.type}</td>
+                            <td>${field.values ? field.values.length : 0}</td>
+                            <td>-</td>
+                            <td>-</td>
+                            <td>-</td>
+                            <td>-</td>
+                            <td>-</td>
+                        </tr>
+                    `;
+                }
+            });
+
+            statsTableHTML += '</tbody>';
+            statsTable.innerHTML = statsTableHTML;
+        }
+
+        // 导出功能
+        document.getElementById('export-png').addEventListener('click', function() {
+            if (!currentChart) {
+                alert('请先生成图表');
+                return;
+            }
+
+            const link = document.createElement('a');
+            link.download = 'chart.png';
+            link.href = chartCanvas.toDataURL('image/png');
+            link.click();
+        });
+
+        document.getElementById('export-data').addEventListener('click', function() {
+            if (!uploadedData) {
+                alert('请先上传数据');
+                return;
+            }
+
+            // 创建CSV内容
+            let csvContent = uploadedData.headers.join(',') + '\n';
+            uploadedData.rows.forEach(row => {
+                csvContent += row.join(',') + '\n';
+            });
+
+            // 创建下载链接
+            const blob = new Blob([csvContent], {type: 'text/csv;charset=utf-8;'});
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.setAttribute('href', url);
+            link.setAttribute('download', 'data_export.csv');
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        });
+
+        // 提供示例数据加载
+        window.addEventListener('load', function() {
+            // 自动加载示例数据用于演示
+            setTimeout(loadSampleData, 500);
+        });
+
+        function loadSampleData() {
+            // 创建示例数据
+            const sampleData = [
+                ['产品类别', '地区', '季度', '销售额', '利润', '客户满意度'],
+                ['电子产品', '华东', 'Q1', 12500, 3500, 4.5],
+                ['家居用品', '华北', 'Q1', 8900, 2100, 4.2],
+                ['服装', '华南', 'Q1', 7500, 1800, 4.7],
+                ['电子产品', '华东', 'Q2', 14200, 4200, 4.8],
+                ['食品', '西南', 'Q2', 6800, 1500, 4.1],
+                ['家居用品', '华北', 'Q2', 11000, 2900, 4.4],
+                ['服装', '华南', 'Q2', 9200, 2300, 4.6],
+                ['电子产品', '华东', 'Q3', 15800, 4800, 4.9],
+                ['食品', '西南', 'Q3', 7200, 1700, 4.3],
+                ['家居用品', '华北', 'Q3', 9800, 2500, 4.5],
+                ['电子产品', '华东', 'Q4', 16800, 5200, 4.9],
+                ['家居用品', '华北', 'Q4', 12000, 3200, 4.6],
+                ['服装', '华南', 'Q4', 10500, 2800, 4.7]
+            ];
+
+            // 处理示例数据
+            processUploadedData(sampleData);
+
+            // 自动设置一些字段用于演示
+            setTimeout(() => {
+                // 模拟拖放操作
+                const xField = fields.find(f => f.name === '季度');
+                const yField = fields.find(f => f.name === '销售额');
+                const groupField = fields.find(f => f.name === '产品类别');
+
+                if (xField && yField && groupField) {
+                    // 创建模拟拖放事件
+                    const event = new Event('drop');
+                    event.dataTransfer = {
+                        getData: () => JSON.stringify({name: xField.name, type: xField.type})
+                    };
+                    xAxisDrop.dispatchEvent(event);
+
+                    setTimeout(() => {
+                        event.dataTransfer = {
+                            getData: () => JSON.stringify({name: yField.name, type: yField.type})
+                        };
+                        yAxisDrop.dispatchEvent(event);
+
+                        setTimeout(() => {
+                            event.dataTransfer = {
+                                getData: () => JSON.stringify({name: groupField.name, type: groupField.type})
+                            };
+                            groupDrop.dispatchEvent(event);
+
+                            // 自动生成图表
+                            setTimeout(() => {
+                                chartTitleInput.value = '各产品类别季度销售额分析';
+                                generateChart();
+                            }, 100);
+                        }, 100);
+                    }, 100);
+                }
+            }, 500);
+        }
+    </script>
+</body>
+</html>
