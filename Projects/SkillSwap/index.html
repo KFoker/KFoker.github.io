@@ -586,6 +586,41 @@
             margin-top: 0.5rem;
         }
 
+        /* 技能详情模态框 */
+        .skill-detail-modal {
+            max-width: 800px;
+        }
+
+        .skill-video {
+            width: 100%;
+            aspect-ratio: 16/9;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+
+        .skill-notes {
+            background: var(--light-color);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            white-space: pre-wrap;
+            line-height: 1.6;
+        }
+
+        .learners-count {
+            color: #666;
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+        }
+
+        .skill-detail-view {
+            display: none;
+        }
+
+        .skill-detail-view.show {
+            display: block;
+        }
+
         /* 响应式设计 */
         @media (max-width: 768px) {
             .nav-links {
@@ -689,6 +724,73 @@
         </div>
     </div>
 
+    <!-- 分享技能模态框 -->
+    <div id="shareSkillModal" class="modal">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h2>分享技能</h2>
+                <button class="close" onclick="closeModal('shareSkillModal')">&times;</button>
+            </div>
+            <form id="shareSkillForm">
+                <div class="form-group">
+                    <label for="shareTitle">技能标题</label>
+                    <input type="text" id="shareTitle" required placeholder="例如：Python编程入门">
+                    <div class="error-message" id="shareTitleError"></div>
+                </div>
+                <div class="form-group">
+                    <label for="shareCategory">技能分类</label>
+                    <select id="shareCategory" required>
+                        <option value="">请选择分类</option>
+                        <option value="编程开发">编程开发</option>
+                        <option value="语言学习">语言学习</option>
+                        <option value="设计创意">设计创意</option>
+                        <option value="音乐艺术">音乐艺术</option>
+                        <option value="健身运动">健身运动</option>
+                        <option value="烹饪烘焙">烹饪烘焙</option>
+                        <option value="商业技能">商业技能</option>
+                        <option value="手工艺">手工艺</option>
+                        <option value="学术辅导">学术辅导</option>
+                        <option value="生活技巧">生活技巧</option>
+                    </select>
+                    <div class="error-message" id="shareCategoryError"></div>
+                </div>
+                <div class="form-group">
+                    <label for="shareDescription">技能描述</label>
+                    <textarea id="shareDescription" required placeholder="详细描述您要分享的技能内容..."></textarea>
+                    <div class="error-message" id="shareDescriptionError"></div>
+                </div>
+                <div class="form-group">
+                    <label for="shareVideoUrl">视频链接（可选）</label>
+                    <input type="url" id="shareVideoUrl" placeholder="https://www.youtube.com/watch?v=...">
+                    <div class="error-message" id="shareVideoUrlError"></div>
+                    <small style="color: #666;">支持 YouTube、Bilibili 等视频平台链接</small>
+                </div>
+                <div class="form-group">
+                    <label for="shareNotes">技能笔记（可选）</label>
+                    <textarea id="shareNotes" placeholder="可以分享您的学习笔记、心得或要点..."></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">分享技能</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 每日签到模态框 -->
+    <div id="dailyCheckInModal" class="modal">
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="modal-header">
+                <h2>每日签到</h2>
+                <button class="close" onclick="closeModal('dailyCheckInModal')">&times;</button>
+            </div>
+            <div style="text-align: center; padding: 2rem 0;">
+                <div style="font-size: 4rem; margin-bottom: 1rem;">🎁</div>
+                <h3 style="color: var(--primary-color); margin-bottom: 1rem;">签到成功！</h3>
+                <p style="font-size: 1.2rem; color: var(--accent-color); font-weight: bold;">+2 时间币</p>
+                <p style="color: #666; margin-top: 1rem;">明天再来签到可获得更多奖励！</p>
+                <button class="btn btn-primary" onclick="closeModal('dailyCheckInModal')" style="margin-top: 1.5rem;">确定</button>
+            </div>
+        </div>
+    </div>
+
     <!-- 导航栏 -->
     <header>
         <div class="container">
@@ -710,6 +812,7 @@
                         <span class="user-name" id="userName"></span>
                         <span class="time-coins">⏱️ <span id="userTimeCoins">0</span> 时间币</span>
                     </div>
+                    <button class="btn btn-primary" onclick="checkDailyReward()" style="font-size: 0.9rem; padding: 0.4rem 0.8rem;" id="dailyCheckInBtn">每日签到</button>
                     <button class="btn btn-outline" onclick="showProfile()">个人中心</button>
                     <button class="btn btn-outline" onclick="logout()">退出</button>
                 </div>
@@ -778,6 +881,13 @@
                 <span class="skill-tag" data-skill="手工艺">手工艺</span>
                 <span class="skill-tag" data-skill="学术辅导">学术辅导</span>
                 <span class="skill-tag" data-skill="生活技巧">生活技巧</span>
+            </div>
+
+            <!-- 分享技能按钮 -->
+            <div style="text-align: center; margin: 2rem 0;">
+                <button class="btn btn-primary" onclick="openShareSkillModal()" style="font-size: 1.1rem; padding: 0.75rem 2rem;">
+                    ➕ 分享我的技能
+                </button>
             </div>
 
             <!-- 技能市场卡片 -->
@@ -881,15 +991,24 @@
             getSkills: () => {
                 const skills = localStorage.getItem('skillSwapSkills');
                 return skills ? JSON.parse(skills) : [
-                    { id: 1, title: 'Python编程教学', provider: '张三', skill: '编程开发', timeCoins: 1, description: '提供Python基础到进阶的编程教学' },
-                    { id: 2, title: '英语口语练习', provider: '李四', skill: '语言学习', timeCoins: 1, description: '英语口语对话练习，适合初学者' },
-                    { id: 3, title: 'UI/UX设计指导', provider: '王五', skill: '设计创意', timeCoins: 2, description: '专业UI/UX设计经验分享' },
-                    { id: 4, title: '健身计划制定', provider: '赵六', skill: '健身运动', timeCoins: 1, description: '个性化健身计划制定' },
-                    { id: 5, title: '烘焙技巧教学', provider: '孙七', skill: '烹饪烘焙', timeCoins: 1, description: '蛋糕、面包制作技巧' }
+                    { id: 1, title: 'Python编程教学', providerId: 0, provider: '张三', skill: '编程开发', description: '提供Python基础到进阶的编程教学', videoUrl: '', notes: '', learners: [], learnersCount: 0, createdAt: new Date().toISOString() },
+                    { id: 2, title: '英语口语练习', providerId: 0, provider: '李四', skill: '语言学习', description: '英语口语对话练习，适合初学者', videoUrl: '', notes: '', learners: [], learnersCount: 0, createdAt: new Date().toISOString() },
+                    { id: 3, title: 'UI/UX设计指导', providerId: 0, provider: '王五', skill: '设计创意', description: '专业UI/UX设计经验分享', videoUrl: '', notes: '', learners: [], learnersCount: 0, createdAt: new Date().toISOString() },
+                    { id: 4, title: '健身计划制定', providerId: 0, provider: '赵六', skill: '健身运动', description: '个性化健身计划制定', videoUrl: '', notes: '', learners: [], learnersCount: 0, createdAt: new Date().toISOString() },
+                    { id: 5, title: '烘焙技巧教学', providerId: 0, provider: '孙七', skill: '烹饪烘焙', description: '蛋糕、面包制作技巧', videoUrl: '', notes: '', learners: [], learnersCount: 0, createdAt: new Date().toISOString() }
                 ];
             },
             saveSkills: (skills) => {
                 localStorage.setItem('skillSwapSkills', JSON.stringify(skills));
+            },
+            getDailyCheckIn: (userId) => {
+                const key = `skillSwapDailyCheckIn_${userId}`;
+                const data = localStorage.getItem(key);
+                return data ? JSON.parse(data) : null;
+            },
+            setDailyCheckIn: (userId, date) => {
+                const key = `skillSwapDailyCheckIn_${userId}`;
+                localStorage.setItem(key, JSON.stringify({ lastCheckIn: date }));
             }
         };
 
@@ -899,7 +1018,18 @@
         }
 
         function closeModal(modalId) {
-            document.getElementById(modalId).classList.remove('show');
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.remove('show');
+                // 如果是动态创建的模态框，直接移除
+                if (modalId === 'skillDetailModal') {
+                    setTimeout(() => {
+                        if (modal && modal.parentNode) {
+                            modal.parentNode.removeChild(modal);
+                        }
+                    }, 300);
+                }
+            }
         }
 
         function switchModal(fromModal, toModal) {
@@ -984,7 +1114,8 @@
                     password: password,
                     timeCoins: 10, // 新用户赠送10个时间币
                     registeredEvents: [],
-                    skills: [],
+                    sharedSkills: [], // 分享的技能ID列表
+                    learnedSkills: [], // 学习的技能ID列表
                     createdAt: new Date().toISOString()
                 };
 
@@ -1046,6 +1177,9 @@
 
                 // 更新活动报名状态
                 updateEventStatus();
+
+                // 更新每日签到按钮
+                updateDailyCheckInButton();
             } else {
                 authButtons.style.display = 'flex';
                 userInfo.classList.remove('show');
@@ -1073,30 +1207,57 @@
                 filteredSkills = filteredSkills.filter(skill => skill.skill === selectedSkill);
             }
 
+            // 按创建时间倒序排列
+            filteredSkills.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
             if (filteredSkills.length === 0) {
                 skillMarket.innerHTML = '<p style="text-align: center; color: #666; grid-column: 1/-1;">暂无匹配的技能</p>';
                 return;
             }
 
-            skillMarket.innerHTML = filteredSkills.map(skill => `
-                <div class="skill-card">
-                    <div class="skill-card-header">
-                        <div class="skill-card-title">${skill.title}</div>
-                        <div class="skill-badge">${skill.skill}</div>
+            const currentUser = Storage.getCurrentUser();
+            const hasLearned = currentUser ? (currentUser.learnedSkills || []) : [];
+            const sharedSkills = currentUser ? (currentUser.sharedSkills || []) : [];
+
+            skillMarket.innerHTML = filteredSkills.map(skill => {
+                const isLearned = hasLearned.includes(skill.id);
+                const isMySkill = currentUser && skill.providerId === currentUser.id;
+                const hasVideo = skill.videoUrl && skill.videoUrl.trim() !== '';
+                const hasNotes = skill.notes && skill.notes.trim() !== '';
+
+                let actionButton = '';
+                if (isMySkill) {
+                    actionButton = `<button class="btn btn-outline" disabled style="width: 100%; margin-top: 1rem; background: #e9ecef; cursor: not-allowed;">我的分享</button>`;
+                } else if (isLearned) {
+                    actionButton = `<button class="btn btn-outline" disabled style="width: 100%; margin-top: 1rem; background: #e9ecef; cursor: not-allowed;">已学习</button>`;
+                } else {
+                    actionButton = `<button class="btn btn-primary" onclick="learnSkill(${skill.id})" style="width: 100%; margin-top: 1rem;">学习技能 (4时间币)</button>`;
+                }
+
+                return `
+                    <div class="skill-card">
+                        <div class="skill-card-header">
+                            <div class="skill-card-title">${skill.title}</div>
+                            <div class="skill-badge">${skill.skill}</div>
+                        </div>
+                        <p style="color: #666; margin: 0.5rem 0;">${skill.description}</p>
+                        <div class="skill-card-meta">
+                            <span>分享者: ${skill.provider}${isMySkill ? ' (我)' : ''}</span>
+                            <span class="learners-count">👥 ${skill.learnersCount || 0} 人学习</span>
+                        </div>
+                        ${hasVideo || hasNotes ? '<div style="margin-top: 0.5rem; font-size: 0.875rem; color: var(--primary-color);">📹 视频 🗒️ 笔记</div>' : ''}
+                        ${!isMySkill ? '<div style="margin-top: 0.5rem; color: var(--accent-color); font-weight: bold;">学习费用: 4 时间币</div>' : ''}
+                        ${actionButton}
+                        <button class="btn btn-outline" onclick="viewSkillDetail(${skill.id})" style="width: 100%; margin-top: 0.5rem;">
+                            查看详情
+                        </button>
                     </div>
-                    <p style="color: #666; margin: 0.5rem 0;">${skill.description}</p>
-                    <div class="skill-card-meta">
-                        <span>提供者: ${skill.provider}</span>
-                        <span style="color: var(--accent-color); font-weight: bold;">${skill.timeCoins} 时间币</span>
-                    </div>
-                    <button class="btn btn-primary" onclick="exchangeSkill(${skill.id})" style="width: 100%; margin-top: 1rem;">
-                        交换技能
-                    </button>
-                </div>
-            `).join('');
+                `;
+            }).join('');
         }
 
-        function exchangeSkill(skillId) {
+        // 学习技能（消耗4个时间币）
+        function learnSkill(skillId) {
             const currentUser = Storage.getCurrentUser();
             if (!currentUser) {
                 showNotification('请先登录', 'error');
@@ -1109,18 +1270,289 @@
 
             if (!skill) return;
 
-            if (currentUser.timeCoins < skill.timeCoins) {
-                showNotification('时间币不足！', 'error');
+            // 检查是否已学习
+            if (!currentUser.learnedSkills) {
+                currentUser.learnedSkills = [];
+            }
+
+            if (currentUser.learnedSkills.includes(skillId)) {
+                showNotification('您已经学习过这个技能了', 'info');
                 return;
             }
 
-            currentUser.timeCoins -= skill.timeCoins;
+            // 不能学习自己分享的技能
+            if (skill.providerId === currentUser.id) {
+                showNotification('不能学习自己分享的技能', 'info');
+                return;
+            }
+
+            // 检查时间币
+            const learnCost = 4;
+            if (currentUser.timeCoins < learnCost) {
+                showNotification('时间币不足！需要4个时间币', 'error');
+                return;
+            }
+
+            // 扣除时间币
+            currentUser.timeCoins -= learnCost;
+
+            // 记录已学习
+            currentUser.learnedSkills.push(skillId);
+
+            // 记录学习者
+            if (!skill.learners) {
+                skill.learners = [];
+            }
+            skill.learners.push(currentUser.id);
+            skill.learnersCount = (skill.learnersCount || 0) + 1;
+
+            // 每2个学习者，分享者获得1个时间币（分享者不能学习自己的技能）
+            const users = Storage.getUsers();
+            const provider = users.find(u => u.id === skill.providerId);
+            if (provider && provider.id !== currentUser.id) {
+                // 检查是否达到奖励条件（每2个学习者）
+                if (skill.learnersCount % 2 === 0) {
+                    provider.timeCoins = (provider.timeCoins || 0) + 1;
+                    Storage.saveUser(provider);
+                    // 如果当前用户是分享者，显示通知
+                    if (currentUser.id === provider.id) {
+                        showNotification(`恭喜！因为有2人学习了您的技能 "${skill.title}"，您获得了1个时间币！`, 'success');
+                    }
+                }
+            }
+
+            // 保存数据
+            Storage.saveUser(currentUser);
+            Storage.setCurrentUser(currentUser);
+            Storage.saveSkills(skills);
+
+            showNotification(`成功学习 "${skill.title}"！消耗 4 时间币`, 'success');
+            updateUserInterface();
+            renderSkillMarket();
+        }
+
+        // 查看技能详情
+        function viewSkillDetail(skillId) {
+            const skills = Storage.getSkills();
+            const skill = skills.find(s => s.id === skillId);
+
+            if (!skill) return;
+
+            let detailContent = `
+                <h3 style="color: var(--primary-color); margin-bottom: 1rem;">${skill.title}</h3>
+                <div style="margin-bottom: 1rem;">
+                    <span class="skill-badge">${skill.skill}</span>
+                    <span style="margin-left: 1rem; color: #666;">分享者: ${skill.provider}</span>
+                </div>
+                <p style="color: #666; margin-bottom: 1rem;">${skill.description}</p>
+                <div style="margin-bottom: 1rem; color: #666;">
+                    <div>👥 ${skill.learnersCount || 0} 人学习</div>
+                    <div style="margin-top: 0.5rem;">学习费用: <span style="color: var(--accent-color); font-weight: bold;">4 时间币</span></div>
+                </div>
+            `;
+
+            // 显示视频
+            if (skill.videoUrl && skill.videoUrl.trim() !== '') {
+                let videoEmbed = '';
+                const videoUrl = skill.videoUrl.trim();
+
+                // YouTube 视频
+                if (videoUrl.includes('youtube.com') || videoUrl.includes('youtu.be')) {
+                    let videoId = '';
+                    if (videoUrl.includes('youtube.com/watch?v=')) {
+                        videoId = videoUrl.split('v=')[1].split('&')[0];
+                    } else if (videoUrl.includes('youtu.be/')) {
+                        videoId = videoUrl.split('youtu.be/')[1].split('?')[0];
+                    }
+                    if (videoId) {
+                        videoEmbed = `<iframe class="skill-video" src="https://www.youtube.com/embed/${videoId}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+                    }
+                }
+                // Bilibili 视频
+                else if (videoUrl.includes('bilibili.com')) {
+                    let bvId = '';
+                    const bvMatch = videoUrl.match(/BV[a-zA-Z0-9]+/);
+                    if (bvMatch) {
+                        bvId = bvMatch[0];
+                        videoEmbed = `<iframe class="skill-video" src="https://player.bilibili.com/player.html?bvid=${bvId}" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"></iframe>`;
+                    }
+                }
+
+                if (videoEmbed) {
+                    detailContent += `<div style="margin-top: 1rem;"><h4>📹 视频内容</h4>${videoEmbed}</div>`;
+                } else {
+                    detailContent += `<div style="margin-top: 1rem;"><h4>📹 视频链接</h4><a href="${videoUrl}" target="_blank" style="color: var(--primary-color);">${videoUrl}</a></div>`;
+                }
+            }
+
+            // 显示笔记
+            if (skill.notes && skill.notes.trim() !== '') {
+                detailContent += `<div style="margin-top: 1rem;"><h4>🗒️ 技能笔记</h4><div class="skill-notes">${skill.notes}</div></div>`;
+            }
+
+            // 创建详情模态框内容
+            const detailModal = document.createElement('div');
+            detailModal.className = 'modal show';
+            detailModal.id = 'skillDetailModal';
+            detailModal.innerHTML = `
+                <div class="modal-content skill-detail-modal">
+                    <div class="modal-header">
+                        <h2>技能详情</h2>
+                        <button class="close" onclick="closeModal('skillDetailModal')">&times;</button>
+                    </div>
+                    ${detailContent}
+                    <div style="margin-top: 1.5rem; text-align: center;">
+                        <button class="btn btn-primary" onclick="learnSkill(${skillId}); closeModal('skillDetailModal');">学习技能 (4时间币)</button>
+                    </div>
+                </div>
+            `;
+
+            document.body.appendChild(detailModal);
+
+            // 点击外部关闭
+            detailModal.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    this.remove();
+                }
+            });
+        }
+
+        // 打开分享技能模态框
+        function openShareSkillModal() {
+            const currentUser = Storage.getCurrentUser();
+            if (!currentUser) {
+                showNotification('请先登录', 'error');
+                openModal('loginModal');
+                return;
+            }
+            openModal('shareSkillModal');
+        }
+
+        // 分享技能表单提交
+        document.getElementById('shareSkillForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const currentUser = Storage.getCurrentUser();
+            if (!currentUser) {
+                showNotification('请先登录', 'error');
+                return;
+            }
+
+            const title = document.getElementById('shareTitle').value.trim();
+            const category = document.getElementById('shareCategory').value;
+            const description = document.getElementById('shareDescription').value.trim();
+            const videoUrl = document.getElementById('shareVideoUrl').value.trim();
+            const notes = document.getElementById('shareNotes').value.trim();
+
+            // 清除错误
+            ['shareTitleError', 'shareCategoryError', 'shareDescriptionError'].forEach(id => hideError(id));
+
+            let hasError = false;
+
+            if (title.length < 3) {
+                showError('shareTitleError', '标题至少需要3个字符');
+                hasError = true;
+            }
+
+            if (!category) {
+                showError('shareCategoryError', '请选择技能分类');
+                hasError = true;
+            }
+
+            if (description.length < 10) {
+                showError('shareDescriptionError', '描述至少需要10个字符');
+                hasError = true;
+            }
+
+            if (hasError) return;
+
+            // 创建新技能
+            const skills = Storage.getSkills();
+            const newSkill = {
+                id: Date.now(),
+                title: title,
+                providerId: currentUser.id,
+                provider: currentUser.name,
+                skill: category,
+                description: description,
+                videoUrl: videoUrl,
+                notes: notes,
+                learners: [],
+                learnersCount: 0,
+                createdAt: new Date().toISOString()
+            };
+
+            skills.push(newSkill);
+            Storage.saveSkills(skills);
+
+            // 分享者获得1个时间币
+            currentUser.timeCoins = (currentUser.timeCoins || 0) + 1;
+
+            // 记录分享的技能
+            if (!currentUser.sharedSkills) {
+                currentUser.sharedSkills = [];
+            }
+            currentUser.sharedSkills.push(newSkill.id);
+
             Storage.saveUser(currentUser);
             Storage.setCurrentUser(currentUser);
 
-            showNotification(`成功交换 "${skill.title}"！消耗 ${skill.timeCoins} 时间币`, 'success');
+            // 重置表单
+            document.getElementById('shareSkillForm').reset();
+            closeModal('shareSkillModal');
+
+            showNotification(`成功分享技能 "${title}"！获得 1 时间币`, 'success');
             updateUserInterface();
             renderSkillMarket();
+        });
+
+        // 每日签到功能
+        function checkDailyReward() {
+            const currentUser = Storage.getCurrentUser();
+            if (!currentUser) {
+                showNotification('请先登录', 'error');
+                openModal('loginModal');
+                return;
+            }
+
+            const today = new Date().toDateString();
+            const lastCheckIn = Storage.getDailyCheckIn(currentUser.id);
+
+            // 检查今天是否已经签到
+            if (lastCheckIn && lastCheckIn.lastCheckIn === today) {
+                showNotification('今天已经签到过了，明天再来吧！', 'info');
+                return;
+            }
+
+            // 签到成功，获得2个时间币
+            currentUser.timeCoins = (currentUser.timeCoins || 0) + 2;
+            Storage.setDailyCheckIn(currentUser.id, today);
+            Storage.saveUser(currentUser);
+            Storage.setCurrentUser(currentUser);
+
+            updateUserInterface();
+            openModal('dailyCheckInModal');
+        }
+
+        // 更新每日签到按钮状态
+        function updateDailyCheckInButton() {
+            const currentUser = Storage.getCurrentUser();
+            const checkInBtn = document.getElementById('dailyCheckInBtn');
+
+            if (!currentUser || !checkInBtn) return;
+
+            const today = new Date().toDateString();
+            const lastCheckIn = Storage.getDailyCheckIn(currentUser.id);
+
+            if (lastCheckIn && lastCheckIn.lastCheckIn === today) {
+                checkInBtn.textContent = '今日已签到';
+                checkInBtn.disabled = true;
+                checkInBtn.style.opacity = '0.6';
+            } else {
+                checkInBtn.textContent = '每日签到';
+                checkInBtn.disabled = false;
+                checkInBtn.style.opacity = '1';
+            }
         }
 
         // 技能标签点击
@@ -1229,9 +1661,31 @@
                         <div class="stat-label">已报名活动</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-value">${(currentUser.skills || []).length}</div>
-                        <div class="stat-label">已交换技能</div>
+                        <div class="stat-value">${(currentUser.sharedSkills || []).length}</div>
+                        <div class="stat-label">分享的技能</div>
                     </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${(currentUser.learnedSkills || []).length}</div>
+                        <div class="stat-label">学习的技能</div>
+                    </div>
+                </div>
+
+                <h3 style="margin-top: 2rem; color: var(--primary-color);">我分享的技能</h3>
+                <div style="margin-top: 1rem;">
+                    ${(() => {
+                        const skills = Storage.getSkills();
+                        const sharedSkills = skills.filter(s => (currentUser.sharedSkills || []).includes(s.id));
+                        return sharedSkills.length > 0 ?
+                            sharedSkills.map(s => `
+                                <div style="background: var(--light-color); padding: 1rem; border-radius: 8px; margin-bottom: 0.5rem;">
+                                    <strong>${s.title}</strong> - ${s.skill}
+                                    <div style="font-size: 0.875rem; color: #666; margin-top: 0.5rem;">
+                                        👥 ${s.learnersCount || 0} 人学习
+                                    </div>
+                                </div>
+                            `).join('') :
+                            '<p style="color: #666; text-align: center;">暂无分享的技能</p>';
+                    })()}
                 </div>
 
                 <h3 style="margin-top: 2rem; color: var(--primary-color);">已报名活动</h3>
