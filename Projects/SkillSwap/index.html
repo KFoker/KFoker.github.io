@@ -236,6 +236,356 @@
             color: white;
         }
 
+        /* 模态框样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            animation: fadeIn 0.3s;
+        }
+
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 8px;
+            max-width: 400px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: slideDown 0.3s;
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-header h2 {
+            color: var(--primary-color);
+            margin: 0;
+        }
+
+        .close {
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+        }
+
+        .close:hover {
+            color: var(--dark-color);
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--dark-color);
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .error-message {
+            color: var(--danger-color);
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        /* 用户信息显示 */
+        .user-info {
+            display: none;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-info.show {
+            display: flex;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .user-details {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .user-name {
+            font-weight: 500;
+            color: var(--dark-color);
+        }
+
+        .time-coins {
+            font-size: 0.875rem;
+            color: var(--accent-color);
+            font-weight: bold;
+        }
+
+        /* 技能标签交互 */
+        .skill-tag {
+            cursor: pointer;
+            transition: all 0.3s;
+            user-select: none;
+        }
+
+        .skill-tag:hover {
+            background-color: var(--primary-color);
+            color: white;
+            transform: scale(1.05);
+        }
+
+        .skill-tag.selected {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        /* 技能搜索框 */
+        .search-box {
+            margin-bottom: 2rem;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 2px solid #ddd;
+            border-radius: 25px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        /* 技能市场卡片 */
+        .skill-market {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .skill-card {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+        }
+
+        .skill-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .skill-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 1rem;
+        }
+
+        .skill-card-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .skill-badge {
+            background: var(--accent-color);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+        }
+
+        .skill-card-meta {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #eee;
+            font-size: 0.875rem;
+            color: #666;
+        }
+
+        /* 活动状态 */
+        .event-status {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            margin-top: 0.5rem;
+        }
+
+        .event-status.registered {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .event-status.full {
+            background: var(--warning-color);
+            color: white;
+        }
+
+        /* 通知提示 */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 2000;
+            display: none;
+            animation: slideInRight 0.3s;
+            max-width: 300px;
+        }
+
+        .notification.show {
+            display: block;
+        }
+
+        .notification.success {
+            border-left: 4px solid var(--success-color);
+        }
+
+        .notification.error {
+            border-left: 4px solid var(--danger-color);
+        }
+
+        .notification.info {
+            border-left: 4px solid var(--primary-color);
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* 个人中心 */
+        .profile-section {
+            display: none;
+            padding: 2rem;
+            background: white;
+            border-radius: 8px;
+            margin: 2rem 0;
+        }
+
+        .profile-section.show {
+            display: block;
+        }
+
+        .profile-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .stat-card {
+            background: var(--light-color);
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+        }
+
         /* 响应式设计 */
         @media (max-width: 768px) {
             .nav-links {
@@ -249,10 +599,96 @@
             .feature-cards {
                 grid-template-columns: 1fr;
             }
+
+            .modal-content {
+                width: 95%;
+                padding: 1.5rem;
+            }
+
+            .user-info {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
         }
     </style>
 </head>
 <body>
+    <!-- 通知提示 -->
+    <div id="notification" class="notification"></div>
+
+    <!-- 登录模态框 -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>登录</h2>
+                <button class="close" onclick="closeModal('loginModal')">&times;</button>
+            </div>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="loginEmail">邮箱</label>
+                    <input type="email" id="loginEmail" required>
+                    <div class="error-message" id="loginEmailError"></div>
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword">密码</label>
+                    <input type="password" id="loginPassword" required>
+                    <div class="error-message" id="loginPasswordError"></div>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">登录</button>
+                <p style="text-align: center; margin-top: 1rem; color: #666;">
+                    还没有账号？<a href="#" onclick="switchModal('loginModal', 'registerModal')" style="color: var(--primary-color);">立即注册</a>
+                </p>
+            </form>
+        </div>
+    </div>
+
+    <!-- 注册模态框 -->
+    <div id="registerModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>注册</h2>
+                <button class="close" onclick="closeModal('registerModal')">&times;</button>
+            </div>
+            <form id="registerForm">
+                <div class="form-group">
+                    <label for="registerName">用户名</label>
+                    <input type="text" id="registerName" required>
+                    <div class="error-message" id="registerNameError"></div>
+                </div>
+                <div class="form-group">
+                    <label for="registerEmail">邮箱</label>
+                    <input type="email" id="registerEmail" required>
+                    <div class="error-message" id="registerEmailError"></div>
+                </div>
+                <div class="form-group">
+                    <label for="registerPassword">密码</label>
+                    <input type="password" id="registerPassword" required minlength="6">
+                    <div class="error-message" id="registerPasswordError"></div>
+                </div>
+                <div class="form-group">
+                    <label for="registerConfirmPassword">确认密码</label>
+                    <input type="password" id="registerConfirmPassword" required>
+                    <div class="error-message" id="registerConfirmPasswordError"></div>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">注册</button>
+                <p style="text-align: center; margin-top: 1rem; color: #666;">
+                    已有账号？<a href="#" onclick="switchModal('registerModal', 'loginModal')" style="color: var(--primary-color);">立即登录</a>
+                </p>
+            </form>
+        </div>
+    </div>
+
+    <!-- 个人中心模态框 -->
+    <div id="profileModal" class="modal">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h2>个人中心</h2>
+                <button class="close" onclick="closeModal('profileModal')">&times;</button>
+            </div>
+            <div id="profileContent"></div>
+        </div>
+    </div>
+
     <!-- 导航栏 -->
     <header>
         <div class="container">
@@ -264,9 +700,18 @@
                     <li><a href="#events">活动</a></li>
                     <li><a href="#about">关于我们</a></li>
                 </ul>
-                <div class="auth-buttons">
-                    <button class="btn btn-outline">登录</button>
-                    <button class="btn btn-primary">注册</button>
+                <div class="auth-buttons" id="authButtons">
+                    <button class="btn btn-outline" onclick="openModal('loginModal')">登录</button>
+                    <button class="btn btn-primary" onclick="openModal('registerModal')">注册</button>
+                </div>
+                <div class="user-info" id="userInfo">
+                    <div class="user-avatar" id="userAvatar"></div>
+                    <div class="user-details">
+                        <span class="user-name" id="userName"></span>
+                        <span class="time-coins">⏱️ <span id="userTimeCoins">0</span> 时间币</span>
+                    </div>
+                    <button class="btn btn-outline" onclick="showProfile()">个人中心</button>
+                    <button class="btn btn-outline" onclick="logout()">退出</button>
                 </div>
             </nav>
         </div>
@@ -313,18 +758,31 @@
     <!-- 技能展示 -->
     <section id="skills" class="skills-section">
         <div class="container">
-            <h2 class="section-title">热门技能标签</h2>
-            <div class="skill-tags">
-                <span class="skill-tag">编程开发</span>
-                <span class="skill-tag">语言学习</span>
-                <span class="skill-tag">设计创意</span>
-                <span class="skill-tag">音乐艺术</span>
-                <span class="skill-tag">健身运动</span>
-                <span class="skill-tag">烹饪烘焙</span>
-                <span class="skill-tag">商业技能</span>
-                <span class="skill-tag">手工艺</span>
-                <span class="skill-tag">学术辅导</span>
-                <span class="skill-tag">生活技巧</span>
+            <h2 class="section-title">技能市场</h2>
+
+            <!-- 搜索框 -->
+            <div class="search-box">
+                <input type="text" id="skillSearch" class="search-input" placeholder="搜索技能或用户...">
+            </div>
+
+            <!-- 热门技能标签 -->
+            <h3 style="text-align: center; margin-bottom: 1rem; color: #666;">热门技能标签</h3>
+            <div class="skill-tags" id="skillTags">
+                <span class="skill-tag" data-skill="编程开发">编程开发</span>
+                <span class="skill-tag" data-skill="语言学习">语言学习</span>
+                <span class="skill-tag" data-skill="设计创意">设计创意</span>
+                <span class="skill-tag" data-skill="音乐艺术">音乐艺术</span>
+                <span class="skill-tag" data-skill="健身运动">健身运动</span>
+                <span class="skill-tag" data-skill="烹饪烘焙">烹饪烘焙</span>
+                <span class="skill-tag" data-skill="商业技能">商业技能</span>
+                <span class="skill-tag" data-skill="手工艺">手工艺</span>
+                <span class="skill-tag" data-skill="学术辅导">学术辅导</span>
+                <span class="skill-tag" data-skill="生活技巧">生活技巧</span>
+            </div>
+
+            <!-- 技能市场卡片 -->
+            <div class="skill-market" id="skillMarket">
+                <!-- 技能卡片将通过JavaScript动态生成 -->
             </div>
         </div>
     </section>
@@ -333,24 +791,33 @@
     <section id="events" class="events-section">
         <div class="container">
             <h2 class="section-title">即将举行的活动</h2>
-            <div class="calendar">
-                <div class="event-card">
+            <div class="calendar" id="eventsList">
+                <div class="event-card" data-event-id="1">
                     <div class="event-date">11月15日 19:00</div>
                     <h3>编程入门工作坊</h3>
                     <p>学习Python基础，适合零基础初学者。</p>
-                    <button class="btn btn-outline" style="margin-top: 1rem;">报名参加</button>
+                    <div class="skill-badge" style="margin-top: 0.5rem; display: inline-block;">编程开发</div>
+                    <div style="margin-top: 0.5rem; color: #666; font-size: 0.875rem;">费用: 1时间币</div>
+                    <button class="btn btn-outline event-register-btn" data-event-id="1" style="margin-top: 1rem;">报名参加</button>
+                    <div class="event-status registered" style="display: none;">已报名</div>
                 </div>
-                <div class="event-card">
+                <div class="event-card" data-event-id="2">
                     <div class="event-date">11月20日 15:00</div>
                     <h3>虚拟语言交换会</h3>
                     <p>与母语者练习英语、日语、西班牙语等。</p>
-                    <button class="btn btn-outline" style="margin-top: 1rem;">报名参加</button>
+                    <div class="skill-badge" style="margin-top: 0.5rem; display: inline-block;">语言学习</div>
+                    <div style="margin-top: 0.5rem; color: #666; font-size: 0.875rem;">费用: 1时间币</div>
+                    <button class="btn btn-outline event-register-btn" data-event-id="2" style="margin-top: 1rem;">报名参加</button>
+                    <div class="event-status registered" style="display: none;">已报名</div>
                 </div>
-                <div class="event-card">
+                <div class="event-card" data-event-id="3">
                     <div class="event-date">11月25日 14:00</div>
                     <h3>数字艺术创作分享</h3>
                     <p>学习使用Procreate和Photoshop进行数字绘画。</p>
-                    <button class="btn btn-outline" style="margin-top: 1rem;">报名参加</button>
+                    <div class="skill-badge" style="margin-top: 0.5rem; display: inline-block;">设计创意</div>
+                    <div style="margin-top: 0.5rem; color: #666; font-size: 0.875rem;">费用: 1时间币</div>
+                    <button class="btn btn-outline event-register-btn" data-event-id="3" style="margin-top: 1rem;">报名参加</button>
+                    <div class="event-status registered" style="display: none;">已报名</div>
                 </div>
             </div>
         </div>
@@ -372,31 +839,431 @@
     </footer>
 
     <script>
-        // 简单的交互功能
-        document.addEventListener('DOMContentLoaded', function() {
-            // 注册按钮点击事件
-            const registerBtn = document.querySelector('.btn-primary');
-            registerBtn.addEventListener('click', function() {
-                alert('欢迎加入SkillSwap！请填写注册信息。');
-            });
+        // ==================== 数据管理 ====================
+        // 使用localStorage存储用户数据
+        const Storage = {
+            getUsers: () => {
+                const users = localStorage.getItem('skillSwapUsers');
+                return users ? JSON.parse(users) : [];
+            },
+            saveUser: (user) => {
+                const users = Storage.getUsers();
+                const existingIndex = users.findIndex(u => u.email === user.email);
+                if (existingIndex >= 0) {
+                    users[existingIndex] = user;
+                } else {
+                    users.push(user);
+                }
+                localStorage.setItem('skillSwapUsers', JSON.stringify(users));
+            },
+            getCurrentUser: () => {
+                const currentUser = localStorage.getItem('skillSwapCurrentUser');
+                return currentUser ? JSON.parse(currentUser) : null;
+            },
+            setCurrentUser: (user) => {
+                if (user) {
+                    localStorage.setItem('skillSwapCurrentUser', JSON.stringify(user));
+                } else {
+                    localStorage.removeItem('skillSwapCurrentUser');
+                }
+            },
+            getEvents: () => {
+                const events = localStorage.getItem('skillSwapEvents');
+                return events ? JSON.parse(events) : [
+                    { id: 1, title: '编程入门工作坊', date: '11月15日 19:00', skill: '编程开发', cost: 1, registered: [] },
+                    { id: 2, title: '虚拟语言交换会', date: '11月20日 15:00', skill: '语言学习', cost: 1, registered: [] },
+                    { id: 3, title: '数字艺术创作分享', date: '11月25日 14:00', skill: '设计创意', cost: 1, registered: [] }
+                ];
+            },
+            saveEvents: (events) => {
+                localStorage.setItem('skillSwapEvents', JSON.stringify(events));
+            },
+            getSkills: () => {
+                const skills = localStorage.getItem('skillSwapSkills');
+                return skills ? JSON.parse(skills) : [
+                    { id: 1, title: 'Python编程教学', provider: '张三', skill: '编程开发', timeCoins: 1, description: '提供Python基础到进阶的编程教学' },
+                    { id: 2, title: '英语口语练习', provider: '李四', skill: '语言学习', timeCoins: 1, description: '英语口语对话练习，适合初学者' },
+                    { id: 3, title: 'UI/UX设计指导', provider: '王五', skill: '设计创意', timeCoins: 2, description: '专业UI/UX设计经验分享' },
+                    { id: 4, title: '健身计划制定', provider: '赵六', skill: '健身运动', timeCoins: 1, description: '个性化健身计划制定' },
+                    { id: 5, title: '烘焙技巧教学', provider: '孙七', skill: '烹饪烘焙', timeCoins: 1, description: '蛋糕、面包制作技巧' }
+                ];
+            },
+            saveSkills: (skills) => {
+                localStorage.setItem('skillSwapSkills', JSON.stringify(skills));
+            }
+        };
 
-            // 活动报名按钮
-            const eventBtns = document.querySelectorAll('.event-card .btn');
-            eventBtns.forEach(btn => {
+        // ==================== 用户认证 ====================
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.add('show');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('show');
+        }
+
+        function switchModal(fromModal, toModal) {
+            closeModal(fromModal);
+            setTimeout(() => openModal(toModal), 300);
+        }
+
+        function showNotification(message, type = 'info') {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = `notification ${type} show`;
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        function validateEmail(email) {
+            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return re.test(email);
+        }
+
+        function showError(elementId, message) {
+            const errorElement = document.getElementById(elementId);
+            if (errorElement) {
+                errorElement.textContent = message;
+                errorElement.classList.add('show');
+            }
+        }
+
+        function hideError(elementId) {
+            const errorElement = document.getElementById(elementId);
+            if (errorElement) {
+                errorElement.classList.remove('show');
+            }
+        }
+
+        // 注册功能
+        document.getElementById('registerForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const name = document.getElementById('registerName').value.trim();
+            const email = document.getElementById('registerEmail').value.trim();
+            const password = document.getElementById('registerPassword').value;
+            const confirmPassword = document.getElementById('registerConfirmPassword').value;
+
+            // 清除之前的错误
+            ['registerNameError', 'registerEmailError', 'registerPasswordError', 'registerConfirmPasswordError'].forEach(id => hideError(id));
+
+            let hasError = false;
+
+            if (name.length < 2) {
+                showError('registerNameError', '用户名至少需要2个字符');
+                hasError = true;
+            }
+
+            if (!validateEmail(email)) {
+                showError('registerEmailError', '请输入有效的邮箱地址');
+                hasError = true;
+            }
+
+            const users = Storage.getUsers();
+            if (users.find(u => u.email === email)) {
+                showError('registerEmailError', '该邮箱已被注册');
+                hasError = true;
+            }
+
+            if (password.length < 6) {
+                showError('registerPasswordError', '密码至少需要6个字符');
+                hasError = true;
+            }
+
+            if (password !== confirmPassword) {
+                showError('registerConfirmPasswordError', '两次输入的密码不一致');
+                hasError = true;
+            }
+
+            if (!hasError) {
+                const newUser = {
+                    id: Date.now(),
+                    name: name,
+                    email: email,
+                    password: password,
+                    timeCoins: 10, // 新用户赠送10个时间币
+                    registeredEvents: [],
+                    skills: [],
+                    createdAt: new Date().toISOString()
+                };
+
+                Storage.saveUser(newUser);
+                Storage.setCurrentUser(newUser);
+                showNotification('注册成功！欢迎加入SkillSwap！', 'success');
+                closeModal('registerModal');
+                updateUserInterface();
+            }
+        });
+
+        // 登录功能
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const email = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPassword').value;
+
+            ['loginEmailError', 'loginPasswordError'].forEach(id => hideError(id));
+
+            if (!validateEmail(email)) {
+                showError('loginEmailError', '请输入有效的邮箱地址');
+                return;
+            }
+
+            const users = Storage.getUsers();
+            const user = users.find(u => u.email === email && u.password === password);
+
+            if (!user) {
+                showError('loginPasswordError', '邮箱或密码错误');
+                return;
+            }
+
+            Storage.setCurrentUser(user);
+            showNotification('登录成功！', 'success');
+            closeModal('loginModal');
+            updateUserInterface();
+        });
+
+        // 退出登录
+        function logout() {
+            Storage.setCurrentUser(null);
+            showNotification('已退出登录', 'info');
+            updateUserInterface();
+        }
+
+        // 更新用户界面
+        function updateUserInterface() {
+            const currentUser = Storage.getCurrentUser();
+            const authButtons = document.getElementById('authButtons');
+            const userInfo = document.getElementById('userInfo');
+
+            if (currentUser) {
+                authButtons.style.display = 'none';
+                userInfo.classList.add('show');
+                document.getElementById('userName').textContent = currentUser.name;
+                document.getElementById('userTimeCoins').textContent = currentUser.timeCoins || 0;
+                document.getElementById('userAvatar').textContent = currentUser.name.charAt(0).toUpperCase();
+
+                // 更新活动报名状态
+                updateEventStatus();
+            } else {
+                authButtons.style.display = 'flex';
+                userInfo.classList.remove('show');
+            }
+        }
+
+        // ==================== 技能市场 ====================
+        function renderSkillMarket() {
+            const skills = Storage.getSkills();
+            const skillMarket = document.getElementById('skillMarket');
+            const searchTerm = document.getElementById('skillSearch').value.toLowerCase();
+            const selectedSkill = document.querySelector('.skill-tag.selected')?.dataset.skill;
+
+            let filteredSkills = skills;
+
+            if (searchTerm) {
+                filteredSkills = filteredSkills.filter(skill =>
+                    skill.title.toLowerCase().includes(searchTerm) ||
+                    skill.provider.toLowerCase().includes(searchTerm) ||
+                    skill.skill.toLowerCase().includes(searchTerm)
+                );
+            }
+
+            if (selectedSkill) {
+                filteredSkills = filteredSkills.filter(skill => skill.skill === selectedSkill);
+            }
+
+            if (filteredSkills.length === 0) {
+                skillMarket.innerHTML = '<p style="text-align: center; color: #666; grid-column: 1/-1;">暂无匹配的技能</p>';
+                return;
+            }
+
+            skillMarket.innerHTML = filteredSkills.map(skill => `
+                <div class="skill-card">
+                    <div class="skill-card-header">
+                        <div class="skill-card-title">${skill.title}</div>
+                        <div class="skill-badge">${skill.skill}</div>
+                    </div>
+                    <p style="color: #666; margin: 0.5rem 0;">${skill.description}</p>
+                    <div class="skill-card-meta">
+                        <span>提供者: ${skill.provider}</span>
+                        <span style="color: var(--accent-color); font-weight: bold;">${skill.timeCoins} 时间币</span>
+                    </div>
+                    <button class="btn btn-primary" onclick="exchangeSkill(${skill.id})" style="width: 100%; margin-top: 1rem;">
+                        交换技能
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function exchangeSkill(skillId) {
+            const currentUser = Storage.getCurrentUser();
+            if (!currentUser) {
+                showNotification('请先登录', 'error');
+                openModal('loginModal');
+                return;
+            }
+
+            const skills = Storage.getSkills();
+            const skill = skills.find(s => s.id === skillId);
+
+            if (!skill) return;
+
+            if (currentUser.timeCoins < skill.timeCoins) {
+                showNotification('时间币不足！', 'error');
+                return;
+            }
+
+            currentUser.timeCoins -= skill.timeCoins;
+            Storage.saveUser(currentUser);
+            Storage.setCurrentUser(currentUser);
+
+            showNotification(`成功交换 "${skill.title}"！消耗 ${skill.timeCoins} 时间币`, 'success');
+            updateUserInterface();
+            renderSkillMarket();
+        }
+
+        // 技能标签点击
+        document.querySelectorAll('.skill-tag').forEach(tag => {
+            tag.addEventListener('click', function() {
+                if (this.classList.contains('selected')) {
+                    this.classList.remove('selected');
+                } else {
+                    document.querySelectorAll('.skill-tag').forEach(t => t.classList.remove('selected'));
+                    this.classList.add('selected');
+                }
+                renderSkillMarket();
+            });
+        });
+
+        // 搜索功能
+        document.getElementById('skillSearch').addEventListener('input', renderSkillMarket);
+
+        // ==================== 活动管理 ====================
+        function updateEventStatus() {
+            const currentUser = Storage.getCurrentUser();
+            if (!currentUser) return;
+
+            const events = Storage.getEvents();
+            const registeredEvents = currentUser.registeredEvents || [];
+
+            document.querySelectorAll('.event-card').forEach(card => {
+                const eventId = parseInt(card.dataset.eventId);
+                const isRegistered = registeredEvents.includes(eventId);
+                const registerBtn = card.querySelector('.event-register-btn');
+                const statusDiv = card.querySelector('.event-status.registered');
+
+                if (isRegistered) {
+                    registerBtn.style.display = 'none';
+                    statusDiv.style.display = 'inline-block';
+                } else {
+                    registerBtn.style.display = 'inline-block';
+                    statusDiv.style.display = 'none';
+                }
+            });
+        }
+
+        // 活动报名
+        document.querySelectorAll('.event-register-btn').forEach(btn => {
                 btn.addEventListener('click', function() {
-                    const eventTitle = this.parentElement.querySelector('h3').textContent;
-                    alert(`您已成功报名参加: ${eventTitle}`);
+                const currentUser = Storage.getCurrentUser();
+                if (!currentUser) {
+                    showNotification('请先登录', 'error');
+                    openModal('loginModal');
+                    return;
+                }
+
+                const eventId = parseInt(this.dataset.eventId);
+                const events = Storage.getEvents();
+                const event = events.find(e => e.id === eventId);
+
+                if (!event) return;
+
+                if (currentUser.timeCoins < event.cost) {
+                    showNotification('时间币不足！', 'error');
+                    return;
+                }
+
+                if (!currentUser.registeredEvents) {
+                    currentUser.registeredEvents = [];
+                }
+
+                if (currentUser.registeredEvents.includes(eventId)) {
+                    showNotification('您已报名此活动', 'info');
+                    return;
+                }
+
+                currentUser.registeredEvents.push(eventId);
+                currentUser.timeCoins -= event.cost;
+                event.registered.push(currentUser.id);
+
+                Storage.saveUser(currentUser);
+                Storage.setCurrentUser(currentUser);
+                Storage.saveEvents(events);
+
+                showNotification(`成功报名 "${event.title}"！`, 'success');
+                updateUserInterface();
                 });
             });
 
-            // 导航链接平滑滚动
+        // ==================== 个人中心 ====================
+        function showProfile() {
+            const currentUser = Storage.getCurrentUser();
+            if (!currentUser) {
+                showNotification('请先登录', 'error');
+                openModal('loginModal');
+                return;
+            }
+
+            const events = Storage.getEvents();
+            const registeredEvents = events.filter(e => (currentUser.registeredEvents || []).includes(e.id));
+
+            const profileContent = `
+                <div class="profile-stats">
+                    <div class="stat-card">
+                        <div class="stat-value">${currentUser.timeCoins || 0}</div>
+                        <div class="stat-label">时间币余额</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${registeredEvents.length}</div>
+                        <div class="stat-label">已报名活动</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${(currentUser.skills || []).length}</div>
+                        <div class="stat-label">已交换技能</div>
+                    </div>
+                </div>
+
+                <h3 style="margin-top: 2rem; color: var(--primary-color);">已报名活动</h3>
+                <div style="margin-top: 1rem;">
+                    ${registeredEvents.length > 0 ?
+                        registeredEvents.map(e => `
+                            <div style="background: var(--light-color); padding: 1rem; border-radius: 8px; margin-bottom: 0.5rem;">
+                                <strong>${e.title}</strong> - ${e.date}
+                            </div>
+                        `).join('') :
+                        '<p style="color: #666; text-align: center;">暂无报名活动</p>'
+                    }
+                </div>
+
+                <h3 style="margin-top: 2rem; color: var(--primary-color);">用户信息</h3>
+                <div style="margin-top: 1rem;">
+                    <p><strong>用户名:</strong> ${currentUser.name}</p>
+                    <p><strong>邮箱:</strong> ${currentUser.email}</p>
+                    <p><strong>注册时间:</strong> ${new Date(currentUser.createdAt).toLocaleDateString('zh-CN')}</p>
+                </div>
+            `;
+
+            document.getElementById('profileContent').innerHTML = profileContent;
+            openModal('profileModal');
+        }
+
+        // ==================== 导航平滑滚动 ====================
             document.querySelectorAll('a[href^="#"]').forEach(anchor => {
                 anchor.addEventListener('click', function (e) {
                     e.preventDefault();
-
                     const targetId = this.getAttribute('href');
                     if(targetId === '#') return;
-
                     const targetElement = document.querySelector(targetId);
                     if(targetElement) {
                         window.scrollTo({
@@ -406,6 +1273,34 @@
                     }
                 });
             });
+
+        // 点击模态框外部关闭
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    this.classList.remove('show');
+                }
+            });
+        });
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            updateUserInterface();
+            renderSkillMarket();
+            updateEventStatus();
+
+            // "开始交换"按钮
+            const startBtn = document.querySelector('.hero .btn-primary');
+            if (startBtn) {
+                startBtn.addEventListener('click', function() {
+                    const currentUser = Storage.getCurrentUser();
+                    if (currentUser) {
+                        document.querySelector('#skills').scrollIntoView({ behavior: 'smooth' });
+                    } else {
+                        openModal('registerModal');
+                    }
+                });
+            }
         });
     </script>
 </body>
