@@ -961,7 +961,7 @@
                 growthStage: 1, // 1-5: 种子到开花
                 decorations: [], // 已解锁的装饰
                 happiness: 100, // 植物幸福度
-                type: "cactus", // 默认植物类型
+                type: "", // 植物类型，初始为空
                 mood: "happy" // 植物心情
             },
 
@@ -1006,6 +1006,9 @@
                 document.getElementById('plantSelection').style.display = 'none';
                 document.getElementById('mainContainer').style.display = 'block';
                 initApp();
+            } else {
+                document.getElementById('plantSelection').style.display = 'flex';
+                document.getElementById('mainContainer').style.display = 'none';
             }
         });
 
