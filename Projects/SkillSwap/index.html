@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SkillSwap - 技能交换市集</title>
+    <style>
+        :root {
+            --primary-color: #4a6fa5;
+            --secondary-color: #6b8cbc;
+            --accent-color: #ff9f1c;
+            --light-color: #f8f9fa;
+            --dark-color: #343a40;
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f7fa;
+            color: var(--dark-color);
+            line-height: 1.6;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* 导航栏样式 */
+        header {
+            background-color: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+        }
+
+        .nav-links li {
+            margin-left: 1.5rem;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--dark-color);
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary-color);
+        }
+
+        .auth-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        /* 主要内容区域 */
+        .hero {
+            padding: 4rem 0;
+            text-align: center;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        }
+
+        .hero h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            max-width: 700px;
+            margin: 0 auto 2rem;
+            color: #555;
+        }
+
+        /* 功能卡片 */
+        .features {
+            padding: 4rem 0;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 3rem;
+            color: var(--primary-color);
+        }
+
+        .feature-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 1.5rem;
+            transition: transform 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card-icon {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .card h3 {
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+        }
+
+        /* 技能展示 */
+        .skills-section {
+            padding: 4rem 0;
+            background-color: white;
+        }
+
+        .skill-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .skill-tag {
+            background-color: var(--light-color);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+
+        /* 活动日历 */
+        .events-section {
+            padding: 4rem 0;
+        }
+
+        .calendar {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .event-card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 1.5rem;
+        }
+
+        .event-date {
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        /* 页脚 */
+        footer {
+            background-color: var(--dark-color);
+            color: white;
+            padding: 3rem 0;
+            text-align: center;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .footer-links a {
+            color: #ccc;
+            text-decoration: none;
+        }
+
+        .footer-links a:hover {
+            color: white;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .feature-cards {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <header>
+        <div class="container">
+            <nav>
+                <div class="logo">SkillSwap</div>
+                <ul class="nav-links">
+                    <li><a href="#features">功能</a></li>
+                    <li><a href="#skills">技能市场</a></li>
+                    <li><a href="#events">活动</a></li>
+                    <li><a href="#about">关于我们</a></li>
+                </ul>
+                <div class="auth-buttons">
+                    <button class="btn btn-outline">登录</button>
+                    <button class="btn btn-primary">注册</button>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- 主横幅 -->
+    <section class="hero">
+        <div class="container">
+            <h1>用时间交换技能，用技能丰富人生</h1>
+            <p>SkillSwap是一个基于时间币的非货币化技能交易平台。在这里，1小时的技能交换等于1个时间币，让知识与经验自由流动。</p>
+            <button class="btn btn-primary">开始交换</button>
+        </div>
+    </section>
+
+    <!-- 核心功能 -->
+    <section id="features" class="features">
+        <div class="container">
+            <h2 class="section-title">平台核心功能</h2>
+            <div class="feature-cards">
+                <div class="card">
+                    <div class="card-icon">⏱️</div>
+                    <h3>时间银行系统</h3>
+                    <p>基于时间币的经济模型，1小时技能交换=1个时间币，实现公平的价值交换。</p>
+                </div>
+                <div class="card">
+                    <div class="card-icon">🔍</div>
+                    <h3>智能匹配系统</h3>
+                    <p>通过技能标签和AI算法，为您精准匹配最合适的技能交换伙伴。</p>
+                </div>
+                <div class="card">
+                    <div class="card-icon">⭐</div>
+                    <h3>双向评价系统</h3>
+                    <p>每次交换后双方互评，建立可信赖的信誉体系。</p>
+                </div>
+                <div class="card">
+                    <div class="card-icon">💻</div>
+                    <h3>虚拟活动</h3>
+                    <p>参加在线技能交换工作坊和主题活动，扩大您的技能网络。</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 技能展示 -->
+    <section id="skills" class="skills-section">
+        <div class="container">
+            <h2 class="section-title">热门技能标签</h2>
+            <div class="skill-tags">
+                <span class="skill-tag">编程开发</span>
+                <span class="skill-tag">语言学习</span>
+                <span class="skill-tag">设计创意</span>
+                <span class="skill-tag">音乐艺术</span>
+                <span class="skill-tag">健身运动</span>
+                <span class="skill-tag">烹饪烘焙</span>
+                <span class="skill-tag">商业技能</span>
+                <span class="skill-tag">手工艺</span>
+                <span class="skill-tag">学术辅导</span>
+                <span class="skill-tag">生活技巧</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- 活动日历 -->
+    <section id="events" class="events-section">
+        <div class="container">
+            <h2 class="section-title">即将举行的活动</h2>
+            <div class="calendar">
+                <div class="event-card">
+                    <div class="event-date">11月15日 19:00</div>
+                    <h3>编程入门工作坊</h3>
+                    <p>学习Python基础，适合零基础初学者。</p>
+                    <button class="btn btn-outline" style="margin-top: 1rem;">报名参加</button>
+                </div>
+                <div class="event-card">
+                    <div class="event-date">11月20日 15:00</div>
+                    <h3>虚拟语言交换会</h3>
+                    <p>与母语者练习英语、日语、西班牙语等。</p>
+                    <button class="btn btn-outline" style="margin-top: 1rem;">报名参加</button>
+                </div>
+                <div class="event-card">
+                    <div class="event-date">11月25日 14:00</div>
+                    <h3>数字艺术创作分享</h3>
+                    <p>学习使用Procreate和Photoshop进行数字绘画。</p>
+                    <button class="btn btn-outline" style="margin-top: 1rem;">报名参加</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 页脚 -->
+    <footer>
+        <div class="container">
+            <div class="logo">SkillSwap</div>
+            <p>基于时间币的非货币化技能交易平台</p>
+            <div class="footer-links">
+                <a href="#">关于我们</a>
+                <a href="#">使用条款</a>
+                <a href="#">隐私政策</a>
+                <a href="#">联系我们</a>
+            </div>
+            <p>&copy; 2023 SkillSwap. 保留所有权利。</p>
+        </div>
+    </footer>
+
+    <script>
+        // 简单的交互功能
+        document.addEventListener('DOMContentLoaded', function() {
+            // 注册按钮点击事件
+            const registerBtn = document.querySelector('.btn-primary');
+            registerBtn.addEventListener('click', function() {
+                alert('欢迎加入SkillSwap！请填写注册信息。');
+            });
+
+            // 活动报名按钮
+            const eventBtns = document.querySelectorAll('.event-card .btn');
+            eventBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const eventTitle = this.parentElement.querySelector('h3').textContent;
+                    alert(`您已成功报名参加: ${eventTitle}`);
+                });
+            });
+
+            // 导航链接平滑滚动
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+
+                    const targetId = this.getAttribute('href');
+                    if(targetId === '#') return;
+
+                    const targetElement = document.querySelector(targetId);
+                    if(targetElement) {
+                        window.scrollTo({
+                            top: targetElement.offsetTop - 80,
+                            behavior: 'smooth'
+                        });
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
