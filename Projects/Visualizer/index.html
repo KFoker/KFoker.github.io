@@ -1,0 +1,1471 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Timeline Visualizer | 专业项目时间线可视化工具</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/vue@3.2.45/dist/vue.global.prod.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts@3.36.3/dist/apexcharts.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+    <style>
+        :root {
+            --primary: #4361ee;
+            --primary-light: #4895ef;
+            --secondary: #3f37c9;
+            --success: #4cc9f0;
+            --warning: #f8961e;
+            --danger: #f94144;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --gray: #6c757d;
+            --bg-color: #f5f7fb;
+            --card-bg: #ffffff;
+            --border-color: #e1e5eb;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--dark);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .app-container {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* 头部样式 */
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 1rem 2rem;
+            box-shadow: var(--shadow-lg);
+            z-index: 100;
+            position: relative;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1800px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .logo i {
+            font-size: 1.75rem;
+        }
+
+        .logo h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .health-score {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .health-score.good {
+            background: rgba(76, 201, 240, 0.3);
+        }
+
+        .health-score.warning {
+            background: rgba(247, 37, 133, 0.3);
+        }
+
+        /* 主内容区 */
+        .main-content {
+            display: flex;
+            flex: 1;
+            max-width: 1800px;
+            margin: 0 auto;
+            width: 100%;
+            padding: 1.5rem;
+            gap: 1.5rem;
+        }
+
+        /* 侧边栏 */
+        .sidebar {
+            width: 300px;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            padding: 1.5rem;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .card h2 {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .card h2 i {
+            color: var(--primary);
+        }
+
+        /* 视图切换器 */
+        .view-switcher {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .view-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+        .view-btn:hover {
+            background: #f0f4ff;
+            border-color: var(--primary);
+        }
+
+        .view-btn.active {
+            background: #e6eeff;
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .view-btn i {
+            width: 20px;
+            text-align: center;
+        }
+
+        /* 项目列表 */
+        .project-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .project-item {
+            padding: 0.75rem;
+            border-radius: 8px;
+            border-left: 4px solid var(--primary);
+            background: #f8f9ff;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .project-item:hover {
+            background: #eef2ff;
+        }
+
+        .project-item.active {
+            background: #e6eeff;
+            border-left-color: var(--secondary);
+        }
+
+        .project-name {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .project-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: var(--gray);
+        }
+
+        /* 统计卡片 */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+        }
+
+        .stat-card {
+            text-align: center;
+            padding: 0.75rem;
+            border-radius: 8px;
+            background: #f8f9fa;
+            transition: transform 0.2s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--gray);
+        }
+
+        /* 内容区域 */
+        .content-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            min-width: 0; /* 防止flex元素溢出 */
+        }
+
+        /* 工具栏 */
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--card-bg);
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+        }
+
+        .toolbar-actions {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .btn {
+            padding: 0.6rem 1rem;
+            border-radius: 6px;
+            border: none;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--secondary);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--dark);
+        }
+
+        .btn-outline:hover {
+            background: #f8f9fa;
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #3aa8d0;
+        }
+
+        /* 视图容器 */
+        .view-container {
+            flex: 1;
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .view-header {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #f8f9fa;
+        }
+
+        .view-content {
+            flex: 1;
+            padding: 1.5rem;
+            overflow: auto;
+        }
+
+        /* 甘特图样式 */
+        .gantt-container {
+            width: 100%;
+            height: 500px;
+            overflow: auto;
+        }
+
+        .gantt-grid {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+            min-width: 800px;
+        }
+
+        .gantt-sidebar {
+            background: #f8f9fa;
+            border-right: 1px solid var(--border-color);
+        }
+
+        .gantt-header {
+            padding: 0.75rem;
+            font-weight: 600;
+            background: #e9ecef;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .gantt-task-list {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .gantt-task-item {
+            padding: 0.75rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: background 0.2s;
+        }
+
+        .gantt-task-item:hover {
+            background: #e9ecef;
+        }
+
+        .gantt-task-item:last-child {
+            border-bottom: none;
+        }
+
+        .task-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .gantt-chart-area {
+            position: relative;
+            overflow: auto;
+            min-width: 600px;
+        }
+
+        .gantt-timeline {
+            display: flex;
+            height: 40px;
+            border-bottom: 1px solid var(--border-color);
+            min-width: 100%;
+        }
+
+        .gantt-time-unit {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-right: 1px solid var(--border-color);
+            font-size: 0.8rem;
+            font-weight: 500;
+            min-width: 80px;
+        }
+
+        .gantt-time-unit:last-child {
+            border-right: none;
+        }
+
+        .gantt-bars {
+            position: relative;
+            height: calc(100% - 40px);
+            min-width: 100%;
+        }
+
+        .gantt-bar {
+            position: absolute;
+            height: 30px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            padding: 0 0.75rem;
+            color: white;
+            font-size: 0.8rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            z-index: 2;
+        }
+
+        .gantt-bar:hover {
+            filter: brightness(1.1);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .gantt-bar-progress {
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            background: rgba(255,255,255,0.3);
+            border-radius: 4px;
+        }
+
+        .gantt-dependency {
+            position: absolute;
+            height: 2px;
+            background: var(--dark);
+            z-index: 1;
+        }
+
+        .gantt-dependency-arrow {
+            position: absolute;
+            width: 0;
+            height: 0;
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            border-top: 5px solid var(--dark);
+        }
+
+        /* 看板样式 */
+        .kanban-container {
+            display: flex;
+            gap: 1rem;
+            height: 500px;
+            overflow-x: auto;
+            padding-bottom: 1rem;
+        }
+
+        .kanban-column {
+            flex: 1;
+            min-width: 280px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            max-height: 100%;
+        }
+
+        .kanban-header {
+            padding: 1rem;
+            font-weight: 600;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .kanban-task-count {
+            background: var(--primary);
+            color: white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+        }
+
+        .kanban-tasks {
+            flex: 1;
+            padding: 0.75rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .kanban-task {
+            background: white;
+            padding: 0.75rem;
+            border-radius: 6px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .kanban-task:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .kanban-task-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .kanban-task-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: var(--gray);
+        }
+
+        /* 日历视图 */
+        .calendar-container {
+            height: 500px;
+            overflow: auto;
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .calendar-nav {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 1px;
+            background: var(--border-color);
+            border: 1px solid var(--border-color);
+        }
+
+        .calendar-day-header {
+            background: #e9ecef;
+            padding: 0.75rem;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .calendar-day {
+            background: white;
+            min-height: 120px;
+            padding: 0.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .calendar-day.other-month {
+            background: #f8f9fa;
+            color: var(--gray);
+        }
+
+        .calendar-day-number {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .calendar-event {
+            background: var(--primary);
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* 资源视图 */
+        .resource-container {
+            height: 500px;
+            overflow: auto;
+        }
+
+        .resource-chart {
+            height: 300px;
+            margin-bottom: 2rem;
+        }
+
+        .resource-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .resource-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+            transition: transform 0.2s;
+        }
+
+        .resource-item:hover {
+            transform: translateY(-2px);
+        }
+
+        .resource-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+
+        .resource-info {
+            flex: 1;
+        }
+
+        .resource-name {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .resource-skills {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .skill-tag {
+            background: #e9ecef;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+        }
+
+        .resource-load {
+            text-align: right;
+        }
+
+        .load-value {
+            font-weight: 600;
+            font-size: 1.25rem;
+        }
+
+        .load-label {
+            font-size: 0.75rem;
+            color: var(--gray);
+        }
+
+        /* 详情面板 */
+        .detail-panel {
+            width: 350px;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .task-detail {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .task-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .task-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            flex: 1;
+            margin-right: 1rem;
+        }
+
+        .task-priority {
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .priority-high {
+            background: #ffe6e6;
+            color: #d32f2f;
+        }
+
+        .priority-medium {
+            background: #fff4e6;
+            color: #f57c00;
+        }
+
+        .priority-low {
+            background: #e6f4ea;
+            color: #388e3c;
+        }
+
+        .task-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .meta-item {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .meta-label {
+            color: var(--gray);
+        }
+
+        .meta-value {
+            font-weight: 500;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: #e9ecef;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--success);
+            border-radius: 4px;
+            transition: width 0.3s;
+        }
+
+        .task-dependencies {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .dependency-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem;
+            background: #f8f9fa;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .dependency-item:hover {
+            background: #e9ecef;
+        }
+
+        .dependency-status {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .status-completed {
+            background: var(--success);
+        }
+
+        .status-in-progress {
+            background: var(--warning);
+        }
+
+        .status-not-started {
+            background: var(--gray);
+        }
+
+        /* 模态框样式 */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 1rem;
+        }
+
+        .modal {
+            background: white;
+            border-radius: 12px;
+            box-shadow: var(--shadow-lg);
+            width: 100%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow: auto;
+        }
+
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.75rem;
+            margin-top: 2rem;
+        }
+
+        /* 关键路径高亮 */
+        .critical-path {
+            border: 2px dashed var(--danger);
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 1400px) {
+            .main-content {
+                flex-direction: column;
+            }
+            
+            .sidebar, .detail-panel {
+                width: 100%;
+            }
+            
+            .sidebar {
+                order: 2;
+            }
+            
+            .content-area {
+                order: 1;
+            }
+            
+            .detail-panel {
+                order: 3;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: flex-start;
+            }
+            
+            .toolbar {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: flex-start;
+            }
+            
+            .gantt-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .gantt-sidebar {
+                display: none;
+            }
+            
+            .kanban-container {
+                flex-direction: column;
+                height: auto;
+            }
+            
+            .calendar-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .calendar-day-header {
+                display: none;
+            }
+            
+            .modal {
+                margin: 1rem;
+            }
+        }
+
+        /* 动画效果 */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        /* 滚动条样式 */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+    </style>
+</head>
+<body>
+    <div id="app" class="app-container">
+        <!-- 头部 -->
+        <header>
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-project-diagram"></i>
+                    <h1>Project Timeline Visualizer</h1>
+                </div>
+                <div class="health-score" :class="projectHealthClass">
+                    <i class="fas fa-heartbeat"></i>
+                    <span>项目健康度: {{ projectHealth }}%</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- 主内容区 -->
+        <div class="main-content">
+            <!-- 侧边栏 -->
+            <div class="sidebar">
+                <div class="card">
+                    <h2><i class="fas fa-th"></i> 视图切换</h2>
+                    <div class="view-switcher">
+                        <button 
+                            v-for="view in views" 
+                            :key="view.id"
+                            class="view-btn" 
+                            :class="{ active: currentView === view.id }"
+                            @click="switchView(view.id)"
+                        >
+                            <i :class="view.icon"></i>
+                            <span>{{ view.name }}</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2><i class="fas fa-folder-open"></i> 项目列表</h2>
+                    <div class="project-list">
+                        <div 
+                            v-for="project in projects" 
+                            :key="project.id"
+                            class="project-item" 
+                            :class="{ active: currentProject.id === project.id }"
+                            @click="selectProject(project)"
+                        >
+                            <div class="project-name">{{ project.name }}</div>
+                            <div class="project-meta">
+                                <span>{{ project.tasks.length }} 个任务</span>
+                                <span>{{ formatDate(project.startDate) }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn btn-outline" style="margin-top: 1rem; width: 100%;" @click="showProjectModal = true">
+                        <i class="fas fa-plus"></i> 新建项目
+                    </button>
+                </div>
+
+                <div class="card">
+                    <h2><i class="fas fa-chart-bar"></i> 项目统计</h2>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-value">{{ completedTasks }}/{{ totalTasks }}</div>
+                            <div class="stat-label">已完成任务</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">{{ overdueTasks }}</div>
+                            <div class="stat-label">逾期任务</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">{{ teamMembers.length }}</div>
+                            <div class="stat-label">团队成员</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">{{ Math.round(projectDuration) }}</div>
+                            <div class="stat-label">项目天数</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2><i class="fas fa-cogs"></i> 项目设置</h2>
+                    <div class="form-group">
+                        <label class="form-label">显示关键路径</label>
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <input type="checkbox" v-model="showCriticalPath" id="criticalPath">
+                            <label for="criticalPath">{{ showCriticalPath ? '显示中' : '已隐藏' }}</label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">时间单位</label>
+                        <select class="form-control" v-model="timeUnit">
+                            <option value="day">天</option>
+                            <option value="week">周</option>
+                            <option value="month">月</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 内容区域 -->
+            <div class="content-area">
+                <div class="toolbar">
+                    <h2>{{ currentProject.name }} - {{ currentViewName }}</h2>
+                    <div class="toolbar-actions">
+                        <button class="btn btn-outline" @click="exportToPDF">
+                            <i class="fas fa-file-pdf"></i> 导出PDF
+                        </button>
+                        <button class="btn btn-outline" @click="exportToImage">
+                            <i class="fas fa-image"></i> 导出图片
+                        </button>
+                        <button class="btn btn-success" @click="showTaskModal = true">
+                            <i class="fas fa-plus"></i> 添加任务
+                        </button>
+                    </div>
+                </div>
+
+                <div class="view-container fade-in">
+                    <div class="view-header">
+                        <h3>{{ currentViewName }}视图</h3>
+                        <div class="view-actions">
+                            <button class="btn btn-outline" v-if="currentView === 'gantt'" @click="toggleFullscreen">
+                                <i class="fas fa-expand"></i> 全屏
+                            </button>
+                            <button class="btn btn-outline" v-if="currentView === 'calendar'">
+                                <i class="fas fa-calendar-alt"></i> {{ currentMonth }} {{ currentYear }}
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="view-content">
+                        <!-- 甘特图视图 -->
+                        <div v-if="currentView === 'gantt'" class="gantt-container">
+                            <div class="gantt-grid">
+                                <div class="gantt-sidebar">
+                                    <div class="gantt-header">
+                                        <span>任务</span>
+                                        <span>负责人</span>
+                                    </div>
+                                    <div class="gantt-task-list">
+                                        <div 
+                                            v-for="task in currentProject.tasks" 
+                                            :key="task.id" 
+                                            class="gantt-task-item"
+                                            :class="{ 'critical-path': isCriticalTask(task.id) }"
+                                        >
+                                            <div class="task-color" :style="{ backgroundColor: getPriorityColor(task.priority) }"></div>
+                                            <span>{{ task.name }}</span>
+                                            <span style="margin-left: auto; font-size: 0.8rem; color: var(--gray);">{{ task.assignee }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="gantt-chart-area">
+                                    <div class="gantt-timeline">
+                                        <div v-for="day in timelineDays" :key="day" class="gantt-time-unit">
+                                            {{ formatTimelineDate(day) }}
+                                        </div>
+                                    </div>
+                                    <div class="gantt-bars">
+                                        <!-- 依赖关系连线 -->
+                                        <svg style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;">
+                                            <line 
+                                                v-for="dep in dependencyLines" 
+                                                :key="dep.id"
+                                                :x1="dep.x1 + '%'" 
+                                                :y1="dep.y1 + 'px'" 
+                                                :x2="dep.x2 + '%'" 
+                                                :y2="dep.y2 + 'px'" 
+                                                stroke="#333" 
+                                                stroke-width="2"
+                                                marker-end="url(#arrowhead)"
+                                            />
+                                            <defs>
+                                                <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                                                    <polygon points="0 0, 10 3.5, 0 7" fill="#333"/>
+                                                </marker>
+                                            </defs>
+                                        </svg>
+                                        
+                                        <!-- 任务条 -->
+                                        <div 
+                                            v-for="task in currentProject.tasks" 
+                                            :key="task.id"
+                                            class="gantt-bar" 
+                                            :style="{
+                                                left: calculateTaskPosition(task.startDate) + '%',
+                                                width: calculateTaskWidth(task.startDate, task.endDate) + '%',
+                                                top: (currentProject.tasks.indexOf(task) * 40) + 'px',
+                                                backgroundColor: getPriorityColor(task.priority)
+                                            }"
+                                            :class="{ 'critical-path': isCriticalTask(task.id) }"
+                                            @click="selectTask(task)"
+                                        >
+                                            <div class="gantt-bar-progress" :style="{ width: task.progress + '%' }"></div>
+                                            <span>{{ task.name }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 看板视图 -->
+                        <div v-if="currentView === 'kanban'" class="kanban-container">
+                            <div v-for="status in taskStatuses" :key="status.id" class="kanban-column">
+                                <div class="kanban-header">
+                                    <span>{{ status.name }}</span>
+                                    <div class="kanban-task-count">{{ getTasksByStatus(status.id).length }}</div>
+                                </div>
+                                <div class="kanban-tasks">
+                                    <div 
+                                        v-for="task in getTasksByStatus(status.id)" 
+                                        :key="task.id"
+                                        class="kanban-task"
+                                        :class="{ 'critical-path': isCriticalTask(task.id) }"
+                                        @click="selectTask(task)"
+                                    >
+                                        <div class="kanban-task-title">{{ task.name }}</div>
+                                        <div class="kanban-task-meta">
+                                            <span>{{ formatDate(task.startDate) }}</span>
+                                            <span>{{ task.assignee }}</span>
+                                        </div>
+                                        <div class="progress-bar" style="margin-top: 0.5rem;">
+                                            <div class="progress-fill" :style="{ width: task.progress + '%' }"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 日历视图 -->
+                        <div v-if="currentView === 'calendar'" class="calendar-container">
+                            <div class="calendar-header">
+                                <div class="calendar-nav">
+                                    <button class="btn btn-outline" @click="prevMonth">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </button>
+                                    <h3>{{ currentMonth }} {{ currentYear }}</h3>
+                                    <button class="btn btn-outline" @click="nextMonth">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </button>
+                                </div>
+                                <button class="btn btn-outline" @click="resetToToday">
+                                    今天
+                                </button>
+                            </div>
+                            <div class="calendar-grid">
+                                <div v-for="day in dayHeaders" :key="day" class="calendar-day-header">
+                                    {{ day }}
+                                </div>
+                                <div 
+                                    v-for="day in calendarDays" 
+                                    :key="day.date.toString()"
+                                    class="calendar-day" 
+                                    :class="{ 'other-month': !day.isCurrentMonth }"
+                                >
+                                    <div class="calendar-day-number">{{ day.date.getDate() }}</div>
+                                    <div 
+                                        v-for="task in getTasksForDay(day.date)" 
+                                        :key="task.id"
+                                        class="calendar-event"
+                                        :style="{ backgroundColor: getPriorityColor(task.priority) }"
+                                        :class="{ 'critical-path': isCriticalTask(task.id) }"
+                                        @click="selectTask(task)"
+                                    >
+                                        {{ task.name }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 资源视图 -->
+                        <div v-if="currentView === 'resource'" class="resource-container">
+                            <div class="resource-chart" id="resourceChart"></div>
+                            <div class="resource-list">
+                                <div v-for="member in teamMembers" :key="member.id" class="resource-item">
+                                    <div class="resource-avatar">
+                                        {{ getInitials(member.name) }}
+                                    </div>
+                                    <div class="resource-info">
+                                        <div class="resource-name">{{ member.name }}</div>
+                                        <div class="resource-skills">
+                                            <span v-for="skill in member.skills" :key="skill" class="skill-tag">
+                                                {{ skill }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="resource-load">
+                                        <div class="load-value">{{ member.load }}%</div>
+                                        <div class="load-label">负载</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 详情面板 -->
+            <div class="detail-panel">
+                <div class="card">
+                    <h2><i class="fas fa-info-circle"></i> 任务详情</h2>
+                    <div class="task-detail" v-if="selectedTask">
+                        <div class="task-header">
+                            <div class="task-title">{{ selectedTask.name }}</div>
+                            <div class="task-priority" :class="'priority-' + selectedTask.priority">
+                                {{ getPriorityText(selectedTask.priority) }}
+                            </div>
+                        </div>
+                        
+                        <div class="task-meta">
+                            <div class="meta-item">
+                                <span class="meta-label">开始日期:</span>
+                                <span class="meta-value">{{ formatDate(selectedTask.startDate) }}</span>
+                            </div>
+                            <div class="meta-item">
+                                <span class="meta-label">结束日期:</span>
+                                <span class="meta-value">{{ formatDate(selectedTask.endDate) }}</span>
+                            </div>
+                            <div class="meta-item">
+                                <span class="meta-label">负责人:</span>
+                                <span class="meta-value">{{ selectedTask.assignee }}</span>
+                            </div>
+                            <div class="meta-item">
+                                <span class="meta-label">进度:</span>
+                                <span class="meta-value">{{ selectedTask.progress }}%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" :style="{ width: selectedTask.progress + '%' }"></div>
+                            </div>
+                            <div class="meta-item">
+                                <span class="meta-label">状态:</span>
+                                <span class="meta-value">{{ getStatusText(selectedTask.status) }}</span>
+                            </div>
+                            <div class="meta-item" v-if="isCriticalTask(selectedTask.id)">
+                                <span class="meta-label" style="color: var(--danger);">关键路径:</span>
+                                <span class="meta-value" style="color: var(--danger);">是</span>
+                            </div>
+                        </div>
+
+                        <div class="task-dependencies" v-if="selectedTask.dependencies && selectedTask.dependencies.length > 0">
+                            <h3>依赖任务</h3>
+                            <div 
+                                v-for="depId in selectedTask.dependencies" 
+                                :key="depId"
+                                class="dependency-item"
+                                @click="selectTaskById(depId)"
+                            >
+                                <div class="dependency-status" :class="'status-' + getDependencyStatus(depId)"></div>
+                                <span>{{ getTaskName(depId) }}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="form-actions">
+                            <button class="btn btn-outline" @click="editTask(selectedTask)">
+                                <i class="fas fa-edit"></i> 编辑
+                            </button>
+                            <button class="btn btn-outline" @click="deleteTask(selectedTask.id)">
+                                <i class="fas fa-trash"></i> 删除
+                            </button>
+                        </div>
+                    </div>
+                    <div v-else class="no-task-selected" style="text-align: center; padding: 2rem; color: var(--gray);">
+                        <i class="fas fa-tasks" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;"></i>
+                        <p>请选择一个任务查看详情</p>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2><i class="fas fa-exclamation-triangle"></i> 风险预警</h2>
+                    <div class="risk-list">
+                        <div v-for="risk in projectRisks" :key="risk.id" class="risk-item" style="padding: 0.75rem; border-left: 3px solid; margin-bottom: 0.75rem; background: #f8f9fa; border-radius: 4px;"
+                            :style="{ borderLeftColor: risk.level === 'high' ? '#f94144' : risk.level === 'medium' ? '#f8961e' : '#43aa8b' }">
+                            <div class="risk-header" style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
+                                <i class="fas fa-exclamation-circle" :style="{ color: risk.level === 'high' ? '#f94144' : risk.level === 'medium' ? '#f8961e' : '#43aa8b' }"></i>
+                                <span style="font-weight: 600;">{{ risk.task }}</span>
+                            </div>
+                            <div class="risk-description" style="font-size: 0.85rem;">
+                                {{ risk.description }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2><i class="fas fa-chart-line"></i> 项目进度</h2>
+                    <div id="progressChart" style="height: 200px;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 任务模态框 -->
+        <div class="modal-overlay" v-if="showTaskModal">
+            <div class="modal fade-in">
+                <div class="modal-header">
+                    <h3>{{ editingTask ? '编辑任务' : '添加新任务' }}</h3>
+                    <button class="btn btn-outline" @click="closeTaskModal" style="padding: 0.5rem;">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label class="form-label">任务名称</label>
+                        <input type="text" class="form-control" v-model="taskForm.name" placeholder="输入任务名称">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">开始日期</label>
+                        <input type="date" class="form-control" v-model="taskForm.startDate">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">结束日期</label>
+                        <input type="date" class="form-control" v-model="taskForm.endDate">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">负责人</label>
+                        <select class="form-control" v-model="taskForm.assignee">
+                            <option v-for="member in teamMembers" :key="member.id" :value="member.name">{{ member.name }}</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">优先级</label>
+                        <select class="form-control" v-model="taskForm.priority">
+                            <option value="low">低</option>
+                            <option value="medium">中</option>
+                            <option value="high">高</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">进度 (%)</label>
+                        <input type="range" class="form-control" min="0" max="100" v-model="taskForm.progress">
+                        <div style="text-align: center; margin-top: 0.5rem;">{{ taskForm.progress }}%</div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">依赖任务</label>
+                        <div style="max-height: 150px; overflow-y: auto; border: 1px solid var(--border-color); border-radius: 6px; padding: 0.5rem;">
+                            <div v-for="task in currentProject.tasks" :key="task.id" style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                                <input type="checkbox" :value="task.id" v-model="taskForm.dependencies" :disabled="task.id === editingTask?.id">
+                                <span>{{ task.name }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <button class="btn btn-outline" @click="closeTaskModal">取消</button>
+                        <button class="btn btn-primary" @click="saveTask">{{ editingTask ? '更新' : '添加' }}</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 项目模态框 -->
+        <div class="modal-overlay" v-if="showProjectModal">
+            <div class="modal fade-in">
+                <div class="modal-header">
+                    <h3>新建项目</h3>
+                    <button class="btn btn-outline" @click="closeProjectModal" style="padding: 0.5rem;">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label class="form-label">项目名称</label>
+                        <input type="text" class="form-control" v-model="projectForm.name" placeholder="输入项目名称">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">开始日期</label>
+                        <input type="date" class="form-control" v-model="projectForm.startDate">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">结束日期</label>
+                        <input type="date" class="form-control" v-model="projectForm.endDate">
+                    </div>
+                    <div class="form-actions">
+                        <button class="btn btn-outline" @click="closeProjectModal">取消</button>
+                        <button class="btn btn-primary" @click="saveProject">创建项目</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Vue 应用逻辑将在这里引入 -->
+    <script src="app.js"></script>
+</body>
+</html>
