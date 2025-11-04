@@ -1,0 +1,925 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>代码生物学模拟实验室 - 进化模拟器</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0c2461, #1e3799);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            color: #6cff6c;
+            text-shadow: 0 0 10px rgba(108, 255, 108, 0.5);
+        }
+
+        .tagline {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .simulation-area {
+            flex: 1;
+            min-width: 700px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .control-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
+            background: #4a69bd;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        button:hover {
+            background: #5a79cd;
+            transform: translateY(-2px);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button.primary {
+            background: #6cff6c;
+            color: #0c2461;
+        }
+
+        button.danger {
+            background: #ff6c6c;
+        }
+
+        .canvas-container {
+            flex: 1;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        canvas {
+            display: block;
+            background: #0a1930;
+        }
+
+        .info-panel {
+            width: 350px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .panel {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .panel h2 {
+            margin-bottom: 15px;
+            color: #6cff6c;
+            font-size: 1.4rem;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .stat {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #6cff6c;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .slider-container {
+            margin-bottom: 15px;
+        }
+
+        .slider-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+
+        input[type="range"] {
+            width: 100%;
+        }
+
+        .traits {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .trait {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .trait-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+        }
+
+        .trait-name {
+            flex: 1;
+        }
+
+        .trait-value {
+            font-weight: bold;
+        }
+
+        .history-chart {
+            height: 200px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            margin-top: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            opacity: 0.7;
+            font-size: 0.9rem;
+        }
+
+        .experiment-controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .event-log {
+            height: 150px;
+            overflow-y: auto;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            padding: 10px;
+            font-family: monospace;
+            font-size: 0.9rem;
+        }
+
+        .log-entry {
+            margin-bottom: 5px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .time {
+            color: #6cff6c;
+        }
+
+        .generation-counter {
+            font-size: 1.2rem;
+            font-weight: bold;
+            text-align: center;
+            margin: 10px 0;
+            color: #6cff6c;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 1100px) {
+            .main-content {
+                flex-direction: column;
+            }
+
+            .simulation-area, .info-panel {
+                width: 100%;
+                min-width: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>代码生物学模拟实验室</h1>
+            <p class="tagline">观察数字生物在模拟环境中的进化过程</p>
+        </header>
+
+        <div class="main-content">
+            <div class="simulation-area">
+                <div class="controls">
+                    <div class="control-group">
+                        <button id="startBtn" class="primary">开始模拟</button>
+                        <button id="pauseBtn">暂停</button>
+                        <button id="resetBtn" class="danger">重置</button>
+                    </div>
+                    <div class="control-group">
+                        <button id="addFoodBtn">添加食物</button>
+                        <button id="addPredatorBtn">添加捕食者</button>
+                        <button id="changeEnvironmentBtn">改变环境</button>
+                    </div>
+                </div>
+
+                <div class="generation-counter">
+                    世代: <span id="generationCount">0</span>
+                </div>
+
+                <div class="canvas-container">
+                    <canvas id="simulationCanvas"></canvas>
+                </div>
+            </div>
+
+            <div class="info-panel">
+                <div class="panel">
+                    <h2>种群统计</h2>
+                    <div class="stats">
+                        <div class="stat">
+                            <div class="stat-value" id="populationCount">0</div>
+                            <div class="stat-label">生物数量</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value" id="foodCount">0</div>
+                            <div class="stat-label">食物数量</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value" id="avgLifespan">0</div>
+                            <div class="stat-label">平均寿命</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value" id="avgSpeed">0</div>
+                            <div class="stat-label">平均速度</div>
+                        </div>
+                    </div>
+
+                    <h2 style="margin-top: 20px;">特征分布</h2>
+                    <div class="traits" id="traitsContainer">
+                        <!-- 特征将通过JavaScript动态添加 -->
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <h2>环境控制</h2>
+                    <div class="slider-container">
+                        <div class="slider-label">
+                            <span>食物生成率</span>
+                            <span id="foodRateValue">5</span>
+                        </div>
+                        <input type="range" id="foodRate" min="1" max="10" value="5">
+                    </div>
+
+                    <div class="slider-container">
+                        <div class="slider-label">
+                            <span>环境严酷度</span>
+                            <span id="harshnessValue">3</span>
+                        </div>
+                        <input type="range" id="harshness" min="1" max="10" value="3">
+                    </div>
+
+                    <div class="slider-container">
+                        <div class="slider-label">
+                            <span>变异率</span>
+                            <span id="mutationRateValue">5</span>
+                        </div>
+                        <input type="range" id="mutationRate" min="1" max="10" value="5">
+                    </div>
+
+                    <div class="experiment-controls">
+                        <button id="introduceTraitBtn">引入新特征</button>
+                        <button id="selectivePressureBtn">选择压力</button>
+                        <button id="bottleneckBtn">种群瓶颈</button>
+                        <button id="massExtinctionBtn">大灭绝事件</button>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <h2>进化事件日志</h2>
+                    <div class="event-log" id="eventLog">
+                        <!-- 事件日志将通过JavaScript动态添加 -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>代码生物学模拟实验室 © 2023 | 探索数字生命的进化奥秘</p>
+        </footer>
+    </div>
+
+    <script>
+        // 主要模拟逻辑
+        document.addEventListener('DOMContentLoaded', function() {
+            const canvas = document.getElementById('simulationCanvas');
+            const ctx = canvas.getContext('2d');
+
+            // 设置Canvas大小
+            function resizeCanvas() {
+                const container = canvas.parentElement;
+                canvas.width = container.clientWidth;
+                canvas.height = container.clientHeight;
+            }
+
+            window.addEventListener('resize', resizeCanvas);
+            resizeCanvas();
+
+            // 模拟状态
+            let simulationRunning = false;
+            let generation = 0;
+            let population = [];
+            let foods = [];
+            let predators = [];
+            let lastFoodSpawn = 0;
+            let lastUpdateTime = 0;
+            let eventLog = [];
+
+            // 生物特征定义
+            const traits = [
+                { name: "速度", color: "#6cff6c", min: 0.5, max: 3.0, value: 1.5 },
+                { name: "大小", color: "#ff6c6c", min: 5, max: 20, value: 12 },
+                { name: "寿命", color: "#6c6cff", min: 100, max: 500, value: 300 },
+                { name: "繁殖率", color: "#ffff6c", min: 0.01, max: 0.1, value: 0.05 },
+                { name: "感知范围", color: "#ff6cff", min: 20, max: 100, value: 60 }
+            ];
+
+            // 初始化特征显示
+            function initTraitsDisplay() {
+                const container = document.getElementById('traitsContainer');
+                container.innerHTML = '';
+
+                traits.forEach(trait => {
+                    const traitEl = document.createElement('div');
+                    traitEl.className = 'trait';
+                    traitEl.innerHTML = `
+                        <div class="trait-color" style="background-color: ${trait.color}"></div>
+                        <div class="trait-name">${trait.name}</div>
+                        <div class="trait-value">${trait.value.toFixed(2)}</div>
+                    `;
+                    container.appendChild(traitEl);
+                });
+            }
+
+            initTraitsDisplay();
+
+            // 生物类
+            class Organism {
+                constructor(x, y, parent = null) {
+                    this.x = x || Math.random() * canvas.width;
+                    this.y = y || Math.random() * canvas.height;
+                    this.age = 0;
+                    this.energy = 100;
+                    this.reproductionCooldown = 0;
+
+                    // 遗传特征
+                    if (parent) {
+                        // 从父代继承特征，可能发生变异
+                        this.traits = {};
+                        for (const trait of traits) {
+                            let value = parent.traits[trait.name];
+
+                            // 变异
+                            if (Math.random() < getMutationRate() / 100) {
+                                const mutation = (Math.random() - 0.5) * 0.2; // -10% 到 +10%
+                                value = Math.max(trait.min, Math.min(trait.max, value * (1 + mutation)));
+
+                                // 记录重大变异事件
+                                if (Math.abs(mutation) > 0.08) {
+                                    addEvent(`新变异: ${trait.name} ${mutation > 0 ? '增加' : '减少'}了${Math.abs(mutation*100).toFixed(1)}%`);
+                                }
+                            }
+
+                            this.traits[trait.name] = value;
+                        }
+                    } else {
+                        // 初始生物，随机特征
+                        this.traits = {};
+                        for (const trait of traits) {
+                            this.traits[trait.name] = trait.min + Math.random() * (trait.max - trait.min);
+                        }
+                    }
+
+                    // 方向
+                    this.direction = Math.random() * Math.PI * 2;
+                    this.speed = this.traits["速度"] || 1.5;
+                    this.size = this.traits["大小"] || 12;
+                    this.lifespan = this.traits["寿命"] || 300;
+                    this.reproductionRate = this.traits["繁殖率"] || 0.05;
+                    this.perception = this.traits["感知范围"] || 60;
+
+                    this.targetFood = null;
+                }
+
+                update() {
+                    this.age++;
+                    this.energy -= 0.1;
+                    this.reproductionCooldown--;
+
+                    // 死亡检查
+                    if (this.age > this.lifespan || this.energy <= 0) {
+                        return false; // 生物死亡
+                    }
+
+                    // 寻找食物
+                    if (!this.targetFood ||
+                        this.distanceTo(this.targetFood) > this.perception ||
+                        !foods.includes(this.targetFood)) {
+                        this.findFood();
+                    }
+
+                    // 向食物移动
+                    if (this.targetFood) {
+                        const dx = this.targetFood.x - this.x;
+                        const dy = this.targetFood.y - this.y;
+                        const dist = Math.sqrt(dx*dx + dy*dy);
+
+                        if (dist < 5) {
+                            // 吃到食物
+                            this.energy = Math.min(100, this.energy + 30);
+                            foods = foods.filter(f => f !== this.targetFood);
+                            this.targetFood = null;
+                        } else {
+                            // 移动向食物
+                            this.direction = Math.atan2(dy, dx);
+                            this.x += Math.cos(this.direction) * this.speed;
+                            this.y += Math.sin(this.direction) * this.speed;
+                        }
+                    } else {
+                        // 随机移动
+                        this.direction += (Math.random() - 0.5) * 0.5;
+                        this.x += Math.cos(this.direction) * this.speed;
+                        this.y += Math.sin(this.direction) * this.speed;
+                    }
+
+                    // 边界检查
+                    if (this.x < 0) this.x = 0;
+                    if (this.x > canvas.width) this.x = canvas.width;
+                    if (this.y < 0) this.y = 0;
+                    if (this.y > canvas.height) this.y = canvas.height;
+
+                    // 繁殖
+                    if (this.energy > 70 && this.reproductionCooldown <= 0 && population.length < 500) {
+                        this.reproduce();
+                    }
+
+                    return true; // 生物存活
+                }
+
+                findFood() {
+                    let closestFood = null;
+                    let closestDist = Infinity;
+
+                    for (const food of foods) {
+                        const dist = this.distanceTo(food);
+                        if (dist < closestDist && dist < this.perception) {
+                            closestDist = dist;
+                            closestFood = food;
+                        }
+                    }
+
+                    this.targetFood = closestFood;
+                }
+
+                distanceTo(target) {
+                    const dx = target.x - this.x;
+                    const dy = target.y - this.y;
+                    return Math.sqrt(dx*dx + dy*dy);
+                }
+
+                reproduce() {
+                    this.energy -= 30;
+                    this.reproductionCooldown = 100;
+
+                    const child = new Organism(
+                        this.x + (Math.random() - 0.5) * 20,
+                        this.y + (Math.random() - 0.5) * 20,
+                        this
+                    );
+
+                    population.push(child);
+
+                    // 记录繁殖事件
+                    if (Math.random() < 0.1) { // 10%几率记录繁殖事件
+                        addEvent("新生物诞生");
+                    }
+                }
+
+                draw() {
+                    // 绘制生物
+                    ctx.save();
+                    ctx.translate(this.x, this.y);
+                    ctx.rotate(this.direction);
+
+                    // 身体
+                    ctx.fillStyle = this.getColor();
+                    ctx.beginPath();
+                    ctx.ellipse(0, 0, this.size, this.size/2, 0, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    // 能量指示器
+                    ctx.fillStyle = this.energy > 50 ? '#6cff6c' : this.energy > 20 ? '#ffff6c' : '#ff6c6c';
+                    ctx.fillRect(-this.size, -this.size-5, this.size * 2 * (this.energy/100), 3);
+
+                    // 感知范围（调试用）
+                    if (this.targetFood) {
+                        ctx.strokeStyle = 'rgba(108, 255, 108, 0.3)';
+                        ctx.setLineDash([5, 5]);
+                        ctx.beginPath();
+                        ctx.arc(0, 0, this.perception, 0, Math.PI * 2);
+                        ctx.stroke();
+                        ctx.setLineDash([]);
+                    }
+
+                    ctx.restore();
+                }
+
+                getColor() {
+                    // 根据特征生成颜色
+                    const speedRatio = (this.traits["速度"] - 0.5) / (3.0 - 0.5);
+                    const sizeRatio = (this.traits["大小"] - 5) / (20 - 5);
+
+                    const r = Math.floor(100 + speedRatio * 155);
+                    const g = Math.floor(100 + sizeRatio * 155);
+                    const b = Math.floor(200 - (this.age / this.lifespan) * 100);
+
+                    return `rgb(${r}, ${g}, ${b})`;
+                }
+            }
+
+            // 食物类
+            class Food {
+                constructor(x, y) {
+                    this.x = x || Math.random() * canvas.width;
+                    this.y = y || Math.random() * canvas.height;
+                    this.energy = 30;
+                    this.size = 4;
+                }
+
+                draw() {
+                    ctx.fillStyle = '#6cff6c';
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+
+            // 初始化模拟
+            function initSimulation() {
+                population = [];
+                foods = [];
+                predators = [];
+                generation = 0;
+                lastFoodSpawn = 0;
+                eventLog = [];
+
+                // 创建初始种群
+                for (let i = 0; i < 20; i++) {
+                    population.push(new Organism());
+                }
+
+                // 创建初始食物
+                for (let i = 0; i < 30; i++) {
+                    foods.push(new Food());
+                }
+
+                updateStats();
+                updateEventLog();
+                document.getElementById('generationCount').textContent = generation;
+            }
+
+            // 更新统计信息
+            function updateStats() {
+                document.getElementById('populationCount').textContent = population.length;
+                document.getElementById('foodCount').textContent = foods.length;
+
+                if (population.length > 0) {
+                    let totalLifespan = 0;
+                    let totalSpeed = 0;
+
+                    for (const org of population) {
+                        totalLifespan += org.traits["寿命"];
+                        totalSpeed += org.traits["速度"];
+                    }
+
+                    document.getElementById('avgLifespan').textContent = (totalLifespan / population.length).toFixed(1);
+                    document.getElementById('avgSpeed').textContent = (totalSpeed / population.length).toFixed(2);
+                } else {
+                    document.getElementById('avgLifespan').textContent = "0";
+                    document.getElementById('avgSpeed').textContent = "0";
+                }
+
+                // 更新特征显示
+                if (population.length > 0) {
+                    const container = document.getElementById('traitsContainer');
+                    const traitEls = container.querySelectorAll('.trait-value');
+
+                    traits.forEach((trait, i) => {
+                        let total = 0;
+                        for (const org of population) {
+                            total += org.traits[trait.name];
+                        }
+                        const avg = total / population.length;
+                        traitEls[i].textContent = avg.toFixed(2);
+                    });
+                }
+            }
+
+            // 添加事件到日志
+            function addEvent(message) {
+                const now = new Date();
+                const timeString = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
+
+                eventLog.unshift({
+                    time: timeString,
+                    message: message
+                });
+
+                // 保持日志不超过50条
+                if (eventLog.length > 50) {
+                    eventLog.pop();
+                }
+
+                updateEventLog();
+            }
+
+            // 更新事件日志显示
+            function updateEventLog() {
+                const logContainer = document.getElementById('eventLog');
+                logContainer.innerHTML = '';
+
+                for (const entry of eventLog) {
+                    const entryEl = document.createElement('div');
+                    entryEl.className = 'log-entry';
+                    entryEl.innerHTML = `<span class="time">[${entry.time}]</span> ${entry.message}`;
+                    logContainer.appendChild(entryEl);
+                }
+            }
+
+            // 获取突变率
+            function getMutationRate() {
+                return parseInt(document.getElementById('mutationRate').value);
+            }
+
+            // 获取环境严酷度
+            function getHarshness() {
+                return parseInt(document.getElementById('harshness').value);
+            }
+
+            // 模拟循环
+            function simulate(timestamp) {
+                if (!lastUpdateTime) lastUpdateTime = timestamp;
+                const deltaTime = timestamp - lastUpdateTime;
+
+                if (simulationRunning && deltaTime > 1000/30) { // 约30fps
+                    // 清除画布
+                    ctx.fillStyle = '#0a1930';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                    // 生成食物
+                    lastFoodSpawn += deltaTime;
+                    if (lastFoodSpawn > 1000 - (getHarshness() * 50)) {
+                        const foodRate = parseInt(document.getElementById('foodRate').value);
+                        for (let i = 0; i < foodRate; i++) {
+                            if (foods.length < 100) {
+                                foods.push(new Food());
+                            }
+                        }
+                        lastFoodSpawn = 0;
+                    }
+
+                    // 更新生物
+                    const newPopulation = [];
+                    for (const org of population) {
+                        if (org.update()) {
+                            newPopulation.push(org);
+                        }
+                    }
+                    population = newPopulation;
+
+                    // 环境压力（基于严酷度）
+                    if (Math.random() < getHarshness() / 1000) {
+                        if (population.length > 0) {
+                            const index = Math.floor(Math.random() * population.length);
+                            population.splice(index, 1);
+                            addEvent("环境压力导致生物死亡");
+                        }
+                    }
+
+                    // 绘制食物
+                    for (const food of foods) {
+                        food.draw();
+                    }
+
+                    // 绘制生物
+                    for (const org of population) {
+                        org.draw();
+                    }
+
+                    // 世代更替
+                    if (population.length === 0) {
+                        addEvent("种群灭绝！重新开始");
+                        initSimulation();
+                    } else if (population.every(org => org.age > 50)) {
+                        generation++;
+                        document.getElementById('generationCount').textContent = generation;
+                        addEvent(`第 ${generation} 代开始`);
+
+                        // 记录世代特征变化
+                        if (generation % 5 === 0) {
+                            let maxTrait = '';
+                            let maxChange = 0;
+
+                            for (const trait of traits) {
+                                let total = 0;
+                                for (const org of population) {
+                                    total += org.traits[trait.name];
+                                }
+                                const avg = total / population.length;
+                                const change = Math.abs(avg - trait.value) / trait.value;
+
+                                if (change > maxChange) {
+                                    maxChange = change;
+                                    maxTrait = trait.name;
+                                }
+                            }
+
+                            if (maxChange > 0.1) {
+                                addEvent(`${maxTrait}特征显著变化: ${(maxChange*100).toFixed(1)}%`);
+                            }
+                        }
+                    }
+
+                    updateStats();
+                    lastUpdateTime = timestamp;
+                }
+
+                requestAnimationFrame(simulate);
+            }
+
+            // 事件处理
+            document.getElementById('startBtn').addEventListener('click', function() {
+                simulationRunning = true;
+                addEvent("模拟开始");
+            });
+
+            document.getElementById('pauseBtn').addEventListener('click', function() {
+                simulationRunning = false;
+                addEvent("模拟暂停");
+            });
+
+            document.getElementById('resetBtn').addEventListener('click', function() {
+                simulationRunning = false;
+                initSimulation();
+                addEvent("模拟重置");
+            });
+
+            document.getElementById('addFoodBtn').addEventListener('click', function() {
+                for (let i = 0; i < 10; i++) {
+                    foods.push(new Food());
+                }
+                addEvent("添加了10个食物源");
+            });
+
+            document.getElementById('addPredatorBtn').addEventListener('click', function() {
+                addEvent("捕食者功能开发中...");
+            });
+
+            document.getElementById('changeEnvironmentBtn').addEventListener('click', function() {
+                // 随机改变环境颜色
+                const hues = [200, 240, 280, 320, 0, 40, 80];
+                const hue = hues[Math.floor(Math.random() * hues.length)];
+                document.body.style.background = `linear-gradient(135deg, hsl(${hue}, 70%, 20%), hsl(${hue+40}, 70%, 30%))`;
+                addEvent("环境条件发生变化");
+            });
+
+            document.getElementById('introduceTraitBtn').addEventListener('click', function() {
+                if (population.length > 0) {
+                    // 随机选择一个生物引入新特征
+                    const org = population[Math.floor(Math.random() * population.length)];
+                    const newTraitValue = org.traits["速度"] * (1 + (Math.random() - 0.5) * 0.5);
+                    org.traits["速度"] = Math.max(0.5, Math.min(3.0, newTraitValue));
+                    addEvent("引入了新的速度特征变异");
+                }
+            });
+
+            document.getElementById('selectivePressureBtn').addEventListener('click', function() {
+                // 施加选择压力 - 淘汰速度最慢的10%生物
+                if (population.length > 5) {
+                    // 按速度排序
+                    population.sort((a, b) => a.traits["速度"] - b.traits["速度"]);
+                    const removeCount = Math.max(1, Math.floor(population.length * 0.1));
+                    population.splice(0, removeCount);
+                    addEvent(`选择压力淘汰了${removeCount}个慢速生物`);
+                }
+            });
+
+            document.getElementById('bottleneckBtn').addEventListener('click', function() {
+                // 种群瓶颈事件 - 只保留少量个体
+                if (population.length > 5) {
+                    const survivors = Math.max(2, Math.floor(population.length * 0.2));
+                    // 随机选择幸存者
+                    for (let i = population.length - 1; i > survivors; i--) {
+                        const removeIndex = Math.floor(Math.random() * (i + 1));
+                        population.splice(removeIndex, 1);
+                    }
+                    addEvent(`种群瓶颈事件！仅${survivors}个生物幸存`);
+                }
+            });
+
+            document.getElementById('massExtinctionBtn').addEventListener('click', function() {
+                // 大灭绝事件 - 淘汰大部分个体
+                if (population.length > 3) {
+                    const survivors = Math.max(2, Math.floor(population.length * 0.1));
+                    // 随机选择幸存者
+                    for (let i = population.length - 1; i > survivors; i--) {
+                        const removeIndex = Math.floor(Math.random() * (i + 1));
+                        population.splice(removeIndex, 1);
+                    }
+                    addEvent(`大灭绝事件！仅${survivors}个生物幸存`);
+                }
+            });
+
+            // 滑块事件
+            document.getElementById('foodRate').addEventListener('input', function() {
+                document.getElementById('foodRateValue').textContent = this.value;
+            });
+
+            document.getElementById('harshness').addEventListener('input', function() {
+                document.getElementById('harshnessValue').textContent = this.value;
+            });
+
+            document.getElementById('mutationRate').addEventListener('input', function() {
+                document.getElementById('mutationRateValue').textContent = this.value;
+            });
+
+            // 初始化模拟
+            initSimulation();
+
+            // 启动模拟循环
+            requestAnimationFrame(simulate);
+        });
+    </script>
+</body>
+</html>
