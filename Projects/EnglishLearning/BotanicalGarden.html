@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>英语学习植物园 - 优化版</title>
+    <title>英语学习植物园 - 卡通版</title>
     <style>
         * {
             margin: 0;
@@ -573,6 +573,115 @@
         .reveal-btn:hover {
             background: #29b6f6;
         }
+
+        /* 卡通植物样式 */
+        .cartoon-plant {
+            position: absolute;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            transition: all 0.5s ease;
+        }
+
+        .cartoon-stem {
+            width: 15px;
+            height: 0;
+            background: #a8e6cf;
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            transition: height 1s ease;
+            border-radius: 5px;
+        }
+
+        .cartoon-leaf {
+            width: 40px;
+            height: 30px;
+            background: #7bcfa8;
+            border-radius: 50%;
+            position: absolute;
+            z-index: 2;
+        }
+
+        .cartoon-face {
+            width: 50px;
+            height: 50px;
+            position: absolute;
+            top: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 4;
+        }
+
+        .cartoon-eye {
+            width: 10px;
+            height: 10px;
+            background: #333;
+            border-radius: 50%;
+            position: absolute;
+            animation: blink 4s infinite;
+        }
+
+        .cartoon-eye.left { left: 10px; top: 15px; }
+        .cartoon-eye.right { right: 10px; top: 15px; }
+
+        .cartoon-mouth {
+            width: 25px;
+            height: 15px;
+            border-bottom: 3px solid #333;
+            border-radius: 0 0 10px 10px;
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            transition: all 0.3s ease;
+        }
+
+        .happy .cartoon-mouth {
+            border-radius: 0 0 10px 10px;
+            border-bottom: 3px solid #333;
+        }
+
+        .sad .cartoon-mouth {
+            border-radius: 10px 10px 0 0;
+            border-top: 3px solid #333;
+            border-bottom: none;
+        }
+
+        .excited .cartoon-mouth {
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            background: #333;
+            border: none;
+        }
+
+        @keyframes blink {
+            0%, 90%, 100% { height: 10px; }
+            95% { height: 2px; }
+        }
+
+        @keyframes sway {
+            0%, 100% { transform: translateX(-50%) rotate(-2deg); }
+            50% { transform: translateX(-50%) rotate(2deg); }
+        }
+
+        .sway {
+            animation: sway 3s ease-in-out infinite;
+        }
+
+        .blush {
+            width: 8px;
+            height: 4px;
+            background: rgba(255, 150, 150, 0.6);
+            border-radius: 50%;
+            position: absolute;
+            top: 20px;
+        }
+
+        .blush.left { left: 5px; }
+        .blush.right { right: 5px; }
     </style>
 </head>
 <body>
@@ -583,50 +692,103 @@
             <div class="plant-options">
                 <div class="plant-option" data-plant="cactus">
                     <div class="plant-preview">
-                        <div style="width: 60px; height: 100px; background: #7bcfa8; border-radius: 10px; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);"></div>
-                        <div style="width: 80px; height: 20px; background: #7bcfa8; border-radius: 50%; position: absolute; bottom: 100px; left: 50%; transform: translateX(-50%);"></div>
-                        <div style="width: 40px; height: 40px; background: #ff9a76; border-radius: 50%; position: absolute; bottom: 120px; left: 50%; transform: translateX(-50%);"></div>
+                        <div class="cartoon-plant">
+                            <div class="cartoon-stem" style="height: 100px; background: #7bcfa8;"></div>
+                            <div class="cartoon-leaf" style="left: -20px; top: -20px;"></div>
+                            <div class="cartoon-leaf" style="right: -20px; top: -40px;"></div>
+                            <div class="cartoon-face">
+                                <div class="cartoon-eye left"></div>
+                                <div class="cartoon-eye right"></div>
+                                <div class="cartoon-mouth"></div>
+                                <div class="blush left"></div>
+                                <div class="blush right"></div>
+                            </div>
+                        </div>
                     </div>
                     <div class="plant-name">仙人掌宝宝</div>
                 </div>
                 <div class="plant-option" data-plant="sunflower">
                     <div class="plant-preview">
-                        <div style="width: 15px; height: 100px; background: #a8e6cf; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);"></div>
-                        <div style="width: 80px; height: 80px; background: #ffd93d; border-radius: 50%; position: absolute; bottom: 100px; left: 50%; transform: translateX(-50%);"></div>
-                        <div style="width: 60px; height: 60px; background: #ff9a76; border-radius: 50%; position: absolute; bottom: 110px; left: 50%; transform: translateX(-50%);"></div>
+                        <div class="cartoon-plant">
+                            <div class="cartoon-stem" style="height: 120px; background: #a8e6cf;"></div>
+                            <div class="cartoon-leaf" style="left: -25px; top: -30px;"></div>
+                            <div class="cartoon-leaf" style="right: -25px; top: -50px;"></div>
+                            <div class="cartoon-face">
+                                <div class="cartoon-eye left"></div>
+                                <div class="cartoon-eye right"></div>
+                                <div class="cartoon-mouth"></div>
+                                <div class="blush left"></div>
+                                <div class="blush right"></div>
+                            </div>
+                        </div>
                     </div>
                     <div class="plant-name">向日葵小子</div>
                 </div>
                 <div class="plant-option" data-plant="rose">
                     <div class="plant-preview">
-                        <div style="width: 10px; height: 120px; background: #a8e6cf; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);"></div>
-                        <div style="width: 50px; height: 50px; background: #ff6b6b; border-radius: 50%; position: absolute; bottom: 120px; left: 50%; transform: translateX(-50%);"></div>
-                        <div style="width: 30px; height: 30px; background: #ffd93d; border-radius: 50%; position: absolute; bottom: 135px; left: 50%; transform: translateX(-50%);"></div>
+                        <div class="cartoon-plant">
+                            <div class="cartoon-stem" style="height: 140px; background: #a8e6cf;"></div>
+                            <div class="cartoon-leaf" style="left: -15px; top: -40px;"></div>
+                            <div class="cartoon-leaf" style="right: -15px; top: -60px;"></div>
+                            <div class="cartoon-face">
+                                <div class="cartoon-eye left"></div>
+                                <div class="cartoon-eye right"></div>
+                                <div class="cartoon-mouth"></div>
+                                <div class="blush left"></div>
+                                <div class="blush right"></div>
+                            </div>
+                        </div>
                     </div>
                     <div class="plant-name">玫瑰小甜心</div>
                 </div>
                 <div class="plant-option" data-plant="fern">
                     <div class="plant-preview">
-                        <div style="width: 15px; height: 80px; background: #a8e6cf; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);"></div>
-                        <div style="width: 100px; height: 20px; background: #7bcfa8; border-radius: 50%; position: absolute; bottom: 80px; left: 50%; transform: translateX(-50%);"></div>
-                        <div style="width: 80px; height: 20px; background: #7bcfa8; border-radius: 50%; position: absolute; bottom: 100px; left: 50%; transform: translateX(-50%);"></div>
-                        <div style="width: 60px; height: 20px; background: #7bcfa8; border-radius: 50%; position: absolute; bottom: 120px; left: 50%; transform: translateX(-50%);"></div>
+                        <div class="cartoon-plant">
+                            <div class="cartoon-stem" style="height: 100px; background: #a8e6cf;"></div>
+                            <div class="cartoon-leaf" style="left: -30px; top: -20px; width: 60px; height: 20px;"></div>
+                            <div class="cartoon-leaf" style="right: -30px; top: -40px; width: 60px; height: 20px;"></div>
+                            <div class="cartoon-leaf" style="left: -20px; top: -60px; width: 40px; height: 15px;"></div>
+                            <div class="cartoon-face">
+                                <div class="cartoon-eye left"></div>
+                                <div class="cartoon-eye right"></div>
+                                <div class="cartoon-mouth"></div>
+                                <div class="blush left"></div>
+                                <div class="blush right"></div>
+                            </div>
+                        </div>
                     </div>
                     <div class="plant-name">蕨类小精灵</div>
                 </div>
                 <div class="plant-option" data-plant="succulent">
                     <div class="plant-preview">
-                        <div style="width: 100px; height: 60px; background: #7bcfa8; border-radius: 50%; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);"></div>
-                        <div style="width: 80px; height: 40px; background: #a8e6cf; border-radius: 50%; position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%);"></div>
-                        <div style="width: 20px; height: 20px; background: #ff9a76; border-radius: 50%; position: absolute; bottom: 70px; left: 50%; transform: translateX(-50%);"></div>
+                        <div class="cartoon-plant">
+                            <div style="width: 80px; height: 60px; background: #7bcfa8; border-radius: 50%; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);"></div>
+                            <div style="width: 60px; height: 40px; background: #a8e6cf; border-radius: 50%; position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);"></div>
+                            <div class="cartoon-face" style="top: -20px;">
+                                <div class="cartoon-eye left"></div>
+                                <div class="cartoon-eye right"></div>
+                                <div class="cartoon-mouth"></div>
+                                <div class="blush left"></div>
+                                <div class="blush right"></div>
+                            </div>
+                        </div>
                     </div>
                     <div class="plant-name">多肉小胖</div>
                 </div>
                 <div class="plant-option" data-plant="lily">
                     <div class="plant-preview">
-                        <div style="width: 10px; height: 100px; background: #a8e6cf; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);"></div>
-                        <div style="width: 60px; height: 60px; background: white; border-radius: 50%; position: absolute; bottom: 100px; left: 50%; transform: translateX(-50%); border: 3px solid #ff9a76;"></div>
-                        <div style="width: 30px; height: 30px; background: #ffd93d; border-radius: 50%; position: absolute; bottom: 115px; left: 50%; transform: translateX(-50%);"></div>
+                        <div class="cartoon-plant">
+                            <div class="cartoon-stem" style="height: 120px; background: #a8e6cf;"></div>
+                            <div class="cartoon-leaf" style="left: -20px; top: -30px; width: 60px; height: 25px;"></div>
+                            <div class="cartoon-leaf" style="right: -20px; top: -50px; width: 60px; height: 25px;"></div>
+                            <div class="cartoon-face">
+                                <div class="cartoon-eye left"></div>
+                                <div class="cartoon-eye right"></div>
+                                <div class="cartoon-mouth"></div>
+                                <div class="blush left"></div>
+                                <div class="blush right"></div>
+                            </div>
+                        </div>
                     </div>
                     <div class="plant-name">百合小天使</div>
                 </div>
@@ -666,14 +828,8 @@
 
                 <div class="plant-container">
                     <div class="pot"></div>
-                    <div class="plant">
-                        <div class="stem" id="plantStem"></div>
-                        <!-- 叶子和花朵将通过JavaScript动态添加 -->
-                        <div class="face" id="plantFace">
-                            <div class="eye left"></div>
-                            <div class="eye right"></div>
-                            <div class="mouth" id="plantMouth"></div>
-                        </div>
+                    <div id="plantDisplay">
+                        <!-- 植物将通过JavaScript动态添加 -->
                     </div>
                 </div>
 
@@ -787,7 +943,7 @@
         ];
 
         // 应用状态和数据
-        const appState = {
+        let appState = {
             // 资源数量
             resources: {
                 water: 10,
@@ -805,7 +961,8 @@
                 growthStage: 1, // 1-5: 种子到开花
                 decorations: [], // 已解锁的装饰
                 happiness: 100, // 植物幸福度
-                type: "cactus" // 默认植物类型
+                type: "cactus", // 默认植物类型
+                mood: "happy" // 植物心情
             },
 
             // 学习数据
@@ -814,7 +971,8 @@
                 streakDays: 1,
                 totalXP: 0,
                 currentWordIndex: 0,
-                answerRevealed: false // 答案是否已显示
+                answerRevealed: false, // 答案是否已显示
+                lastStudyDate: new Date().toDateString() // 最后学习日期
             },
 
             // 商店物品
@@ -829,6 +987,9 @@
 
         // 初始化应用
         document.addEventListener('DOMContentLoaded', function() {
+            // 尝试从本地存储加载数据
+            loadData();
+
             // 设置植物选择事件
             setupPlantSelection();
 
@@ -839,7 +1000,62 @@
             document.getElementById('nextBtn').addEventListener('click', nextWord);
             document.getElementById('hintBtn').addEventListener('click', showHint);
             document.getElementById('revealBtn').addEventListener('click', revealAnswer);
+
+            // 检查是否已经选择了植物
+            if (appState.plant.type) {
+                document.getElementById('plantSelection').style.display = 'none';
+                document.getElementById('mainContainer').style.display = 'block';
+                initApp();
+            }
         });
+
+        // 从本地存储加载数据
+        function loadData() {
+            const savedData = localStorage.getItem('englishPlantGarden');
+            if (savedData) {
+                try {
+                    const parsedData = JSON.parse(savedData);
+                    appState = { ...appState, ...parsedData };
+
+                    // 检查连续学习天数
+                    checkStreakDays();
+                } catch (e) {
+                    console.error('加载数据失败:', e);
+                }
+            }
+        }
+
+        // 保存数据到本地存储
+        function saveData() {
+            try {
+                localStorage.setItem('englishPlantGarden', JSON.stringify(appState));
+            } catch (e) {
+                console.error('保存数据失败:', e);
+            }
+        }
+
+        // 检查连续学习天数
+        function checkStreakDays() {
+            const today = new Date().toDateString();
+            const lastStudyDate = appState.learning.lastStudyDate;
+
+            if (today !== lastStudyDate) {
+                const yesterday = new Date();
+                yesterday.setDate(yesterday.getDate() - 1);
+                const yesterdayStr = yesterday.toDateString();
+
+                if (lastStudyDate === yesterdayStr) {
+                    // 连续学习
+                    appState.learning.streakDays++;
+                } else {
+                    // 中断学习，重置连续天数
+                    appState.learning.streakDays = 1;
+                }
+
+                appState.learning.lastStudyDate = today;
+                saveData();
+            }
+        }
 
         // 设置植物选择
         function setupPlantSelection() {
@@ -859,6 +1075,9 @@
                     appState.plant.type = selectedPlant;
                     document.getElementById('plantSelection').style.display = 'none';
                     document.getElementById('mainContainer').style.display = 'block';
+
+                    // 保存选择
+                    saveData();
 
                     // 初始化应用
                     initApp();
@@ -892,12 +1111,14 @@
         // 更新植物显示
         function updatePlantDisplay() {
             const plant = appState.plant;
-            const stem = document.getElementById('plantStem');
-            const flower = document.querySelector('.flower');
-            const face = document.getElementById('plantFace');
+            const plantDisplay = document.getElementById('plantDisplay');
 
-            // 根据植物类型设置不同的外观
-            updatePlantAppearance();
+            // 清除现有植物
+            plantDisplay.innerHTML = '';
+
+            // 创建植物
+            const plantElement = document.createElement('div');
+            plantElement.className = `cartoon-plant ${plant.mood} sway`;
 
             // 根据成长阶段设置茎的高度
             let stemHeight = 0;
@@ -906,53 +1127,61 @@
             if (plant.growthStage >= 4) stemHeight = 160;
             if (plant.growthStage >= 5) stemHeight = 200;
 
-            if (stem) stem.style.height = `${stemHeight}px`;
+            // 添加茎
+            const stem = document.createElement('div');
+            stem.className = 'cartoon-stem';
+            stem.style.height = `${stemHeight}px`;
+            plantElement.appendChild(stem);
+
+            // 根据植物类型设置不同的外观
+            updatePlantAppearance(plantElement, plant.type);
 
             // 添加叶子（根据成长阶段）
-            const plantContainer = document.querySelector('.plant');
-            // 清除现有叶子（除了装饰品）
-            document.querySelectorAll('.leaf').forEach(leaf => leaf.remove());
-
             if (plant.growthStage >= 2) {
-                // 添加叶子
                 for (let i = 0; i < plant.growthStage * 2; i++) {
                     const leaf = document.createElement('div');
-                    leaf.className = 'leaf';
-                    leaf.style.left = `${50 + (i % 2 === 0 ? -1 : 1) * 30}px`;
+                    leaf.className = 'cartoon-leaf';
+                    leaf.style.left = `${(i % 2 === 0 ? -1 : 1) * 30}px`;
                     leaf.style.top = `${-i * 20}px`;
-                    plantContainer.appendChild(leaf);
-                }
-
-                // 添加花朵（如果达到开花阶段）
-                if (plant.growthStage >= 5 && !document.querySelector('.flower')) {
-                    const flower = document.createElement('div');
-                    flower.className = 'flower';
-                    flower.innerHTML = `
-                        <div class="petal"></div>
-                        <div class="petal"></div>
-                        <div class="petal"></div>
-                        <div class="petal"></div>
-                        <div class="petal center"></div>
-                    `;
-                    plantContainer.appendChild(flower);
-                }
-
-                // 显示或隐藏花朵
-                if (plant.growthStage >= 5) {
-                    if (flower) flower.style.opacity = '1';
-                } else {
-                    if (flower) flower.style.opacity = '0';
+                    plantElement.appendChild(leaf);
                 }
             }
 
-            // 添加装饰品
-            document.querySelectorAll('.decoration').forEach(decoration => decoration.remove());
+            // 添加花朵（如果达到开花阶段）
+            if (plant.growthStage >= 5) {
+                const flower = document.createElement('div');
+                flower.className = 'flower';
+                flower.style.opacity = '1';
+                flower.innerHTML = `
+                    <div class="petal"></div>
+                    <div class="petal"></div>
+                    <div class="petal"></div>
+                    <div class="petal"></div>
+                    <div class="petal center"></div>
+                `;
+                plantElement.appendChild(flower);
+            }
 
+            // 添加面部
+            const face = document.createElement('div');
+            face.className = 'cartoon-face';
+            face.innerHTML = `
+                <div class="cartoon-eye left"></div>
+                <div class="cartoon-eye right"></div>
+                <div class="cartoon-mouth"></div>
+                <div class="blush left"></div>
+                <div class="blush right"></div>
+            `;
+            plantElement.appendChild(face);
+
+            // 添加装饰品
             plant.decorations.forEach(decoration => {
                 const decorElement = document.createElement('div');
                 decorElement.className = `decoration ${decoration}`;
-                document.querySelector('.plant').appendChild(decorElement);
+                plantElement.appendChild(decorElement);
             });
+
+            plantDisplay.appendChild(plantElement);
 
             // 更新植物等级显示
             document.getElementById('plantLevel').textContent = plant.growthStage;
@@ -968,21 +1197,23 @@
 
             // 添加动画效果
             if (plant.water > 70 && plant.sunlight > 70 && plant.fertilizer > 70) {
-                plantContainer.classList.add('bounce');
+                plantElement.classList.add('bounce');
                 setTimeout(() => {
-                    plantContainer.classList.remove('bounce');
+                    plantElement.classList.remove('bounce');
                 }, 500);
             }
+
+            // 更新植物心情
+            updatePlantMood();
         }
 
         // 根据植物类型更新外观
-        function updatePlantAppearance() {
-            const plant = appState.plant;
-            const stem = document.getElementById('plantStem');
-            const leaves = document.querySelectorAll('.leaf');
+        function updatePlantAppearance(plantElement, plantType) {
+            const stem = plantElement.querySelector('.cartoon-stem');
+            const leaves = plantElement.querySelectorAll('.cartoon-leaf');
 
             // 根据植物类型设置不同的颜色和形状
-            switch(plant.type) {
+            switch(plantType) {
                 case "cactus":
                     stem.style.background = "#7bcfa8";
                     stem.style.borderRadius = "10px";
@@ -1028,21 +1259,21 @@
         // 更新植物表情
         function updatePlantMood() {
             const plant = appState.plant;
-            const mouth = document.getElementById('plantMouth');
+            const plantElement = document.querySelector('.cartoon-plant');
 
+            if (!plantElement) return;
+
+            // 根据植物状态更新心情
             if (plant.water < 30 || plant.sunlight < 30 || plant.fertilizer < 30) {
-                // 不开心
-                mouth.style.borderBottom = '3px solid #333';
-                mouth.style.borderRadius = '10px 10px 0 0';
+                plant.mood = "sad";
             } else if (plant.water > 70 && plant.sunlight > 70 && plant.fertilizer > 70) {
-                // 很开心
-                mouth.style.borderBottom = '3px solid #333';
-                mouth.style.borderRadius = '0 0 10px 10px';
+                plant.mood = "excited";
             } else {
-                // 中性
-                mouth.style.borderBottom = '3px solid #333';
-                mouth.style.borderRadius = '0 0 10px 10px';
+                plant.mood = "happy";
             }
+
+            // 更新植物类名
+            plantElement.className = `cartoon-plant ${plant.mood} sway`;
         }
 
         // 更新资源显示
@@ -1138,9 +1369,9 @@
                 appState.resources.fertilizer += 1;
 
                 // 植物开心动画
-                document.querySelector('.plant').classList.add('wiggle');
+                document.querySelector('.cartoon-plant').classList.add('wiggle');
                 setTimeout(() => {
-                    document.querySelector('.plant').classList.remove('wiggle');
+                    document.querySelector('.cartoon-plant').classList.remove('wiggle');
                 }, 500);
 
                 showRewardNotification("回答正确！获得资源奖励！", "success");
@@ -1151,6 +1382,9 @@
                 document.getElementById('currentTranslation').style.display = 'block';
                 document.getElementById('currentExample').style.display = 'block';
                 document.getElementById('revealBtn').style.display = 'none';
+
+                // 保存数据
+                saveData();
             } else {
                 showRewardNotification(`回答错误，正确答案是: ${correct}`, "error");
                 if (correctOption) {
@@ -1194,6 +1428,7 @@
                 updatePlantDisplay();
                 updateResourceDisplay();
                 showRewardNotification("植物喝饱了水！", "success");
+                saveData();
             } else {
                 showRewardNotification("水分不足，学习更多单词来获取！", "error");
             }
@@ -1207,6 +1442,7 @@
                 updatePlantDisplay();
                 updateResourceDisplay();
                 showRewardNotification("植物享受了阳光！", "success");
+                saveData();
             } else {
                 showRewardNotification("阳光不足，学习更多单词来获取！", "error");
             }
@@ -1220,6 +1456,7 @@
                 updatePlantDisplay();
                 updateResourceDisplay();
                 showRewardNotification("植物获得了营养！", "success");
+                saveData();
             } else {
                 showRewardNotification("肥料不足，学习更多单词来获取！", "error");
             }
@@ -1232,6 +1469,7 @@
             appState.plant.fertilizer = Math.max(0, appState.plant.fertilizer - 2);
 
             updatePlantDisplay();
+            saveData();
 
             // 如果资源过低，显示警告
             if (appState.plant.water < 20) {
@@ -1255,6 +1493,7 @@
                     showRewardNotification(`恭喜！植物升级到第${plant.growthStage}阶段！`, "success");
                     updatePlantDisplay();
                     updateStatsDisplay();
+                    saveData();
                 }
             }
 
@@ -1266,6 +1505,7 @@
                     showRewardNotification(`警告！植物降级到第${plant.growthStage}阶段！`, "error");
                     updatePlantDisplay();
                     updateStatsDisplay();
+                    saveData();
                 }
             }
         }
@@ -1331,6 +1571,7 @@
                 updateResourceDisplay();
                 updatePlantDisplay();
                 setupShop();
+                saveData();
 
                 showRewardNotification(`成功购买${item.name}！`, "success");
             } else {
