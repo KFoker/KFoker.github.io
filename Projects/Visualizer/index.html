@@ -5,7 +5,35 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Project Timeline Visualizer | 项目时间线可视化</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/vue@3.2.45/dist/vue.global.prod.js"></script>
+    <!-- Vue.js CDN - 多个备用源 -->
+    <script src="https://cdn.jsdelivr.net/npm/vue@3.2.45/dist/vue.global.prod.js"
+            onerror="loadVueFallback1()"></script>
+    <script>
+        // 备用CDN加载函数
+        function loadVueFallback1() {
+            console.warn('主CDN加载失败，尝试备用CDN1...');
+            const script = document.createElement('script');
+            script.src = 'https://unpkg.com/vue@3.2.45/dist/vue.global.prod.js';
+            script.onerror = loadVueFallback2;
+            script.onload = function() {
+                console.log('✓ 备用CDN1加载成功');
+            };
+            document.head.appendChild(script);
+        }
+
+        function loadVueFallback2() {
+            console.warn('备用CDN1也失败，尝试备用CDN2...');
+            const script = document.createElement('script');
+            script.src = 'https://cdn.bootcdn.net/ajax/libs/vue/3.2.45/vue.global.prod.min.js';
+            script.onerror = function() {
+                console.error('所有CDN都加载失败！');
+            };
+            script.onload = function() {
+                console.log('✓ 备用CDN2加载成功');
+            };
+            document.head.appendChild(script);
+        }
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/apexcharts@3.36.3/dist/apexcharts.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/apexcharts@3.36.3/dist/apexcharts.css">
@@ -2008,16 +2036,49 @@
     </div>
 
     <script>
-        // 检查Vue是否加载
-        if (typeof Vue === 'undefined') {
-            console.error('Vue未加载！请检查CDN链接');
-            alert('Vue.js未加载，请检查网络连接');
+        // 检查Vue是否加载 - 等待一段时间让备用CDN加载
+        function checkVueLoaded(retries = 0) {
+            if (typeof Vue === 'undefined') {
+                if (retries < 10) {
+                    console.log(`等待Vue加载... (${retries + 1}/10)`);
+                    setTimeout(() => checkVueLoaded(retries + 1), 500);
+                } else {
+                    console.error('Vue未加载！请检查CDN链接');
+                    document.body.innerHTML = `
+                        <div style="display: flex; justify-content: center; align-items: center; height: 100vh; flex-direction: column; gap: 20px; padding: 20px; text-align: center;">
+                            <h1 style="color: #f94144;">⚠️ Vue.js加载失败</h1>
+                            <p style="font-size: 16px; color: #666;">无法加载Vue.js框架，可能的原因：</p>
+                            <ul style="text-align: left; max-width: 500px; color: #666;">
+                                <li>网络连接问题</li>
+                                <li>CDN服务不可用</li>
+                                <li>防火墙或代理设置阻止</li>
+                            </ul>
+                            <p style="color: #666;">建议：</p>
+                            <ul style="text-align: left; max-width: 500px; color: #666;">
+                                <li>检查网络连接</li>
+                                <li>刷新页面重试</li>
+                                <li>使用VPN或更换网络</li>
+                                <li>联系网站管理员</li>
+                            </ul>
+                            <button onclick="location.reload()" style="padding: 10px 20px; background: #4361ee; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 16px;">
+                                刷新页面
+                            </button>
+                        </div>
+                    `;
+                }
+                return;
+            }
+            console.log('✓ Vue.js已成功加载');
+            initializeApp();
         }
 
-        const { createApp } = Vue;
+        // 延迟初始化应用
+        function initializeApp() {
 
-        // 示例数据
-        const sampleProjects = [
+            const { createApp } = Vue;
+
+            // 示例数据
+            const sampleProjects = [
             {
                 id: 1,
                 name: "网站重构项目",
@@ -3273,63 +3334,67 @@
                     }
                 }
             }
-        });
+            });
 
-        // 确保Vue正确挂载
-        try {
-            const app = VueApp.mount('#app');
+            // 确保Vue正确挂载
+            try {
+                const app = VueApp.mount('#app');
 
-            // 添加全局调试
-            window.app = app;
-            window.VueApp = VueApp;
-            console.log('Vue应用已挂载', app);
-            console.log('Vue实例方法:', Object.keys(app));
-            console.log('showProjectModal方法:', typeof app.showProjectModal);
-            console.log('showTaskModal方法:', typeof app.showTaskModal);
-            console.log('isProjectModalVisible属性:', typeof app.isProjectModalVisible);
-            console.log('isTaskModalVisible属性:', typeof app.isTaskModalVisible);
+                // 添加全局调试
+                window.app = app;
+                window.VueApp = VueApp;
+                console.log('Vue应用已挂载', app);
+                console.log('Vue实例方法:', Object.keys(app));
+                console.log('showProjectModal方法:', typeof app.showProjectModal);
+                console.log('showTaskModal方法:', typeof app.showTaskModal);
+                console.log('isProjectModalVisible属性:', typeof app.isProjectModalVisible);
+                console.log('isTaskModalVisible属性:', typeof app.isTaskModalVisible);
 
-            // 测试方法是否可访问
-            if (typeof app.showProjectModal === 'function') {
-                console.log('✓ showProjectModal方法存在');
-            } else {
-                console.error('✗ showProjectModal方法不存在！');
-            }
-
-            if (typeof app.showTaskModal === 'function') {
-                console.log('✓ showTaskModal方法存在');
-            } else {
-                console.error('✗ showTaskModal方法不存在！');
-            }
-
-            // 添加测试按钮事件监听
-            setTimeout(() => {
-                const newProjectBtn = document.querySelector('[title="创建新项目"]');
-                const addTaskBtn = document.querySelector('[title="添加新任务"]');
-
-                if (newProjectBtn) {
-                    console.log('找到新建项目按钮');
-                    newProjectBtn.addEventListener('click', function(e) {
-                        console.log('新建项目按钮被点击（原生事件）');
-                    });
+                // 测试方法是否可访问
+                if (typeof app.showProjectModal === 'function') {
+                    console.log('✓ showProjectModal方法存在');
                 } else {
-                    console.error('未找到新建项目按钮！');
+                    console.error('✗ showProjectModal方法不存在！');
                 }
 
-                if (addTaskBtn) {
-                    console.log('找到添加任务按钮');
-                    addTaskBtn.addEventListener('click', function(e) {
-                        console.log('添加任务按钮被点击（原生事件）');
-                    });
+                if (typeof app.showTaskModal === 'function') {
+                    console.log('✓ showTaskModal方法存在');
                 } else {
-                    console.error('未找到添加任务按钮！');
+                    console.error('✗ showTaskModal方法不存在！');
                 }
-            }, 1000);
 
-        } catch (error) {
-            console.error('Vue挂载失败:', error);
-            alert('Vue应用挂载失败: ' + error.message);
+                // 添加测试按钮事件监听
+                setTimeout(() => {
+                    const newProjectBtn = document.querySelector('[title="创建新项目"]');
+                    const addTaskBtn = document.querySelector('[title="添加新任务"]');
+
+                    if (newProjectBtn) {
+                        console.log('找到新建项目按钮');
+                        newProjectBtn.addEventListener('click', function(e) {
+                            console.log('新建项目按钮被点击（原生事件）');
+                        });
+                    } else {
+                        console.error('未找到新建项目按钮！');
+                    }
+
+                    if (addTaskBtn) {
+                        console.log('找到添加任务按钮');
+                        addTaskBtn.addEventListener('click', function(e) {
+                            console.log('添加任务按钮被点击（原生事件）');
+                        });
+                    } else {
+                        console.error('未找到添加任务按钮！');
+                    }
+                }, 1000);
+
+            } catch (error) {
+                console.error('Vue挂载失败:', error);
+                alert('Vue应用挂载失败: ' + error.message);
+            }
         }
+
+        // 开始检查Vue是否加载
+        checkVueLoaded();
     </script>
 </body>
 </html>
