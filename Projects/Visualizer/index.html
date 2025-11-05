@@ -3,19 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Project Timeline Visualizer | 专业项目时间线可视化工具</title>
+    <title>Project Timeline Visualizer | 项目时间线可视化</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/vue@3.2.45/dist/vue.global.prod.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/apexcharts@3.36.3/dist/apexcharts.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/apexcharts@3.36.3/dist/apexcharts.css">
     <style>
         :root {
             --primary: #4361ee;
-            --primary-light: #4895ef;
             --secondary: #3f37c9;
             --success: #4cc9f0;
-            --warning: #f8961e;
+            --warning: #f72585;
             --danger: #f94144;
             --light: #f8f9fa;
             --dark: #212529;
@@ -24,7 +23,6 @@
             --card-bg: #ffffff;
             --border-color: #e1e5eb;
             --shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-            --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
         }
 
         * {
@@ -38,13 +36,14 @@
             background-color: var(--bg-color);
             color: var(--dark);
             line-height: 1.6;
-            overflow-x: hidden;
         }
 
         .app-container {
             display: flex;
             flex-direction: column;
             min-height: 100vh;
+            position: relative;
+            isolation: isolate;
         }
 
         /* 头部样式 */
@@ -52,16 +51,19 @@
             background: linear-gradient(135deg, var(--primary), var(--secondary));
             color: white;
             padding: 1rem 2rem;
-            box-shadow: var(--shadow-lg);
+            box-shadow: var(--shadow);
             z-index: 100;
             position: relative;
+            isolation: isolate;
+            flex-shrink: 0;
+            height: 70px;
         }
 
         .header-content {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            max-width: 1800px;
+            max-width: 1400px;
             margin: 0 auto;
         }
 
@@ -88,7 +90,6 @@
             display: flex;
             align-items: center;
             gap: 0.5rem;
-            backdrop-filter: blur(10px);
         }
 
         .health-score.good {
@@ -103,33 +104,44 @@
         .main-content {
             display: flex;
             flex: 1;
-            max-width: 1800px;
+            max-width: 100%;
             margin: 0 auto;
             width: 100%;
-            padding: 1.5rem;
-            gap: 1.5rem;
+            padding: 1rem;
+            gap: 1rem;
+            position: relative;
+            isolation: isolate;
+            height: calc(100vh - 70px);
+            overflow: hidden;
         }
 
         /* 侧边栏 */
         .sidebar {
-            width: 300px;
+            width: 280px;
+            min-width: 280px;
+            max-width: 280px;
             display: flex;
             flex-direction: column;
-            gap: 1.5rem;
-            flex-shrink: 0;
+            gap: 1rem;
+            position: relative;
+            isolation: isolate;
+            overflow-y: auto;
+            height: 100%;
         }
 
         .card {
             background: var(--card-bg);
             border-radius: 12px;
-            box-shadow: var(--shadow);
-            padding: 1.5rem;
-            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            padding: 1rem;
+            position: relative;
+            isolation: isolate;
+            transition: box-shadow 0.3s ease, transform 0.2s ease;
         }
 
         .card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
             transform: translateY(-2px);
-            box-shadow: var(--shadow-lg);
         }
 
         .card h2 {
@@ -139,8 +151,6 @@
             display: flex;
             align-items: center;
             gap: 0.5rem;
-            padding-bottom: 0.5rem;
-            border-bottom: 1px solid var(--border-color);
         }
 
         .card h2 i {
@@ -192,20 +202,25 @@
 
         .project-item {
             padding: 0.75rem;
-            border-radius: 8px;
+            border-radius: 10px;
             border-left: 4px solid var(--primary);
             background: #f8f9ff;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.3s ease;
+            position: relative;
+            isolation: isolate;
         }
 
         .project-item:hover {
             background: #eef2ff;
+            transform: translateX(4px);
+            box-shadow: 0 2px 8px rgba(67, 97, 238, 0.15);
         }
 
         .project-item.active {
-            background: #e6eeff;
+            background: linear-gradient(135deg, #e6eeff, #f0f4ff);
             border-left-color: var(--secondary);
+            box-shadow: 0 2px 8px rgba(67, 97, 238, 0.2);
         }
 
         .project-name {
@@ -232,11 +247,6 @@
             padding: 0.75rem;
             border-radius: 8px;
             background: #f8f9fa;
-            transition: transform 0.2s;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-2px);
         }
 
         .stat-value {
@@ -255,8 +265,12 @@
             flex: 1;
             display: flex;
             flex-direction: column;
-            gap: 1.5rem;
-            min-width: 0; /* 防止flex元素溢出 */
+            gap: 1rem;
+            position: relative;
+            isolation: isolate;
+            min-width: 0;
+            overflow: hidden;
+            height: 100%;
         }
 
         /* 工具栏 */
@@ -264,10 +278,8 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: var(--card-bg);
-            padding: 1rem 1.5rem;
-            border-radius: 12px;
-            box-shadow: var(--shadow);
+            flex-shrink: 0;
+            padding: 0.75rem 1rem;
         }
 
         .toolbar-actions {
@@ -277,14 +289,20 @@
 
         .btn {
             padding: 0.6rem 1rem;
-            border-radius: 6px;
+            border-radius: 8px;
             border: none;
             font-weight: 500;
             cursor: pointer;
             display: flex;
             align-items: center;
             gap: 0.5rem;
-            transition: all 0.2s;
+            transition: all 0.2s ease;
+            position: relative;
+            isolation: isolate;
+        }
+
+        .btn:active {
+            transform: scale(0.98);
         }
 
         .btn-primary {
@@ -306,55 +324,50 @@
             background: #f8f9fa;
         }
 
-        .btn-success {
-            background: var(--success);
-            color: white;
-        }
-
-        .btn-success:hover {
-            background: #3aa8d0;
-        }
-
         /* 视图容器 */
         .view-container {
             flex: 1;
             background: var(--card-bg);
             border-radius: 12px;
-            box-shadow: var(--shadow);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
             overflow: hidden;
             display: flex;
             flex-direction: column;
+            position: relative;
+            isolation: isolate;
+            min-height: 0;
+            height: 100%;
         }
 
         .view-header {
-            padding: 1.25rem 1.5rem;
+            padding: 1.25rem;
             border-bottom: 1px solid var(--border-color);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: #f8f9fa;
         }
 
         .view-content {
             flex: 1;
-            padding: 1.5rem;
+            padding: 1rem;
             overflow: auto;
+            min-height: 0;
         }
 
         /* 甘特图样式 */
         .gantt-container {
             width: 100%;
-            height: 500px;
+            height: 100%;
+            min-height: 400px;
             overflow: auto;
         }
 
         .gantt-grid {
             display: grid;
-            grid-template-columns: 300px 1fr;
+            grid-template-columns: 250px 1fr;
             border: 1px solid var(--border-color);
             border-radius: 8px;
             overflow: hidden;
-            min-width: 800px;
         }
 
         .gantt-sidebar {
@@ -367,9 +380,6 @@
             font-weight: 600;
             background: #e9ecef;
             border-bottom: 1px solid var(--border-color);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
         }
 
         .gantt-task-list {
@@ -383,11 +393,6 @@
             display: flex;
             align-items: center;
             gap: 0.5rem;
-            transition: background 0.2s;
-        }
-
-        .gantt-task-item:hover {
-            background: #e9ecef;
         }
 
         .gantt-task-item:last-child {
@@ -403,14 +408,12 @@
         .gantt-chart-area {
             position: relative;
             overflow: auto;
-            min-width: 600px;
         }
 
         .gantt-timeline {
             display: flex;
             height: 40px;
             border-bottom: 1px solid var(--border-color);
-            min-width: 100%;
         }
 
         .gantt-time-unit {
@@ -421,7 +424,6 @@
             border-right: 1px solid var(--border-color);
             font-size: 0.8rem;
             font-weight: 500;
-            min-width: 80px;
         }
 
         .gantt-time-unit:last-child {
@@ -431,7 +433,6 @@
         .gantt-bars {
             position: relative;
             height: calc(100% - 40px);
-            min-width: 100%;
         }
 
         .gantt-bar {
@@ -446,7 +447,6 @@
             font-weight: 500;
             cursor: pointer;
             transition: all 0.2s;
-            z-index: 2;
         }
 
         .gantt-bar:hover {
@@ -464,29 +464,14 @@
             border-radius: 4px;
         }
 
-        .gantt-dependency {
-            position: absolute;
-            height: 2px;
-            background: var(--dark);
-            z-index: 1;
-        }
-
-        .gantt-dependency-arrow {
-            position: absolute;
-            width: 0;
-            height: 0;
-            border-left: 5px solid transparent;
-            border-right: 5px solid transparent;
-            border-top: 5px solid var(--dark);
-        }
-
         /* 看板样式 */
         .kanban-container {
             display: flex;
             gap: 1rem;
-            height: 500px;
+            height: 100%;
+            min-height: 400px;
             overflow-x: auto;
-            padding-bottom: 1rem;
+            overflow-y: hidden;
         }
 
         .kanban-column {
@@ -543,6 +528,11 @@
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
 
+        .kanban-task.selected {
+            border: 2px solid var(--primary);
+            background: #e6eeff;
+        }
+
         .kanban-task-title {
             font-weight: 600;
             margin-bottom: 0.5rem;
@@ -557,7 +547,8 @@
 
         /* 日历视图 */
         .calendar-container {
-            height: 500px;
+            height: 100%;
+            min-height: 400px;
             overflow: auto;
         }
 
@@ -591,7 +582,7 @@
 
         .calendar-day {
             background: white;
-            min-height: 120px;
+            min-height: 100px;
             padding: 0.5rem;
             display: flex;
             flex-direction: column;
@@ -615,14 +606,12 @@
             border-radius: 4px;
             font-size: 0.75rem;
             cursor: pointer;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
         }
 
         /* 资源视图 */
         .resource-container {
-            height: 500px;
+            height: 100%;
+            min-height: 400px;
             overflow: auto;
         }
 
@@ -644,11 +633,6 @@
             padding: 1rem;
             background: #f8f9fa;
             border-radius: 8px;
-            transition: transform 0.2s;
-        }
-
-        .resource-item:hover {
-            transform: translateY(-2px);
         }
 
         .resource-avatar {
@@ -701,11 +685,16 @@
 
         /* 详情面板 */
         .detail-panel {
-            width: 350px;
+            width: 320px;
+            min-width: 320px;
+            max-width: 320px;
             display: flex;
             flex-direction: column;
-            gap: 1.5rem;
-            flex-shrink: 0;
+            gap: 1rem;
+            position: relative;
+            isolation: isolate;
+            overflow-y: auto;
+            height: 100%;
         }
 
         .task-detail {
@@ -723,8 +712,6 @@
         .task-title {
             font-size: 1.25rem;
             font-weight: 600;
-            flex: 1;
-            margin-right: 1rem;
         }
 
         .task-priority {
@@ -732,7 +719,6 @@
             border-radius: 4px;
             font-size: 0.75rem;
             font-weight: 600;
-            white-space: nowrap;
         }
 
         .priority-high {
@@ -780,7 +766,6 @@
             height: 100%;
             background: var(--success);
             border-radius: 4px;
-            transition: width 0.3s;
         }
 
         .task-dependencies {
@@ -796,11 +781,6 @@
             padding: 0.5rem;
             background: #f8f9fa;
             border-radius: 4px;
-            cursor: pointer;
-        }
-
-        .dependency-item:hover {
-            background: #e9ecef;
         }
 
         .dependency-status {
@@ -828,89 +808,342 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
             display: flex;
             align-items: center;
             justify-content: center;
             z-index: 1000;
-            padding: 1rem;
+            animation: fadeIn 0.2s;
+            isolation: isolate;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
 
         .modal {
             background: white;
-            border-radius: 12px;
-            box-shadow: var(--shadow-lg);
-            width: 100%;
-            max-width: 600px;
+            border-radius: 16px;
+            padding: 2rem;
+            width: 90%;
+            max-width: 500px;
             max-height: 90vh;
-            overflow: auto;
+            overflow-y: auto;
+            animation: slideUp 0.3s;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            position: relative;
+            isolation: isolate;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
         }
 
         .modal-header {
-            padding: 1.5rem;
-            border-bottom: 1px solid var(--border-color);
             display: flex;
             justify-content: space-between;
             align-items: center;
+            margin-bottom: 1.5rem;
         }
 
-        .modal-body {
-            padding: 1.5rem;
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--gray);
+            padding: 0.5rem;
+            line-height: 1;
+        }
+
+        .modal-close:hover {
+            color: var(--dark);
         }
 
         .form-group {
-            margin-bottom: 1.5rem;
+            margin-bottom: 1.25rem;
         }
 
         .form-label {
             display: block;
             margin-bottom: 0.5rem;
             font-weight: 500;
+            color: var(--dark);
         }
 
-        .form-control {
+        .form-input,
+        .form-select,
+        .form-textarea {
             width: 100%;
             padding: 0.75rem;
             border: 1px solid var(--border-color);
             border-radius: 6px;
             font-size: 1rem;
+            transition: border-color 0.2s;
         }
 
-        .form-control:focus {
+        .form-input:focus,
+        .form-select:focus,
+        .form-textarea:focus {
             outline: none;
             border-color: var(--primary);
         }
 
-        .form-actions {
-            display: flex;
-            justify-content: flex-end;
-            gap: 0.75rem;
-            margin-top: 2rem;
+        .form-textarea {
+            resize: vertical;
+            min-height: 80px;
         }
 
-        /* 关键路径高亮 */
-        .critical-path {
-            border: 2px dashed var(--danger);
+        .form-actions {
+            display: flex;
+            gap: 0.75rem;
+            justify-content: flex-end;
+            margin-top: 1.5rem;
+        }
+
+        /* 空状态 */
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: var(--gray);
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .empty-state p {
+            font-size: 1rem;
+        }
+
+        /* 加载状态 */
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid var(--border-color);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* 通知提示 */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            z-index: 2000;
+            animation: slideInRight 0.3s;
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .toast.success {
+            border-left: 4px solid var(--success);
+        }
+
+        .toast.error {
+            border-left: 4px solid var(--danger);
+        }
+
+        .toast.info {
+            border-left: 4px solid var(--primary);
+        }
+
+        /* 甘特图优化 */
+        .gantt-time-unit {
+            min-width: 60px;
+        }
+
+        /* 可拖拽任务样式 */
+        .kanban-task.dragging {
+            opacity: 0.5;
+        }
+
+        .kanban-column.drag-over {
+            background: #e6eeff;
+        }
+
+        /* 风险列表样式 */
+        .risk-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .risk-item {
+            padding: 0.75rem;
+            background: #f8f9fa;
+            border-radius: 6px;
+            border-left: 3px solid var(--gray);
+        }
+
+        .risk-item.high {
+            border-left-color: var(--danger);
+        }
+
+        .risk-item.medium {
+            border-left-color: var(--warning);
+        }
+
+        .risk-item.low {
+            border-left-color: var(--success);
+        }
+
+        .risk-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .risk-description {
+            font-size: 0.875rem;
+            color: var(--gray);
+        }
+
+        /* 深色主题 */
+        [data-theme="dark"] {
+            --bg-color: #1a1a1a;
+            --card-bg: #2d2d2d;
+            --dark: #ffffff;
+            --light: #3a3a3a;
+            --border-color: #404040;
+            --gray: #999999;
+        }
+
+        [data-theme="dark"] body {
+            background-color: var(--bg-color);
+            color: var(--dark);
+        }
+
+        [data-theme="dark"] .card {
+            background: var(--card-bg);
+            color: var(--dark);
+        }
+
+        [data-theme="dark"] .gantt-sidebar {
+            background: #252525;
+        }
+
+        [data-theme="dark"] .gantt-header {
+            background: #333333;
+        }
+
+        [data-theme="dark"] .kanban-column {
+            background: #252525;
+        }
+
+        [data-theme="dark"] .kanban-task {
+            background: var(--card-bg);
+        }
+
+        [data-theme="dark"] .calendar-day {
+            background: var(--card-bg);
+        }
+
+        [data-theme="dark"] .calendar-day.other-month {
+            background: #252525;
+        }
+
+        /* 设置面板 */
+        .settings-panel {
+            position: fixed;
+            top: 0;
+            right: -400px;
+            width: 400px;
+            height: 100vh;
+            background: var(--card-bg);
+            box-shadow: -4px 0 20px rgba(0,0,0,0.15);
+            transition: right 0.3s ease;
+            z-index: 999;
+            overflow-y: auto;
+            padding: 2rem;
+            isolation: isolate;
+        }
+
+        .settings-panel.active {
+            right: 0;
+        }
+
+        .settings-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.4);
+            backdrop-filter: blur(2px);
+            z-index: 998;
+            display: none;
+            isolation: isolate;
+        }
+
+        .settings-overlay.active {
+            display: block;
         }
 
         /* 响应式设计 */
-        @media (max-width: 1400px) {
+        @media (max-width: 1200px) {
             .main-content {
                 flex-direction: column;
             }
-            
+
             .sidebar, .detail-panel {
                 width: 100%;
             }
-            
+
             .sidebar {
                 order: 2;
             }
-            
+
             .content-area {
                 order: 1;
             }
-            
+
             .detail-panel {
                 order: 3;
             }
@@ -922,67 +1155,33 @@
                 gap: 1rem;
                 align-items: flex-start;
             }
-            
+
             .toolbar {
                 flex-direction: column;
                 gap: 1rem;
                 align-items: flex-start;
             }
-            
+
             .gantt-grid {
                 grid-template-columns: 1fr;
             }
-            
+
             .gantt-sidebar {
                 display: none;
             }
-            
+
             .kanban-container {
                 flex-direction: column;
                 height: auto;
             }
-            
+
             .calendar-grid {
                 grid-template-columns: 1fr;
             }
-            
+
             .calendar-day-header {
                 display: none;
             }
-            
-            .modal {
-                margin: 1rem;
-            }
-        }
-
-        /* 动画效果 */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .fade-in {
-            animation: fadeIn 0.3s ease-out;
-        }
-
-        /* 滚动条样式 */
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 4px;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: #c1c1c1;
-            border-radius: 4px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: #a8a8a8;
         }
     </style>
 </head>
@@ -1009,10 +1208,10 @@
                 <div class="card">
                     <h2><i class="fas fa-th"></i> 视图切换</h2>
                     <div class="view-switcher">
-                        <button 
-                            v-for="view in views" 
+                        <button
+                            v-for="view in views"
                             :key="view.id"
-                            class="view-btn" 
+                            class="view-btn"
                             :class="{ active: currentView === view.id }"
                             @click="switchView(view.id)"
                         >
@@ -1023,25 +1222,39 @@
                 </div>
 
                 <div class="card">
-                    <h2><i class="fas fa-folder-open"></i> 项目列表</h2>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <h2 style="margin: 0;"><i class="fas fa-folder-open"></i> 项目列表</h2>
+                        <button class="btn btn-primary" @click="showProjectModal()" style="padding: 0.4rem 0.75rem; font-size: 0.875rem;">
+                            <i class="fas fa-plus"></i> 新建
+                        </button>
+                    </div>
                     <div class="project-list">
-                        <div 
-                            v-for="project in projects" 
+                        <div
+                            v-for="project in projects"
                             :key="project.id"
-                            class="project-item" 
-                            :class="{ active: currentProject.id === project.id }"
+                            class="project-item"
+                            :class="{ active: currentProject?.id === project.id }"
                             @click="selectProject(project)"
                         >
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                                <div style="flex: 1;">
                             <div class="project-name">{{ project.name }}</div>
                             <div class="project-meta">
                                 <span>{{ project.tasks.length }} 个任务</span>
                                 <span>{{ formatDate(project.startDate) }}</span>
+                                    </div>
+                                </div>
+                                <div style="display: flex; gap: 0.25rem;">
+                                    <button class="btn btn-outline" @click.stop="showProjectModal(project)" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-outline" @click.stop="deleteProject(project)" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; color: var(--danger);">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <button class="btn btn-outline" style="margin-top: 1rem; width: 100%;" @click="showProjectModal = true">
-                        <i class="fas fa-plus"></i> 新建项目
-                    </button>
                 </div>
 
                 <div class="card">
@@ -1065,49 +1278,98 @@
                         </div>
                     </div>
                 </div>
-
-                <div class="card">
-                    <h2><i class="fas fa-cogs"></i> 项目设置</h2>
-                    <div class="form-group">
-                        <label class="form-label">显示关键路径</label>
-                        <div style="display: flex; align-items: center; gap: 0.5rem;">
-                            <input type="checkbox" v-model="showCriticalPath" id="criticalPath">
-                            <label for="criticalPath">{{ showCriticalPath ? '显示中' : '已隐藏' }}</label>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">时间单位</label>
-                        <select class="form-control" v-model="timeUnit">
-                            <option value="day">天</option>
-                            <option value="week">周</option>
-                            <option value="month">月</option>
-                        </select>
-                    </div>
-                </div>
             </div>
 
             <!-- 内容区域 -->
             <div class="content-area">
                 <div class="toolbar">
-                    <h2>{{ currentProject.name }} - {{ currentViewName }}</h2>
+                    <h2>{{ currentProject?.name || '请选择项目' }} - {{ currentViewName }}</h2>
                     <div class="toolbar-actions">
-                        <button class="btn btn-outline" @click="exportToPDF">
-                            <i class="fas fa-file-pdf"></i> 导出PDF
+                        <button class="btn btn-outline" @click="showSettings = !showSettings" title="设置">
+                            <i class="fas fa-cog"></i>
                         </button>
-                        <button class="btn btn-outline" @click="exportToImage">
-                            <i class="fas fa-image"></i> 导出图片
+                        <button class="btn btn-outline" @click="toggleTheme" :title="theme === 'light' ? '切换到深色模式' : '切换到浅色模式'">
+                            <i :class="theme === 'light' ? 'fas fa-moon' : 'fas fa-sun'"></i>
                         </button>
-                        <button class="btn btn-success" @click="showTaskModal = true">
+                        <button class="btn btn-outline" @click="exportData">
+                            <i class="fas fa-download"></i> 导出
+                        </button>
+                        <button class="btn btn-outline" @click="shareProject">
+                            <i class="fas fa-share"></i> 分享
+                        </button>
+                        <button class="btn btn-primary" @click="showTaskModal()" v-if="currentProject">
                             <i class="fas fa-plus"></i> 添加任务
                         </button>
                     </div>
                 </div>
 
-                <div class="view-container fade-in">
+                <!-- 搜索和筛选栏 -->
+                <div v-if="currentProject" class="card" style="padding: 0.75rem 1rem; flex-shrink: 0;">
+                    <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center;">
+                        <div style="flex: 1; min-width: 200px;">
+                            <input
+                                type="text"
+                                class="form-input search-input"
+                                v-model="searchQuery"
+                                placeholder="搜索任务..."
+                                style="width: 100%;"
+                            >
+                        </div>
+                        <select class="form-select" v-model="filterStatus" style="width: 120px;">
+                            <option value="all">全部状态</option>
+                            <option value="not-started">未开始</option>
+                            <option value="in-progress">进行中</option>
+                            <option value="completed">已完成</option>
+                        </select>
+                        <select class="form-select" v-model="filterPriority" style="width: 120px;">
+                            <option value="all">全部优先级</option>
+                            <option value="high">高优先级</option>
+                            <option value="medium">中优先级</option>
+                            <option value="low">低优先级</option>
+                        </select>
+                        <select class="form-select" v-model="filterAssignee" style="width: 120px;">
+                            <option value="all">全部负责人</option>
+                            <option v-for="member in teamMembers" :key="member.id" :value="member.name">
+                                {{ member.name }}
+                            </option>
+                        </select>
+                        <button class="btn btn-outline" @click="clearFilters" v-if="searchQuery || filterStatus !== 'all' || filterPriority !== 'all' || filterAssignee !== 'all'">
+                            <i class="fas fa-times"></i> 清除
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 批量操作栏 -->
+                <div v-if="showBulkActions && selectedTasks.length > 0" class="card" style="padding: 0.75rem 1rem; background: #e6eeff; border-left: 4px solid var(--primary); flex-shrink: 0;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <strong>已选择 {{ selectedTasks.length }} 个任务</strong>
+                        </div>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <button class="btn btn-outline" @click="bulkUpdateStatus('not-started')">
+                                设为未开始
+                            </button>
+                            <button class="btn btn-outline" @click="bulkUpdateStatus('in-progress')">
+                                设为进行中
+                            </button>
+                            <button class="btn btn-outline" @click="bulkUpdateStatus('completed')">
+                                设为已完成
+                            </button>
+                            <button class="btn btn-outline" @click="bulkDeleteTasks()" style="color: var(--danger);">
+                                <i class="fas fa-trash"></i> 删除
+                            </button>
+                            <button class="btn btn-outline" @click="selectedTasks = []; showBulkActions = false;">
+                                取消选择
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="view-container">
                     <div class="view-header">
                         <h3>{{ currentViewName }}视图</h3>
                         <div class="view-actions">
-                            <button class="btn btn-outline" v-if="currentView === 'gantt'" @click="toggleFullscreen">
+                            <button class="btn btn-outline" v-if="currentView === 'gantt'">
                                 <i class="fas fa-expand"></i> 全屏
                             </button>
                             <button class="btn btn-outline" v-if="currentView === 'calendar'">
@@ -1119,64 +1381,37 @@
                     <div class="view-content">
                         <!-- 甘特图视图 -->
                         <div v-if="currentView === 'gantt'" class="gantt-container">
-                            <div class="gantt-grid">
+                            <div v-if="currentProject.tasks.length === 0" class="empty-state">
+                                <i class="fas fa-tasks"></i>
+                                <p>当前项目没有任务，请添加任务</p>
+                            </div>
+                            <div v-else class="gantt-grid">
                                 <div class="gantt-sidebar">
-                                    <div class="gantt-header">
-                                        <span>任务</span>
-                                        <span>负责人</span>
-                                    </div>
+                                    <div class="gantt-header">任务</div>
                                     <div class="gantt-task-list">
-                                        <div 
-                                            v-for="task in currentProject.tasks" 
-                                            :key="task.id" 
-                                            class="gantt-task-item"
-                                            :class="{ 'critical-path': isCriticalTask(task.id) }"
-                                        >
+                                        <div v-for="task in filteredTasks" :key="task.id" class="gantt-task-item">
                                             <div class="task-color" :style="{ backgroundColor: getPriorityColor(task.priority) }"></div>
                                             <span>{{ task.name }}</span>
-                                            <span style="margin-left: auto; font-size: 0.8rem; color: var(--gray);">{{ task.assignee }}</span>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="gantt-chart-area">
                                     <div class="gantt-timeline">
-                                        <div v-for="day in timelineDays" :key="day" class="gantt-time-unit">
+                                        <div v-for="(day, index) in timelineDays" :key="day.getTime() || index" class="gantt-time-unit">
                                             {{ formatTimelineDate(day) }}
                                         </div>
                                     </div>
                                     <div class="gantt-bars">
-                                        <!-- 依赖关系连线 -->
-                                        <svg style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;">
-                                            <line 
-                                                v-for="dep in dependencyLines" 
-                                                :key="dep.id"
-                                                :x1="dep.x1 + '%'" 
-                                                :y1="dep.y1 + 'px'" 
-                                                :x2="dep.x2 + '%'" 
-                                                :y2="dep.y2 + 'px'" 
-                                                stroke="#333" 
-                                                stroke-width="2"
-                                                marker-end="url(#arrowhead)"
-                                            />
-                                            <defs>
-                                                <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
-                                                    <polygon points="0 0, 10 3.5, 0 7" fill="#333"/>
-                                                </marker>
-                                            </defs>
-                                        </svg>
-                                        
-                                        <!-- 任务条 -->
-                                        <div 
-                                            v-for="task in currentProject.tasks" 
+                                        <div
+                                            v-for="task in filteredTasks"
                                             :key="task.id"
-                                            class="gantt-bar" 
+                                            class="gantt-bar"
                                             :style="{
                                                 left: calculateTaskPosition(task.startDate) + '%',
                                                 width: calculateTaskWidth(task.startDate, task.endDate) + '%',
-                                                top: (currentProject.tasks.indexOf(task) * 40) + 'px',
+                                                top: (filteredTasks.indexOf(task) * 40) + 'px',
                                                 backgroundColor: getPriorityColor(task.priority)
                                             }"
-                                            :class="{ 'critical-path': isCriticalTask(task.id) }"
                                             @click="selectTask(task)"
                                         >
                                             <div class="gantt-bar-progress" :style="{ width: task.progress + '%' }"></div>
@@ -1195,20 +1430,19 @@
                                     <div class="kanban-task-count">{{ getTasksByStatus(status.id).length }}</div>
                                 </div>
                                 <div class="kanban-tasks">
-                                    <div 
-                                        v-for="task in getTasksByStatus(status.id)" 
+                                    <div
+                                        v-for="task in getTasksByStatus(status.id)"
                                         :key="task.id"
                                         class="kanban-task"
-                                        :class="{ 'critical-path': isCriticalTask(task.id) }"
+                                        :data-task-id="task.id"
+                                        :class="{ 'selected': selectedTasks.some(t => t.id === task.id) }"
                                         @click="selectTask(task)"
+                                        @contextmenu.prevent="toggleTaskSelection(task)"
                                     >
                                         <div class="kanban-task-title">{{ task.name }}</div>
                                         <div class="kanban-task-meta">
                                             <span>{{ formatDate(task.startDate) }}</span>
                                             <span>{{ task.assignee }}</span>
-                                        </div>
-                                        <div class="progress-bar" style="margin-top: 0.5rem;">
-                                            <div class="progress-fill" :style="{ width: task.progress + '%' }"></div>
                                         </div>
                                     </div>
                                 </div>
@@ -1235,19 +1469,18 @@
                                 <div v-for="day in dayHeaders" :key="day" class="calendar-day-header">
                                     {{ day }}
                                 </div>
-                                <div 
-                                    v-for="day in calendarDays" 
-                                    :key="day.date.toString()"
-                                    class="calendar-day" 
+                                <div
+                                    v-for="(day, index) in calendarDays"
+                                    :key="day.date.getTime() || index"
+                                    class="calendar-day"
                                     :class="{ 'other-month': !day.isCurrentMonth }"
                                 >
                                     <div class="calendar-day-number">{{ day.date.getDate() }}</div>
-                                    <div 
-                                        v-for="task in getTasksForDay(day.date)" 
+                                    <div
+                                        v-for="task in getTasksForDay(day.date)"
                                         :key="task.id"
                                         class="calendar-event"
                                         :style="{ backgroundColor: getPriorityColor(task.priority) }"
-                                        :class="{ 'critical-path': isCriticalTask(task.id) }"
                                         @click="selectTask(task)"
                                     >
                                         {{ task.name }}
@@ -1294,7 +1527,7 @@
                                 {{ getPriorityText(selectedTask.priority) }}
                             </div>
                         </div>
-                        
+
                         <div class="task-meta">
                             <div class="meta-item">
                                 <span class="meta-label">开始日期:</span>
@@ -1315,40 +1548,31 @@
                             <div class="progress-bar">
                                 <div class="progress-fill" :style="{ width: selectedTask.progress + '%' }"></div>
                             </div>
-                            <div class="meta-item">
-                                <span class="meta-label">状态:</span>
-                                <span class="meta-value">{{ getStatusText(selectedTask.status) }}</span>
-                            </div>
-                            <div class="meta-item" v-if="isCriticalTask(selectedTask.id)">
-                                <span class="meta-label" style="color: var(--danger);">关键路径:</span>
-                                <span class="meta-value" style="color: var(--danger);">是</span>
-                            </div>
                         </div>
 
                         <div class="task-dependencies" v-if="selectedTask.dependencies && selectedTask.dependencies.length > 0">
                             <h3>依赖任务</h3>
-                            <div 
-                                v-for="depId in selectedTask.dependencies" 
+                            <div
+                                v-for="depId in selectedTask.dependencies"
                                 :key="depId"
                                 class="dependency-item"
-                                @click="selectTaskById(depId)"
                             >
                                 <div class="dependency-status" :class="'status-' + getDependencyStatus(depId)"></div>
                                 <span>{{ getTaskName(depId) }}</span>
                             </div>
                         </div>
-                        
-                        <div class="form-actions">
-                            <button class="btn btn-outline" @click="editTask(selectedTask)">
-                                <i class="fas fa-edit"></i> 编辑
+
+                        <div class="form-actions" style="margin-top: 1rem;">
+                            <button class="btn btn-primary" @click.stop="openEditTaskModal(selectedTask)" style="flex: 1;">
+                                <i class="fas fa-edit"></i> 编辑任务
                             </button>
-                            <button class="btn btn-outline" @click="deleteTask(selectedTask.id)">
-                                <i class="fas fa-trash"></i> 删除
+                            <button class="btn btn-outline" @click.stop="deleteTask(selectedTask)" style="flex: 1;">
+                                <i class="fas fa-trash"></i> 删除任务
                             </button>
-                        </div>
                     </div>
-                    <div v-else class="no-task-selected" style="text-align: center; padding: 2rem; color: var(--gray);">
-                        <i class="fas fa-tasks" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;"></i>
+                    </div>
+                    <div v-else class="empty-state">
+                        <i class="fas fa-info-circle"></i>
                         <p>请选择一个任务查看详情</p>
                     </div>
                 </div>
@@ -1356,116 +1580,1297 @@
                 <div class="card">
                     <h2><i class="fas fa-exclamation-triangle"></i> 风险预警</h2>
                     <div class="risk-list">
-                        <div v-for="risk in projectRisks" :key="risk.id" class="risk-item" style="padding: 0.75rem; border-left: 3px solid; margin-bottom: 0.75rem; background: #f8f9fa; border-radius: 4px;"
-                            :style="{ borderLeftColor: risk.level === 'high' ? '#f94144' : risk.level === 'medium' ? '#f8961e' : '#43aa8b' }">
-                            <div class="risk-header" style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
-                                <i class="fas fa-exclamation-circle" :style="{ color: risk.level === 'high' ? '#f94144' : risk.level === 'medium' ? '#f8961e' : '#43aa8b' }"></i>
-                                <span style="font-weight: 600;">{{ risk.task }}</span>
+                        <div v-for="risk in projectRisks" :key="risk.id" class="risk-item" :class="risk.level">
+                            <div class="risk-header">
+                                <i class="fas fa-exclamation-circle"></i>
+                                <span>{{ risk.task }}</span>
                             </div>
-                            <div class="risk-description" style="font-size: 0.85rem;">
+                            <div class="risk-description">
                                 {{ risk.description }}
                             </div>
                         </div>
-                    </div>
-                </div>
-
-                <div class="card">
-                    <h2><i class="fas fa-chart-line"></i> 项目进度</h2>
-                    <div id="progressChart" style="height: 200px;"></div>
-                </div>
-            </div>
-        </div>
-
-        <!-- 任务模态框 -->
-        <div class="modal-overlay" v-if="showTaskModal">
-            <div class="modal fade-in">
-                <div class="modal-header">
-                    <h3>{{ editingTask ? '编辑任务' : '添加新任务' }}</h3>
-                    <button class="btn btn-outline" @click="closeTaskModal" style="padding: 0.5rem;">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <div class="form-group">
-                        <label class="form-label">任务名称</label>
-                        <input type="text" class="form-control" v-model="taskForm.name" placeholder="输入任务名称">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">开始日期</label>
-                        <input type="date" class="form-control" v-model="taskForm.startDate">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">结束日期</label>
-                        <input type="date" class="form-control" v-model="taskForm.endDate">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">负责人</label>
-                        <select class="form-control" v-model="taskForm.assignee">
-                            <option v-for="member in teamMembers" :key="member.id" :value="member.name">{{ member.name }}</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">优先级</label>
-                        <select class="form-control" v-model="taskForm.priority">
-                            <option value="low">低</option>
-                            <option value="medium">中</option>
-                            <option value="high">高</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">进度 (%)</label>
-                        <input type="range" class="form-control" min="0" max="100" v-model="taskForm.progress">
-                        <div style="text-align: center; margin-top: 0.5rem;">{{ taskForm.progress }}%</div>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">依赖任务</label>
-                        <div style="max-height: 150px; overflow-y: auto; border: 1px solid var(--border-color); border-radius: 6px; padding: 0.5rem;">
-                            <div v-for="task in currentProject.tasks" :key="task.id" style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
-                                <input type="checkbox" :value="task.id" v-model="taskForm.dependencies" :disabled="task.id === editingTask?.id">
-                                <span>{{ task.name }}</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="form-actions">
-                        <button class="btn btn-outline" @click="closeTaskModal">取消</button>
-                        <button class="btn btn-primary" @click="saveTask">{{ editingTask ? '更新' : '添加' }}</button>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- 项目模态框 -->
-        <div class="modal-overlay" v-if="showProjectModal">
-            <div class="modal fade-in">
+        <div v-if="showProjectModal" class="modal-overlay" @click.self="closeProjectModal">
+            <div class="modal">
                 <div class="modal-header">
-                    <h3>新建项目</h3>
-                    <button class="btn btn-outline" @click="closeProjectModal" style="padding: 0.5rem;">
+                    <h3 class="modal-title">{{ editingProject ? '编辑项目' : '新建项目' }}</h3>
+                    <button class="modal-close" @click="closeProjectModal">
                         <i class="fas fa-times"></i>
                     </button>
                 </div>
-                <div class="modal-body">
+                <form @submit.prevent="saveProject">
                     <div class="form-group">
-                        <label class="form-label">项目名称</label>
-                        <input type="text" class="form-control" v-model="projectForm.name" placeholder="输入项目名称">
+                        <label class="form-label">项目名称 *</label>
+                        <input
+                            type="text"
+                            class="form-input"
+                            v-model="newProject.name"
+                            placeholder="请输入项目名称"
+                            required
+                        >
                     </div>
                     <div class="form-group">
-                        <label class="form-label">开始日期</label>
-                        <input type="date" class="form-control" v-model="projectForm.startDate">
+                        <label class="form-label">开始日期 *</label>
+                        <input
+                            type="date"
+                            class="form-input"
+                            v-model="newProject.startDate"
+                            required
+                        >
                     </div>
                     <div class="form-group">
-                        <label class="form-label">结束日期</label>
-                        <input type="date" class="form-control" v-model="projectForm.endDate">
+                        <label class="form-label">结束日期 *</label>
+                        <input
+                            type="date"
+                            class="form-input"
+                            v-model="newProject.endDate"
+                            required
+                        >
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">项目描述</label>
+                        <textarea
+                            class="form-textarea"
+                            v-model="newProject.description"
+                            placeholder="请输入项目描述（可选）"
+                        ></textarea>
                     </div>
                     <div class="form-actions">
-                        <button class="btn btn-outline" @click="closeProjectModal">取消</button>
-                        <button class="btn btn-primary" @click="saveProject">创建项目</button>
+                        <button type="button" class="btn btn-outline" @click="closeProjectModal">
+                            取消
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> {{ editingProject ? '保存' : '创建' }}
+                        </button>
                     </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- 任务模态框 -->
+        <div v-if="showTaskModal" class="modal-overlay" @click.self="closeTaskModal">
+            <div class="modal">
+                <div class="modal-header">
+                    <h3 class="modal-title">{{ editingTask ? '编辑任务' : '新建任务' }}</h3>
+                    <button class="modal-close" @click="closeTaskModal">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <form @submit.prevent="saveTask">
+                    <div class="form-group">
+                        <label class="form-label">任务名称 *</label>
+                        <input
+                            type="text"
+                            class="form-input"
+                            v-model="newTask.name"
+                            placeholder="请输入任务名称"
+                            required
+                        >
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">开始日期 *</label>
+                        <input
+                            type="date"
+                            class="form-input"
+                            v-model="newTask.startDate"
+                            required
+                        >
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">结束日期 *</label>
+                        <input
+                            type="date"
+                            class="form-input"
+                            v-model="newTask.endDate"
+                            required
+                        >
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">优先级</label>
+                        <select class="form-select" v-model="newTask.priority">
+                            <option value="low">低优先级</option>
+                            <option value="medium">中优先级</option>
+                            <option value="high">高优先级</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">状态</label>
+                        <select class="form-select" v-model="newTask.status">
+                            <option value="not-started">未开始</option>
+                            <option value="in-progress">进行中</option>
+                            <option value="completed">已完成</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">负责人</label>
+                        <select class="form-select" v-model="newTask.assignee">
+                            <option v-for="member in teamMembers" :key="member.id" :value="member.name">
+                                {{ member.name }}
+                            </option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">进度 (%)</label>
+                        <input
+                            type="number"
+                            class="form-input"
+                            v-model.number="newTask.progress"
+                            min="0"
+                            max="100"
+                        >
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-outline" @click="closeTaskModal">
+                            取消
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> {{ editingTask ? '保存' : '创建' }}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- 设置面板 -->
+        <div v-if="showSettings" class="settings-overlay active" @click="showSettings = false"></div>
+        <div class="settings-panel" :class="{ active: showSettings }">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                <h2>设置</h2>
+                <button class="modal-close" @click="showSettings = false">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">主题</label>
+                <div style="display: flex; gap: 1rem;">
+                    <button class="btn btn-outline" :class="{ 'btn-primary': theme === 'light' }" @click="toggleTheme">
+                        <i class="fas fa-sun"></i> 浅色
+                    </button>
+                    <button class="btn btn-outline" :class="{ 'btn-primary': theme === 'dark' }" @click="toggleTheme">
+                        <i class="fas fa-moon"></i> 深色
+                    </button>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">数据管理</label>
+                <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                    <button class="btn btn-outline" @click="exportData">
+                        <i class="fas fa-download"></i> 导出数据
+                    </button>
+                    <label class="btn btn-outline" style="cursor: pointer; text-align: center;">
+                        <i class="fas fa-upload"></i> 导入数据
+                        <input type="file" accept=".json" @change="importData" style="display: none;">
+                    </label>
+                    <button class="btn btn-outline" @click="clearAllData" style="color: var(--danger);">
+                        <i class="fas fa-trash"></i> 清除所有数据
+                    </button>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">快捷键</label>
+                <div style="font-size: 0.875rem; color: var(--gray);">
+                    <div style="margin-bottom: 0.5rem;"><strong>Ctrl/Cmd + N:</strong> 新建任务</div>
+                    <div style="margin-bottom: 0.5rem;"><strong>Ctrl/Cmd + Shift + N:</strong> 新建项目</div>
+                    <div style="margin-bottom: 0.5rem;"><strong>Ctrl/Cmd + F:</strong> 搜索</div>
+                    <div><strong>Esc:</strong> 关闭模态框</div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Vue 应用逻辑将在这里引入 -->
-    <script src="app.js"></script>
+    <script>
+        const { createApp } = Vue;
+
+        // 示例数据
+        const sampleProjects = [
+            {
+                id: 1,
+                name: "网站重构项目",
+                startDate: new Date(2023, 5, 1),
+                endDate: new Date(2023, 7, 15),
+                tasks: [
+                    { id: 1, name: "需求分析", startDate: new Date(2023, 5, 1), endDate: new Date(2023, 5, 7), progress: 100, priority: "low", status: "completed", assignee: "张三", dependencies: [] },
+                    { id: 2, name: "UI/UX设计", startDate: new Date(2023, 5, 8), endDate: new Date(2023, 5, 21), progress: 80, priority: "medium", status: "in-progress", assignee: "李四", dependencies: [1] },
+                    { id: 3, name: "前端开发", startDate: new Date(2023, 5, 15), endDate: new Date(2023, 6, 10), progress: 30, priority: "high", status: "in-progress", assignee: "王五", dependencies: [2] },
+                    { id: 4, name: "后端开发", startDate: new Date(2023, 5, 22), endDate: new Date(2023, 6, 15), progress: 20, priority: "high", status: "not-started", assignee: "赵六", dependencies: [1] },
+                    { id: 5, name: "测试与调试", startDate: new Date(2023, 6, 16), endDate: new Date(2023, 7, 5), progress: 0, priority: "medium", status: "not-started", assignee: "钱七", dependencies: [3, 4] },
+                    { id: 6, name: "部署上线", startDate: new Date(2023, 7, 6), endDate: new Date(2023, 7, 15), progress: 0, priority: "high", status: "not-started", assignee: "孙八", dependencies: [5] }
+                ]
+            },
+            {
+                id: 2,
+                name: "移动应用开发",
+                startDate: new Date(2023, 4, 1),
+                endDate: new Date(2023, 8, 30),
+                tasks: [
+                    { id: 7, name: "市场调研", startDate: new Date(2023, 4, 1), endDate: new Date(2023, 4, 15), progress: 100, priority: "low", status: "completed", assignee: "张三", dependencies: [] },
+                    { id: 8, name: "原型设计", startDate: new Date(2023, 4, 16), endDate: new Date(2023, 5, 5), progress: 100, priority: "medium", status: "completed", assignee: "李四", dependencies: [7] },
+                    { id: 9, name: "iOS开发", startDate: new Date(2023, 5, 6), endDate: new Date(2023, 7, 10), progress: 60, priority: "high", status: "in-progress", assignee: "王五", dependencies: [8] },
+                    { id: 10, name: "Android开发", startDate: new Date(2023, 5, 6), endDate: new Date(2023, 7, 10), progress: 40, priority: "high", status: "in-progress", assignee: "赵六", dependencies: [8] },
+                    { id: 11, name: "后端API开发", startDate: new Date(2023, 5, 1), endDate: new Date(2023, 6, 15), progress: 90, priority: "high", status: "in-progress", assignee: "钱七", dependencies: [] },
+                    { id: 12, name: "测试与发布", startDate: new Date(2023, 7, 11), endDate: new Date(2023, 8, 30), progress: 0, priority: "medium", status: "not-started", assignee: "孙八", dependencies: [9, 10, 11] }
+                ]
+            }
+        ];
+
+        const teamMembers = [
+            { id: 1, name: "张三", skills: ["UI设计", "用户体验"], load: 70 },
+            { id: 2, name: "李四", skills: ["前端开发", "Vue.js"], load: 85 },
+            { id: 3, name: "王五", skills: ["iOS开发", "Swift"], load: 60 },
+            { id: 4, name: "赵六", skills: ["Android开发", "Kotlin"], load: 75 },
+            { id: 5, name: "钱七", skills: ["后端开发", "Node.js"], load: 80 },
+            { id: 6, name: "孙八", skills: ["测试", "质量保证"], load: 40 }
+        ];
+
+        const taskStatuses = [
+            { id: "not-started", name: "未开始" },
+            { id: "in-progress", name: "进行中" },
+            { id: "completed", name: "已完成" }
+        ];
+
+        const views = [
+            { id: "gantt", name: "甘特图", icon: "fas fa-chart-bar" },
+            { id: "kanban", name: "看板", icon: "fas fa-columns" },
+            { id: "calendar", name: "日历", icon: "fas fa-calendar-alt" },
+            { id: "resource", name: "资源", icon: "fas fa-users" }
+        ];
+
+        createApp({
+            data() {
+                return {
+                    projects: sampleProjects,
+                    currentProject: sampleProjects[0],
+                    currentView: "gantt",
+                    views: views,
+                    teamMembers: teamMembers,
+                    taskStatuses: taskStatuses,
+                    selectedTask: null,
+                    showTaskModal: false,
+                    editingTask: null,
+                    currentMonth: new Date().toLocaleString('zh-CN', { month: 'long' }),
+                    currentYear: new Date().getFullYear(),
+                    calendarDate: new Date(),
+                    dayHeaders: ['日', '一', '二', '三', '四', '五', '六'],
+                    projectRisks: [
+                        { id: 1, task: "前端开发", description: "进度落后计划5天", level: "medium" },
+                        { id: 2, task: "后端开发", description: "资源分配不足", level: "high" },
+                        { id: 3, task: "测试与调试", description: "依赖任务可能延迟", level: "low" }
+                    ],
+                    newTask: {
+                        name: "",
+                        startDate: "",
+                        endDate: "",
+                        priority: "medium",
+                        status: "not-started",
+                        assignee: "",
+                        progress: 0,
+                        dependencies: []
+                    },
+                    resourceChart: null,
+                    nextTaskId: 13,
+                    nextProjectId: 3,
+                    toast: null,
+                    toastTimer: null,
+                    showProjectModal: false,
+                    editingProject: null,
+                    newProject: {
+                        name: "",
+                        startDate: "",
+                        endDate: "",
+                        description: ""
+                    },
+                    searchQuery: "",
+                    filterStatus: "all",
+                    filterPriority: "all",
+                    filterAssignee: "all",
+                    showSettings: false,
+                    theme: "light",
+                    selectedTasks: [],
+                    showBulkActions: false
+                };
+            },
+            computed: {
+                currentViewName() {
+                    const view = this.views.find(v => v.id === this.currentView);
+                    return view ? view.name : "";
+                },
+                completedTasks() {
+                    return this.currentProject.tasks.filter(task => task.status === "completed").length;
+                },
+                totalTasks() {
+                    return this.currentProject.tasks.length;
+                },
+                overdueTasks() {
+                    const today = new Date();
+                    return this.currentProject.tasks.filter(task =>
+                        task.endDate < today && task.status !== "completed"
+                    ).length;
+                },
+                projectDuration() {
+                    const diffTime = Math.abs(this.currentProject.endDate - this.currentProject.startDate);
+                    return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                },
+                projectHealth() {
+                    // 简单的健康度计算：基于完成进度和逾期任务
+                    const progressScore = (this.completedTasks / this.totalTasks) * 70;
+                    const overduePenalty = this.overdueTasks * 10;
+                    return Math.max(0, Math.min(100, progressScore - overduePenalty));
+                },
+                projectHealthClass() {
+                    if (this.projectHealth >= 70) return "good";
+                    if (this.projectHealth >= 40) return "";
+                    return "warning";
+                },
+                timelineDays() {
+                    const days = [];
+                    const start = new Date(this.currentProject.startDate);
+                    const end = new Date(this.currentProject.endDate);
+                    const duration = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
+
+                    // 如果项目周期超过90天，按周显示；否则按天显示
+                    if (duration > 90) {
+                        // 按周显示
+                        const currentDate = new Date(start);
+                        while (currentDate <= end) {
+                            days.push(new Date(currentDate));
+                            currentDate.setDate(currentDate.getDate() + 7);
+                        }
+                        // 确保最后一天包含在内
+                        if (days[days.length - 1] < end) {
+                            days.push(new Date(end));
+                        }
+                    } else {
+                        // 按天显示（如果天数太多，可以按每隔几天显示）
+                        const step = duration > 30 ? 3 : 1;
+                        for (let date = new Date(start); date <= end; date.setDate(date.getDate() + step)) {
+                        days.push(new Date(date));
+                        }
+                        // 确保最后一天包含在内
+                        if (days[days.length - 1] < end) {
+                            days.push(new Date(end));
+                        }
+                    }
+
+                    return days;
+                },
+                calendarDays() {
+                    const year = this.calendarDate.getFullYear();
+                    const month = this.calendarDate.getMonth();
+
+                    // 当月第一天
+                    const firstDay = new Date(year, month, 1);
+                    // 当月最后一天
+                    const lastDay = new Date(year, month + 1, 0);
+                    // 当月第一天是周几（0-6，0是周日）
+                    const firstDayOfWeek = firstDay.getDay();
+                    // 当月总天数
+                    const daysInMonth = lastDay.getDate();
+
+                    // 上个月最后几天
+                    const prevMonthLastDay = new Date(year, month, 0).getDate();
+
+                    const days = [];
+
+                    // 添加上个月的最后几天
+                    for (let i = firstDayOfWeek - 1; i >= 0; i--) {
+                        const date = new Date(year, month - 1, prevMonthLastDay - i);
+                        days.push({ date, isCurrentMonth: false });
+                    }
+
+                    // 添加当月的所有天
+                    for (let i = 1; i <= daysInMonth; i++) {
+                        const date = new Date(year, month, i);
+                        days.push({ date, isCurrentMonth: true });
+                    }
+
+                    // 添加下个月的前几天，补齐6行
+                    const totalCells = 42; // 6行 * 7天
+                    const nextMonthDays = totalCells - days.length;
+                    for (let i = 1; i <= nextMonthDays; i++) {
+                        const date = new Date(year, month + 1, i);
+                        days.push({ date, isCurrentMonth: false });
+                    }
+
+                    return days;
+                },
+                filteredTasks() {
+                    let tasks = this.currentProject?.tasks || [];
+
+                    // 搜索
+                    if (this.searchQuery) {
+                        const query = this.searchQuery.toLowerCase();
+                        tasks = tasks.filter(task =>
+                            task.name.toLowerCase().includes(query) ||
+                            task.assignee?.toLowerCase().includes(query)
+                        );
+                    }
+
+                    // 状态筛选
+                    if (this.filterStatus !== 'all') {
+                        tasks = tasks.filter(task => task.status === this.filterStatus);
+                    }
+
+                    // 优先级筛选
+                    if (this.filterPriority !== 'all') {
+                        tasks = tasks.filter(task => task.priority === this.filterPriority);
+                    }
+
+                    // 负责人筛选
+                    if (this.filterAssignee !== 'all') {
+                        tasks = tasks.filter(task => task.assignee === this.filterAssignee);
+                    }
+
+                    return tasks;
+                }
+            },
+            mounted() {
+                // 加载保存的数据
+                this.loadData();
+
+                this.selectedTask = this.currentProject?.tasks[0] || null;
+                this.initResourceChart();
+                this.initKanbanDrag();
+
+                // 初始化ID
+                this.initializeIds();
+
+                // 加载主题
+                this.loadTheme();
+
+                // 绑定快捷键
+                this.bindKeyboardShortcuts();
+
+                // 监听数据变化，自动保存
+                this.autoSave();
+            },
+            beforeUnmount() {
+                // 清理图表实例
+                if (this.resourceChart) {
+                    this.resourceChart.destroy();
+                }
+                if (this.toastTimer) {
+                    clearTimeout(this.toastTimer);
+                }
+            },
+            methods: {
+                switchView(view) {
+                    this.currentView = view;
+                    // 切换视图时重新初始化拖拽功能
+                    if (view === 'kanban') {
+                        this.$nextTick(() => {
+                            this.initKanbanDrag();
+                        });
+                    }
+                    // 切换视图时重新初始化资源图表
+                    if (view === 'resource') {
+                        this.$nextTick(() => {
+                            this.initResourceChart();
+                        });
+                    }
+                },
+                selectProject(project) {
+                    this.currentProject = project;
+                    this.selectedTask = project.tasks[0] || null;
+
+                    // 重新初始化相关视图
+                    if (this.currentView === 'resource') {
+                        this.$nextTick(() => {
+                            this.initResourceChart();
+                        });
+                    }
+                    if (this.currentView === 'kanban') {
+                        this.$nextTick(() => {
+                            this.initKanbanDrag();
+                        });
+                    }
+                },
+                selectTask(task) {
+                    this.selectedTask = task;
+                },
+                getTasksByStatus(status) {
+                    // 在看板视图中，即使有筛选也显示所有任务，但可以标记筛选状态
+                    let tasks = this.currentProject?.tasks || [];
+
+                    // 先按状态筛选
+                    tasks = tasks.filter(task => task.status === status);
+
+                    // 如果应用了其他筛选，也应用
+                    if (this.searchQuery || this.filterPriority !== 'all' || this.filterAssignee !== 'all') {
+                        // 应用搜索和筛选
+                        if (this.searchQuery) {
+                            const query = this.searchQuery.toLowerCase();
+                            tasks = tasks.filter(task =>
+                                task.name.toLowerCase().includes(query) ||
+                                task.assignee?.toLowerCase().includes(query)
+                            );
+                        }
+                        if (this.filterPriority !== 'all') {
+                            tasks = tasks.filter(task => task.priority === this.filterPriority);
+                        }
+                        if (this.filterAssignee !== 'all') {
+                            tasks = tasks.filter(task => task.assignee === this.filterAssignee);
+                        }
+                    }
+
+                    return tasks;
+                },
+                getPriorityColor(priority) {
+                    switch(priority) {
+                        case "high": return "#f94144";
+                        case "medium": return "#f8961e";
+                        case "low": return "#43aa8b";
+                        default: return "#6c757d";
+                    }
+                },
+                getPriorityText(priority) {
+                    switch(priority) {
+                        case "high": return "高优先级";
+                        case "medium": return "中优先级";
+                        case "low": return "低优先级";
+                        default: return "普通";
+                    }
+                },
+                formatDate(date) {
+                    return date.toLocaleDateString('zh-CN');
+                },
+                formatTimelineDate(date) {
+                    const month = date.getMonth() + 1;
+                    const day = date.getDate();
+                    return `${month}/${day}`;
+                },
+                calculateTaskPosition(startDate) {
+                    const projectStart = new Date(this.currentProject.startDate);
+                    const taskStart = new Date(startDate);
+                    const projectDuration = this.projectDuration;
+                    const daysFromStart = Math.ceil((taskStart - projectStart) / (1000 * 60 * 60 * 24));
+
+                    return (daysFromStart / projectDuration) * 100;
+                },
+                calculateTaskWidth(startDate, endDate) {
+                    const taskStart = new Date(startDate);
+                    const taskEnd = new Date(endDate);
+                    const taskDuration = Math.ceil((taskEnd - taskStart) / (1000 * 60 * 60 * 24));
+                    const projectDuration = this.projectDuration;
+
+                    return (taskDuration / projectDuration) * 100;
+                },
+                getTasksForDay(date) {
+                    return this.currentProject.tasks.filter(task => {
+                        const taskStart = new Date(task.startDate);
+                        const taskEnd = new Date(task.endDate);
+                        return date >= taskStart && date <= taskEnd;
+                    });
+                },
+                prevMonth() {
+                    this.calendarDate = new Date(this.calendarDate.getFullYear(), this.calendarDate.getMonth() - 1, 1);
+                    this.currentMonth = this.calendarDate.toLocaleString('zh-CN', { month: 'long' });
+                    this.currentYear = this.calendarDate.getFullYear();
+                },
+                nextMonth() {
+                    this.calendarDate = new Date(this.calendarDate.getFullYear(), this.calendarDate.getMonth() + 1, 1);
+                    this.currentMonth = this.calendarDate.toLocaleString('zh-CN', { month: 'long' });
+                    this.currentYear = this.calendarDate.getFullYear();
+                },
+                resetToToday() {
+                    this.calendarDate = new Date();
+                    this.currentMonth = this.calendarDate.toLocaleString('zh-CN', { month: 'long' });
+                    this.currentYear = this.calendarDate.getFullYear();
+                },
+                getInitials(name) {
+                    return name.split('').slice(0, 2).join('');
+                },
+                getDependencyStatus(depId) {
+                    const task = this.currentProject.tasks.find(t => t.id === depId);
+                    return task ? task.status : "not-started";
+                },
+                getTaskName(taskId) {
+                    const task = this.currentProject.tasks.find(t => t.id === taskId);
+                    return task ? task.name : "未知任务";
+                },
+                initResourceChart() {
+                    // 销毁旧图表实例
+                    if (this.resourceChart) {
+                        this.resourceChart.destroy();
+                        this.resourceChart = null;
+                    }
+
+                    const chartElement = document.querySelector("#resourceChart");
+                    if (!chartElement) {
+                        return;
+                    }
+
+                    const options = {
+                        series: [{
+                            name: '工作负载',
+                            data: this.teamMembers.map(member => member.load)
+                        }],
+                        chart: {
+                            height: 300,
+                            type: 'bar',
+                            toolbar: {
+                                show: false
+                            }
+                        },
+                        colors: ['#4361ee'],
+                        plotOptions: {
+                            bar: {
+                                borderRadius: 4,
+                                horizontal: true,
+                                distributed: true
+                            }
+                        },
+                        dataLabels: {
+                            enabled: false
+                        },
+                        xaxis: {
+                            categories: this.teamMembers.map(member => member.name),
+                            max: 100
+                        },
+                        yaxis: {
+                            labels: {
+                                style: {
+                                    fontSize: '12px'
+                                }
+                            }
+                        }
+                    };
+
+                    this.resourceChart = new ApexCharts(chartElement, options);
+                    this.resourceChart.render();
+                },
+                initKanbanDrag() {
+                    this.$nextTick(() => {
+                        // 先销毁旧的Sortable实例（如果存在）
+                        const kanbanColumns = document.querySelectorAll('.kanban-tasks');
+                        kanbanColumns.forEach((column) => {
+                            if (column.sortableInstance) {
+                                column.sortableInstance.destroy();
+                            }
+                        });
+
+                        // 创建新的Sortable实例
+                        kanbanColumns.forEach((column, colIndex) => {
+                            const statusId = this.taskStatuses[colIndex].id;
+                            const sortable = new Sortable(column, {
+                                group: 'kanban',
+                                animation: 150,
+                                onEnd: (evt) => {
+                                    const taskId = parseInt(evt.item.dataset.taskId);
+                                    const task = this.currentProject.tasks.find(t => t.id === taskId);
+                                    if (task && task.status !== statusId) {
+                                        task.status = statusId;
+                                        this.showToast('任务状态已更新', 'success');
+                                    }
+                                }
+                            });
+                            // 保存实例引用以便后续销毁
+                            column.sortableInstance = sortable;
+                        });
+                    });
+                },
+                openEditTaskModal(task) {
+                    if (!task) {
+                        this.showToast('请先选择一个任务', 'error');
+                        return;
+                    }
+                    // 编辑模式
+                    this.editingTask = task;
+                    this.newTask = {
+                        name: task.name,
+                        startDate: this.formatDateForInput(task.startDate),
+                        endDate: this.formatDateForInput(task.endDate),
+                        priority: task.priority,
+                        status: task.status,
+                        assignee: task.assignee,
+                        progress: task.progress,
+                        dependencies: [...(task.dependencies || [])]
+                    };
+                    this.showTaskModal = true;
+                },
+                showTaskModal(task = null) {
+                    if (task) {
+                        // 编辑模式
+                        this.editingTask = task;
+                        this.newTask = {
+                            name: task.name,
+                            startDate: this.formatDateForInput(task.startDate),
+                            endDate: this.formatDateForInput(task.endDate),
+                            priority: task.priority,
+                            status: task.status,
+                            assignee: task.assignee,
+                            progress: task.progress,
+                            dependencies: [...(task.dependencies || [])]
+                        };
+                    } else {
+                        // 新建模式
+                        this.editingTask = null;
+                        const today = new Date();
+                        const nextWeek = new Date(today);
+                        nextWeek.setDate(today.getDate() + 7);
+                        this.newTask = {
+                            name: "",
+                            startDate: this.formatDateForInput(today),
+                            endDate: this.formatDateForInput(nextWeek),
+                            priority: "medium",
+                            status: "not-started",
+                            assignee: this.teamMembers[0]?.name || "",
+                            progress: 0,
+                            dependencies: []
+                        };
+                    }
+                    this.showTaskModal = true;
+                },
+                closeTaskModal() {
+                    this.showTaskModal = false;
+                    this.editingTask = null;
+                    this.newTask = {
+                        name: "",
+                        startDate: "",
+                        endDate: "",
+                        priority: "medium",
+                        status: "not-started",
+                        assignee: "",
+                        progress: 0,
+                        dependencies: []
+                    };
+                },
+                saveTask() {
+                    // 验证必填字段
+                    if (!this.newTask.name.trim()) {
+                        this.showToast('请输入任务名称', 'error');
+                        return;
+                    }
+                    if (!this.newTask.startDate || !this.newTask.endDate) {
+                        this.showToast('请选择开始和结束日期', 'error');
+                        return;
+                    }
+
+                    const startDate = new Date(this.newTask.startDate);
+                    const endDate = new Date(this.newTask.endDate);
+
+                    if (endDate < startDate) {
+                        this.showToast('结束日期不能早于开始日期', 'error');
+                        return;
+                    }
+
+                    if (this.editingTask) {
+                        // 更新现有任务
+                        Object.assign(this.editingTask, {
+                            name: this.newTask.name,
+                            startDate: startDate,
+                            endDate: endDate,
+                            priority: this.newTask.priority,
+                            status: this.newTask.status,
+                            assignee: this.newTask.assignee,
+                            progress: parseInt(this.newTask.progress) || 0,
+                            dependencies: this.newTask.dependencies || []
+                        });
+                        this.showToast('任务已更新', 'success');
+                        this.saveData();
+                    } else {
+                        // 创建新任务
+                        const newTask = {
+                            id: this.nextTaskId++,
+                            name: this.newTask.name,
+                            startDate: startDate,
+                            endDate: endDate,
+                            progress: parseInt(this.newTask.progress) || 0,
+                            priority: this.newTask.priority,
+                            status: this.newTask.status,
+                            assignee: this.newTask.assignee,
+                            dependencies: this.newTask.dependencies || []
+                        };
+                        this.currentProject.tasks.push(newTask);
+                        this.showToast('任务已创建', 'success');
+                        this.saveData();
+                    }
+                    this.closeTaskModal();
+                },
+                deleteTask(task) {
+                    if (confirm(`确定要删除任务"${task.name}"吗？`)) {
+                        const index = this.currentProject.tasks.findIndex(t => t.id === task.id);
+                        if (index > -1) {
+                            this.currentProject.tasks.splice(index, 1);
+                            if (this.selectedTask && this.selectedTask.id === task.id) {
+                                this.selectedTask = this.currentProject.tasks[0] || null;
+                            }
+                            this.showToast('任务已删除', 'success');
+                            this.saveData();
+                        }
+                    }
+                },
+                formatDateForInput(date) {
+                    if (!date) return "";
+                    const d = new Date(date);
+                    const year = d.getFullYear();
+                    const month = String(d.getMonth() + 1).padStart(2, '0');
+                    const day = String(d.getDate()).padStart(2, '0');
+                    return `${year}-${month}-${day}`;
+                },
+                exportData() {
+                    try {
+                        const data = {
+                            projects: this.projects.map(p => ({
+                                ...p,
+                                tasks: p.tasks.map(t => ({
+                                    ...t,
+                                    startDate: t.startDate.toISOString(),
+                                    endDate: t.endDate.toISOString()
+                                })),
+                                startDate: p.startDate.toISOString(),
+                                endDate: p.endDate.toISOString()
+                            }))
+                        };
+                        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = `project-timeline-${new Date().toISOString().split('T')[0]}.json`;
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                        URL.revokeObjectURL(url);
+                        this.showToast('数据导出成功', 'success');
+                    } catch (error) {
+                        this.showToast('导出失败: ' + error.message, 'error');
+                    }
+                },
+                shareProject() {
+                    try {
+                        const shareData = {
+                            projectName: this.currentProject.name,
+                            projectHealth: this.projectHealth,
+                            totalTasks: this.totalTasks,
+                            completedTasks: this.completedTasks,
+                            url: window.location.href
+                        };
+                        const shareText = `项目: ${shareData.projectName}\n健康度: ${shareData.projectHealth}%\n任务: ${shareData.completedTasks}/${shareData.totalTasks}`;
+
+                        if (navigator.share) {
+                            navigator.share({
+                                title: shareData.projectName,
+                                text: shareText
+                            }).catch(() => {
+                                this.copyToClipboard(shareText);
+                            });
+                        } else {
+                            this.copyToClipboard(shareText);
+                        }
+                    } catch (error) {
+                        this.showToast('分享失败: ' + error.message, 'error');
+                    }
+                },
+                copyToClipboard(text) {
+                    if (navigator.clipboard) {
+                        navigator.clipboard.writeText(text).then(() => {
+                            this.showToast('已复制到剪贴板', 'success');
+                        }).catch(() => {
+                            this.showToast('复制失败', 'error');
+                        });
+                    } else {
+                        // 降级方案
+                        const textarea = document.createElement('textarea');
+                        textarea.value = text;
+                        document.body.appendChild(textarea);
+                        textarea.select();
+                        try {
+                            document.execCommand('copy');
+                            this.showToast('已复制到剪贴板', 'success');
+                        } catch (err) {
+                            this.showToast('复制失败', 'error');
+                        }
+                        document.body.removeChild(textarea);
+                    }
+                },
+                showToast(message, type = 'info') {
+                    // 清除旧的提示
+                    if (this.toast) {
+                        this.toast.remove();
+                    }
+                    if (this.toastTimer) {
+                        clearTimeout(this.toastTimer);
+                    }
+
+                    // 创建新提示
+                    const toast = document.createElement('div');
+                    toast.className = `toast ${type}`;
+                    const icon = type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle';
+                    toast.innerHTML = `
+                        <i class="fas ${icon}"></i>
+                        <span>${message}</span>
+                    `;
+                    document.body.appendChild(toast);
+                    this.toast = toast;
+
+                    // 自动移除
+                    this.toastTimer = setTimeout(() => {
+                        toast.style.animation = 'slideInRight 0.3s reverse';
+                        setTimeout(() => {
+                            toast.remove();
+                        this.toast = null;
+                    }, 300);
+                }, 3000);
+                },
+                // ========== 数据持久化 ==========
+                saveData() {
+                    try {
+                        const dataToSave = {
+                            projects: this.projects.map(p => ({
+                                ...p,
+                                tasks: p.tasks.map(t => ({
+                                    ...t,
+                                    startDate: t.startDate.toISOString(),
+                                    endDate: t.endDate.toISOString()
+                                })),
+                                startDate: p.startDate.toISOString(),
+                                endDate: p.endDate.toISOString()
+                            })),
+                            nextTaskId: this.nextTaskId,
+                            nextProjectId: this.nextProjectId,
+                            currentProjectId: this.currentProject?.id,
+                            currentView: this.currentView,
+                            theme: this.theme
+                        };
+                        localStorage.setItem('projectTimelineData', JSON.stringify(dataToSave));
+                    } catch (error) {
+                        console.error('保存数据失败:', error);
+                    }
+                },
+                loadData() {
+                    try {
+                        const savedData = localStorage.getItem('projectTimelineData');
+                        if (savedData) {
+                            const data = JSON.parse(savedData);
+
+                            // 恢复项目数据
+                            this.projects = data.projects.map(p => ({
+                                ...p,
+                                startDate: new Date(p.startDate),
+                                endDate: new Date(p.endDate),
+                                tasks: p.tasks.map(t => ({
+                                    ...t,
+                                    startDate: new Date(t.startDate),
+                                    endDate: new Date(t.endDate)
+                                }))
+                            }));
+
+                            // 恢复ID
+                            this.nextTaskId = data.nextTaskId || 13;
+                            this.nextProjectId = data.nextProjectId || 3;
+
+                            // 恢复当前项目
+                            if (data.currentProjectId) {
+                                const project = this.projects.find(p => p.id === data.currentProjectId);
+                                if (project) {
+                                    this.currentProject = project;
+                                }
+                            } else {
+                                this.currentProject = this.projects[0];
+                            }
+
+                            // 恢复视图
+                            if (data.currentView) {
+                                this.currentView = data.currentView;
+                            }
+
+                            // 恢复主题
+                            if (data.theme) {
+                                this.theme = data.theme;
+                            }
+                        }
+                    } catch (error) {
+                        console.error('加载数据失败:', error);
+                        // 如果加载失败，使用默认数据
+                        this.currentProject = this.projects[0];
+                    }
+                },
+                autoSave() {
+                    // 使用防抖保存
+                    let saveTimer = null;
+
+                    // 监听项目变化
+                    this.$watch('projects', () => {
+                        clearTimeout(saveTimer);
+                        saveTimer = setTimeout(() => {
+                            this.saveData();
+                        }, 1000);
+                    }, { deep: true });
+
+                    // 监听当前项目变化
+                    this.$watch('currentProject', () => {
+                        clearTimeout(saveTimer);
+                        saveTimer = setTimeout(() => {
+                            this.saveData();
+                        }, 1000);
+                    }, { deep: true });
+                },
+                initializeIds() {
+                    if (this.projects.length > 0) {
+                        const maxTaskId = Math.max(...this.projects.flatMap(p => p.tasks.map(t => t.id || 0)));
+                        const maxProjectId = Math.max(...this.projects.map(p => p.id || 0));
+                        this.nextTaskId = Math.max(maxTaskId + 1, this.nextTaskId);
+                        this.nextProjectId = Math.max(maxProjectId + 1, this.nextProjectId);
+                    }
+                },
+                // ========== 项目管理 ==========
+                showProjectModal(project = null) {
+                    if (project) {
+                        this.editingProject = project;
+                        this.newProject = {
+                            name: project.name,
+                            startDate: this.formatDateForInput(project.startDate),
+                            endDate: this.formatDateForInput(project.endDate),
+                            description: project.description || ""
+                        };
+                    } else {
+                        this.editingProject = null;
+                        const today = new Date();
+                        const nextMonth = new Date(today);
+                        nextMonth.setMonth(today.getMonth() + 3);
+                        this.newProject = {
+                            name: "",
+                            startDate: this.formatDateForInput(today),
+                            endDate: this.formatDateForInput(nextMonth),
+                            description: ""
+                        };
+                    }
+                    this.showProjectModal = true;
+                },
+                closeProjectModal() {
+                    this.showProjectModal = false;
+                    this.editingProject = null;
+                    this.newProject = {
+                        name: "",
+                        startDate: "",
+                        endDate: "",
+                        description: ""
+                    };
+                },
+                saveProject() {
+                    if (!this.newProject.name.trim()) {
+                        this.showToast('请输入项目名称', 'error');
+                        return;
+                    }
+                    if (!this.newProject.startDate || !this.newProject.endDate) {
+                        this.showToast('请选择开始和结束日期', 'error');
+                        return;
+                    }
+
+                    const startDate = new Date(this.newProject.startDate);
+                    const endDate = new Date(this.newProject.endDate);
+
+                    if (endDate < startDate) {
+                        this.showToast('结束日期不能早于开始日期', 'error');
+                        return;
+                    }
+
+                    if (this.editingProject) {
+                        // 更新项目
+                        Object.assign(this.editingProject, {
+                            name: this.newProject.name,
+                            startDate: startDate,
+                            endDate: endDate,
+                            description: this.newProject.description
+                        });
+                        this.showToast('项目已更新', 'success');
+                    } else {
+                        // 创建新项目
+                        const newProject = {
+                            id: this.nextProjectId++,
+                            name: this.newProject.name,
+                            startDate: startDate,
+                            endDate: endDate,
+                            description: this.newProject.description,
+                            tasks: []
+                        };
+                        this.projects.push(newProject);
+                        this.currentProject = newProject;
+                        this.showToast('项目已创建', 'success');
+                    }
+                    this.saveData();
+                    this.closeProjectModal();
+                },
+                deleteProject(project) {
+                    if (confirm(`确定要删除项目"${project.name}"吗？这将删除项目下的所有任务！`)) {
+                        const index = this.projects.findIndex(p => p.id === project.id);
+                        if (index > -1) {
+                            this.projects.splice(index, 1);
+                            if (this.currentProject && this.currentProject.id === project.id) {
+                                this.currentProject = this.projects[0] || null;
+                            }
+                            this.showToast('项目已删除', 'success');
+                            this.saveData();
+                        }
+                    }
+                },
+                // ========== 搜索和筛选 ==========
+                clearFilters() {
+                    this.searchQuery = "";
+                    this.filterStatus = "all";
+                    this.filterPriority = "all";
+                    this.filterAssignee = "all";
+                },
+                // ========== 主题切换 ==========
+                loadTheme() {
+                    document.documentElement.setAttribute('data-theme', this.theme);
+                },
+                toggleTheme() {
+                    this.theme = this.theme === 'light' ? 'dark' : 'light';
+                    this.loadTheme();
+                    this.saveData();
+                },
+                // ========== 快捷键 ==========
+                bindKeyboardShortcuts() {
+                    document.addEventListener('keydown', (e) => {
+                        // Ctrl/Cmd + N: 新建任务
+                        if ((e.ctrlKey || e.metaKey) && e.key === 'n' && !e.shiftKey) {
+                            e.preventDefault();
+                            this.showTaskModal();
+                        }
+                        // Ctrl/Cmd + Shift + N: 新建项目
+                        if ((e.ctrlKey || e.metaKey) && e.key === 'N') {
+                            e.preventDefault();
+                            this.showProjectModal();
+                        }
+                        // Ctrl/Cmd + F: 聚焦搜索
+                        if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+                            e.preventDefault();
+                            const searchInput = document.querySelector('.search-input');
+                            if (searchInput) {
+                                searchInput.focus();
+                            }
+                        }
+                        // Escape: 关闭模态框
+                        if (e.key === 'Escape') {
+                            if (this.showTaskModal) {
+                                this.closeTaskModal();
+                            }
+                            if (this.showProjectModal) {
+                                this.closeProjectModal();
+                            }
+                            if (this.showSettings) {
+                                this.showSettings = false;
+                            }
+                        }
+                    });
+                },
+                // ========== 批量操作 ==========
+                toggleTaskSelection(task) {
+                    const index = this.selectedTasks.findIndex(t => t.id === task.id);
+                    if (index > -1) {
+                        this.selectedTasks.splice(index, 1);
+                    } else {
+                        this.selectedTasks.push(task);
+                    }
+                    this.showBulkActions = this.selectedTasks.length > 0;
+                },
+                selectAllTasks() {
+                    const filtered = this.filteredTasks();
+                    this.selectedTasks = filtered.length === this.selectedTasks.length ? [] : [...filtered];
+                    this.showBulkActions = this.selectedTasks.length > 0;
+                },
+                bulkDeleteTasks() {
+                    const count = this.selectedTasks.length;
+                    if (count === 0) return;
+                    if (confirm(`确定要删除选中的 ${count} 个任务吗？`)) {
+                        const tasksToDelete = [...this.selectedTasks];
+                        tasksToDelete.forEach(task => {
+                            const index = this.currentProject.tasks.findIndex(t => t.id === task.id);
+                            if (index > -1) {
+                                this.currentProject.tasks.splice(index, 1);
+                            }
+                        });
+                        this.selectedTasks = [];
+                        this.showBulkActions = false;
+                        this.showToast(`已删除 ${count} 个任务`, 'success');
+                        this.saveData();
+                    }
+                },
+                bulkUpdateStatus(status) {
+                    if (this.selectedTasks.length === 0) return;
+                    this.selectedTasks.forEach(task => {
+                        task.status = status;
+                    });
+                    this.showToast(`已更新 ${this.selectedTasks.length} 个任务的状态`, 'success');
+                    this.selectedTasks = [];
+                    this.showBulkActions = false;
+                    this.saveData();
+                },
+                // ========== 打印和导出 ==========
+                printView() {
+                    window.print();
+                },
+                exportToPDF() {
+                    // 使用浏览器打印功能转换为PDF
+                    const printWindow = window.open('', '_blank');
+                    const content = document.querySelector('.view-container').innerHTML;
+                    printWindow.document.write(`
+                        <html>
+                            <head>
+                                <title>${this.currentProject.name} - ${this.currentViewName}</title>
+                                <style>
+                                    body { font-family: Arial, sans-serif; padding: 20px; }
+                                    .gantt-grid { border: 1px solid #ccc; }
+                                </style>
+                            </head>
+                            <body>
+                                <h1>${this.currentProject.name} - ${this.currentViewName}</h1>
+                                ${content}
+                            </body>
+                        </html>
+                    `);
+                    printWindow.document.close();
+                    printWindow.print();
+                },
+                importData(event) {
+                    const file = event.target.files[0];
+                    if (!file) return;
+
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        try {
+                            const data = JSON.parse(e.target.result);
+                            if (data.projects && Array.isArray(data.projects)) {
+                                // 转换日期
+                                data.projects = data.projects.map(p => ({
+                                    ...p,
+                                    startDate: new Date(p.startDate),
+                                    endDate: new Date(p.endDate),
+                                    tasks: p.tasks.map(t => ({
+                                        ...t,
+                                        startDate: new Date(t.startDate),
+                                        endDate: new Date(t.endDate)
+                                    }))
+                                }));
+
+                                // 合并项目
+                                this.projects = [...this.projects, ...data.projects];
+                                this.initializeIds();
+                                this.showToast(`成功导入 ${data.projects.length} 个项目`, 'success');
+                                this.saveData();
+                            }
+                        } catch (error) {
+                            this.showToast('导入失败: ' + error.message, 'error');
+                        }
+                    };
+                    reader.readAsText(file);
+                },
+                clearAllData() {
+                    if (confirm('确定要清除所有数据吗？此操作无法撤销！')) {
+                        localStorage.removeItem('projectTimelineData');
+                        location.reload();
+                    }
+                }
+            }
+        }).mount('#app');
+    </script>
 </body>
 </html>
