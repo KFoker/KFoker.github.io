@@ -6,33 +6,87 @@
     <title>Project Timeline Visualizer | 项目时间线可视化</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Vue.js CDN - 多个备用源 -->
-    <script src="https://cdn.jsdelivr.net/npm/vue@3.2.45/dist/vue.global.prod.js"
-            onerror="loadVueFallback1()"></script>
     <script>
-        // 备用CDN加载函数
-        function loadVueFallback1() {
-            console.warn('主CDN加载失败，尝试备用CDN1...');
+        // Vue.js CDN列表（按优先级排序，包含多个备用源）
+        const vueCDNs = [
+            'https://unpkg.com/vue@3.2.45/dist/vue.global.prod.js',  // 优先使用unpkg（通常更稳定）
+            'https://cdn.jsdelivr.net/npm/vue@3.2.45/dist/vue.global.prod.js',
+            'https://fastly.jsdelivr.net/npm/vue@3.2.45/dist/vue.global.prod.js',
+            'https://cdnjs.cloudflare.com/ajax/libs/vue/3.2.45/vue.global.prod.min.js',
+            'https://cdn.bootcdn.net/ajax/libs/vue/3.2.45/vue.global.prod.min.js',  // 国内CDN
+            'https://cdn.staticfile.org/vue/3.2.45/vue.global.prod.min.js',  // 七牛云CDN
+            'https://gcore.jsdelivr.net/npm/vue@3.2.45/dist/vue.global.prod.js'  // Gcore CDN
+        ];
+
+        let currentCDNIndex = 0;
+
+        // 加载Vue.js的函数
+        function loadVue(cdnIndex = 0) {
+            if (cdnIndex >= vueCDNs.length) {
+                // 所有CDN都失败了
+                console.error('所有Vue.js CDN都加载失败！');
+                showVueError();
+                return;
+            }
+
             const script = document.createElement('script');
-            script.src = 'https://unpkg.com/vue@3.2.45/dist/vue.global.prod.js';
-            script.onerror = loadVueFallback2;
+            script.src = vueCDNs[cdnIndex];
+
             script.onload = function() {
-                console.log('✓ 备用CDN1加载成功');
+                console.log('✓ Vue.js脚本加载成功，来源:', vueCDNs[cdnIndex]);
+                // 等待一小段时间确保Vue已定义
+                setTimeout(() => {
+                    if (typeof Vue !== 'undefined') {
+                        console.log('✓ Vue对象已定义，版本:', Vue.version || '未知');
+                        // Vue加载成功，不继续加载
+                        return;
+                    } else {
+                        console.warn('Vue对象未定义，尝试下一个CDN');
+                        loadVue(cdnIndex + 1);
+                    }
+                }, 200);
             };
+
+            script.onerror = function() {
+                console.warn('CDN加载失败:', vueCDNs[cdnIndex]);
+                // 尝试下一个CDN
+                loadVue(cdnIndex + 1);
+            };
+
             document.head.appendChild(script);
         }
 
-        function loadVueFallback2() {
-            console.warn('备用CDN1也失败，尝试备用CDN2...');
-            const script = document.createElement('script');
-            script.src = 'https://cdn.bootcdn.net/ajax/libs/vue/3.2.45/vue.global.prod.min.js';
-            script.onerror = function() {
-                console.error('所有CDN都加载失败！');
-            };
-            script.onload = function() {
-                console.log('✓ 备用CDN2加载成功');
-            };
-            document.head.appendChild(script);
-        }
+        // 显示Vue加载错误页面
+        window.showVueError = function() {
+            if (document.body) {
+                document.body.innerHTML = `
+                    <div style="display: flex; justify-content: center; align-items: center; height: 100vh; flex-direction: column; gap: 20px; padding: 20px; text-align: center; background: #f5f7fb;">
+                        <div style="font-size: 64px;">⚠️</div>
+                        <h1 style="color: #f94144; margin: 0;">Vue.js加载失败</h1>
+                        <p style="font-size: 16px; color: #666; max-width: 600px;">无法加载Vue.js框架，可能的原因：</p>
+                        <ul style="text-align: left; max-width: 500px; color: #666; line-height: 1.8;">
+                            <li>网络连接问题</li>
+                            <li>CDN服务不可用</li>
+                            <li>防火墙或代理设置阻止</li>
+                            <li>地区限制</li>
+                        </ul>
+                        <p style="color: #666; font-weight: 600;">建议：</p>
+                        <ul style="text-align: left; max-width: 500px; color: #666; line-height: 1.8;">
+                            <li>检查网络连接</li>
+                            <li>刷新页面重试</li>
+                            <li>使用VPN或更换网络</li>
+                            <li>联系网站管理员</li>
+                        </ul>
+                        <button onclick="location.reload()" style="padding: 12px 24px; background: #4361ee; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: 600; box-shadow: 0 2px 8px rgba(67, 97, 238, 0.3); transition: all 0.3s;">
+                            刷新页面
+                        </button>
+                    </div>
+                `;
+            }
+        };
+
+        // 开始加载Vue.js
+        loadVue(0);
     </script>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/apexcharts@3.36.3/dist/apexcharts.min.js"></script>
@@ -2039,46 +2093,42 @@
         // 检查Vue是否加载 - 等待一段时间让备用CDN加载
         function checkVueLoaded(retries = 0) {
             if (typeof Vue === 'undefined') {
-                if (retries < 10) {
-                    console.log(`等待Vue加载... (${retries + 1}/10)`);
+                if (retries < 30) {  // 增加重试次数到30次（15秒），给CDN更多时间
+                    if (retries % 3 === 0) {  // 每3次重试才打印一次日志
+                        console.log(`等待Vue加载... (${Math.floor(retries/3) + 1}/10)`);
+                    }
                     setTimeout(() => checkVueLoaded(retries + 1), 500);
                 } else {
-                    console.error('Vue未加载！请检查CDN链接');
-                    document.body.innerHTML = `
-                        <div style="display: flex; justify-content: center; align-items: center; height: 100vh; flex-direction: column; gap: 20px; padding: 20px; text-align: center;">
-                            <h1 style="color: #f94144;">⚠️ Vue.js加载失败</h1>
-                            <p style="font-size: 16px; color: #666;">无法加载Vue.js框架，可能的原因：</p>
-                            <ul style="text-align: left; max-width: 500px; color: #666;">
-                                <li>网络连接问题</li>
-                                <li>CDN服务不可用</li>
-                                <li>防火墙或代理设置阻止</li>
-                            </ul>
-                            <p style="color: #666;">建议：</p>
-                            <ul style="text-align: left; max-width: 500px; color: #666;">
-                                <li>检查网络连接</li>
-                                <li>刷新页面重试</li>
-                                <li>使用VPN或更换网络</li>
-                                <li>联系网站管理员</li>
-                            </ul>
-                            <button onclick="location.reload()" style="padding: 10px 20px; background: #4361ee; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 16px;">
-                                刷新页面
-                            </button>
-                        </div>
-                    `;
+                    console.error('Vue未加载！所有CDN都失败，已重试30次');
+                    if (typeof showVueError === 'function') {
+                        showVueError();
+                    } else {
+                        // 如果showVueError未定义，直接显示错误
+                        if (document.body) {
+                            document.body.innerHTML = '<div style="padding: 20px; text-align: center;"><h1>Vue.js加载失败</h1><p>请刷新页面重试</p><button onclick="location.reload()">刷新</button></div>';
+                        }
+                    }
                 }
                 return;
             }
-            console.log('✓ Vue.js已成功加载');
-            initializeApp();
+            console.log('✓ Vue.js已成功加载，版本:', Vue.version || '未知');
+            // 再等待一小段时间确保Vue完全初始化
+            setTimeout(() => {
+                try {
+                    initializeApp();
+                } catch (error) {
+                    console.error('初始化应用失败:', error);
+                }
+            }, 200);
         }
 
         // 延迟初始化应用
         function initializeApp() {
 
-            const { createApp } = Vue;
+        const { createApp } = Vue;
 
-            // 示例数据
-            const sampleProjects = [
+        // 示例数据
+        const sampleProjects = [
             {
                 id: 1,
                 name: "网站重构项目",
