@@ -162,7 +162,10 @@
             width: 200px;
             height: 200px;
             border-radius: 50%;
-            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            background: linear-gradient(135deg,
+                rgba(0, 198, 255, 0.15) 0%,
+                rgba(0, 114, 255, 0.2) 50%,
+                rgba(0, 198, 255, 0.15) 100%);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -170,9 +173,442 @@
             color: white;
             margin-bottom: 30px;
             position: relative;
-            overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0, 198, 255, 0.3);
+            overflow: visible;
+            box-shadow:
+                0 8px 32px rgba(0, 198, 255, 0.25),
+                0 0 80px rgba(0, 198, 255, 0.15),
+                inset 0 0 40px rgba(0, 198, 255, 0.08),
+                0 0 0 2px rgba(0, 198, 255, 0.2);
+            cursor: pointer;
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                        box-shadow 0.4s ease;
+            animation: pulse-glow 4s ease-in-out infinite;
         }
+
+        @keyframes pulse-glow {
+            0%, 100% {
+                box-shadow:
+                    0 8px 32px rgba(0, 198, 255, 0.25),
+                    0 0 80px rgba(0, 198, 255, 0.15),
+                    inset 0 0 40px rgba(0, 198, 255, 0.08),
+                    0 0 0 2px rgba(0, 198, 255, 0.2);
+            }
+            50% {
+                box-shadow:
+                    0 12px 40px rgba(0, 198, 255, 0.35),
+                    0 0 100px rgba(0, 198, 255, 0.25),
+                    inset 0 0 50px rgba(0, 198, 255, 0.12),
+                    0 0 0 3px rgba(0, 198, 255, 0.3);
+            }
+        }
+
+        .profile-image:hover {
+            transform: scale(1.05);
+            box-shadow:
+                0 15px 50px rgba(0, 198, 255, 0.4),
+                0 0 120px rgba(0, 198, 255, 0.3),
+                inset 0 0 60px rgba(0, 198, 255, 0.15),
+                0 0 0 4px rgba(0, 198, 255, 0.4);
+        }
+
+        /* 优雅的光效装饰 */
+        .profile-image::before {
+            content: '';
+            position: absolute;
+            top: -3px;
+            left: -3px;
+            right: -3px;
+            bottom: -3px;
+            border-radius: 50%;
+            background: conic-gradient(
+                from 0deg,
+                transparent 0deg,
+                rgba(0, 198, 255, 0.3) 90deg,
+                transparent 180deg,
+                rgba(0, 114, 255, 0.3) 270deg,
+                transparent 360deg
+            );
+            z-index: -1;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            animation: rotate-border 6s linear infinite;
+        }
+
+        .profile-image:hover::before {
+            opacity: 0.6;
+        }
+
+        @keyframes rotate-border {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* 灵动头像容器 */
+        .animated-avatar {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            border-radius: 50%;
+            overflow: hidden;
+        }
+
+        /* 脸部 - 酷炫科技感设计 */
+        .avatar-face {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg,
+                #1a1a2e 0%,
+                #16213e 25%,
+                #0f3460 50%,
+                #1a1a2e 75%,
+                #16213e 100%);
+            border-radius: 50%;
+            position: relative;
+            transform-style: preserve-3d;
+            will-change: transform;
+            box-shadow:
+                inset 0 0 80px rgba(0, 198, 255, 0.2),
+                inset 0 0 40px rgba(0, 114, 255, 0.15),
+                0 0 60px rgba(0, 198, 255, 0.3),
+                0 0 100px rgba(0, 198, 255, 0.15);
+            overflow: hidden;
+        }
+
+        /* 科技感网格背景 */
+        .avatar-face::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image:
+                linear-gradient(rgba(0, 198, 255, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 198, 255, 0.1) 1px, transparent 1px);
+            background-size: 25px 25px;
+            opacity: 0.4;
+            animation: grid-move 15s linear infinite;
+        }
+
+        @keyframes grid-move {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(25px, 25px); }
+        }
+
+        /* 动态光效层 */
+        .avatar-face::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle,
+                rgba(0, 198, 255, 0.3) 0%,
+                rgba(0, 114, 255, 0.2) 30%,
+                transparent 60%);
+            animation: light-rotate 8s linear infinite;
+        }
+
+        @keyframes light-rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* 眼睛容器 */
+        .eyes-container {
+            position: absolute;
+            top: 35%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 70%;
+            height: 20%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 15%;
+        }
+
+        /* 单只眼睛 - 酷炫科技感设计 */
+        .eye {
+            width: 40px;
+            height: 40px;
+            background: rgba(0, 0, 0, 0.9);
+            border-radius: 50%;
+            position: relative;
+            box-shadow:
+                inset 0 2px 10px rgba(0, 0, 0, 0.6),
+                0 0 25px rgba(0, 198, 255, 0.8),
+                0 0 50px rgba(0, 198, 255, 0.5),
+                0 0 80px rgba(0, 198, 255, 0.3);
+            border: 2px solid rgba(0, 198, 255, 0.6);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            z-index: 10;
+        }
+
+        /* 眼球 - 酷炫发光效果 */
+        .eyeball {
+            width: 24px;
+            height: 24px;
+            background: radial-gradient(circle at 30% 30%,
+                #00c6ff 0%,
+                #0099ff 25%,
+                #0072ff 50%,
+                #0052cc 75%,
+                #0a0a16 100%);
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            transition: none;
+            box-shadow:
+                0 0 15px rgba(0, 198, 255, 1),
+                0 0 30px rgba(0, 198, 255, 0.8),
+                0 0 50px rgba(0, 198, 255, 0.5),
+                inset 0 0 15px rgba(0, 0, 0, 0.5),
+                inset 0 -3px 8px rgba(0, 198, 255, 0.3);
+            will-change: transform;
+            border: 1px solid rgba(0, 198, 255, 0.5);
+            animation: eye-pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes eye-pulse {
+            0%, 100% {
+                box-shadow:
+                    0 0 15px rgba(0, 198, 255, 1),
+                    0 0 30px rgba(0, 198, 255, 0.8),
+                    0 0 50px rgba(0, 198, 255, 0.5),
+                    inset 0 0 15px rgba(0, 0, 0, 0.5),
+                    inset 0 -3px 8px rgba(0, 198, 255, 0.3);
+            }
+            50% {
+                box-shadow:
+                    0 0 20px rgba(0, 198, 255, 1.2),
+                    0 0 40px rgba(0, 198, 255, 1),
+                    0 0 70px rgba(0, 198, 255, 0.7),
+                    inset 0 0 15px rgba(0, 0, 0, 0.5),
+                    inset 0 -3px 8px rgba(0, 198, 255, 0.5);
+            }
+        }
+
+        /* 眼球高光 - 更亮 */
+        .eyeball::before {
+            content: '';
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: radial-gradient(circle,
+                rgba(255, 255, 255, 1) 0%,
+                rgba(255, 255, 255, 0.9) 40%,
+                rgba(0, 198, 255, 0.5) 100%);
+            border-radius: 50%;
+            top: 4px;
+            left: 5px;
+            opacity: 1;
+            box-shadow: 0 0 6px rgba(255, 255, 255, 1);
+        }
+
+        /* 眼球内发光 - 更强烈 */
+        .eyeball::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: radial-gradient(circle,
+                rgba(0, 198, 255, 0.4) 0%,
+                rgba(0, 198, 255, 0.2) 40%,
+                transparent 70%);
+            top: 0;
+            left: 0;
+            animation: eye-glow 2s ease-in-out infinite;
+        }
+
+        @keyframes eye-glow {
+            0%, 100% { opacity: 0.6; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.1); }
+        }
+
+        /* 眉毛 - 酷炫发光设计 */
+        .eyebrow {
+            position: absolute;
+            top: -12px;
+            width: 38px;
+            height: 4px;
+            background: linear-gradient(90deg,
+                transparent 0%,
+                rgba(0, 198, 255, 0.5) 20%,
+                rgba(0, 198, 255, 0.9) 50%,
+                rgba(0, 198, 255, 0.5) 80%,
+                transparent 100%);
+            border-radius: 50px;
+            transition: all 0.2s ease;
+            box-shadow:
+                0 0 10px rgba(0, 198, 255, 0.6),
+                0 0 20px rgba(0, 198, 255, 0.4);
+            z-index: 5;
+            clip-path: polygon(0 0, 100% 0, 95% 100%, 5% 100%);
+        }
+
+        .eyebrow.left {
+            left: 0px;
+            transform: rotate(-8deg);
+        }
+
+        .eyebrow.right {
+            right: 0px;
+            transform: rotate(8deg);
+        }
+
+        /* 嘴巴 - 酷炫发光设计 */
+        .mouth {
+            position: absolute;
+            bottom: 24%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50px;
+            height: 8px;
+            background: linear-gradient(90deg,
+                transparent 0%,
+                rgba(0, 198, 255, 0.4) 20%,
+                rgba(0, 198, 255, 0.8) 50%,
+                rgba(0, 198, 255, 0.4) 80%,
+                transparent 100%);
+            border: none;
+            border-radius: 0;
+            border-bottom: 2px solid rgba(0, 198, 255, 0.8);
+            transition: all 0.3s ease;
+            box-shadow:
+                0 0 15px rgba(0, 198, 255, 0.6),
+                0 0 30px rgba(0, 198, 255, 0.4);
+            clip-path: polygon(10% 0, 90% 0, 100% 100%, 0 100%);
+        }
+
+        /* 嘴巴内发光 - 更酷炫 */
+        .mouth::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 70%;
+            height: 2px;
+            background: linear-gradient(90deg,
+                transparent,
+                rgba(0, 198, 255, 1),
+                transparent);
+            border-radius: 50px;
+            box-shadow: 0 0 10px rgba(0, 198, 255, 0.9);
+            animation: mouth-pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes mouth-pulse {
+            0%, 100% {
+                width: 60%;
+                opacity: 0.6;
+            }
+            50% {
+                width: 90%;
+                opacity: 1;
+            }
+        }
+
+        /* 科技感装饰线条 */
+        .tech-line {
+            position: absolute;
+            background: linear-gradient(90deg,
+                transparent 0%,
+                rgba(0, 198, 255, 0.4) 30%,
+                rgba(0, 198, 255, 0.7) 50%,
+                rgba(0, 198, 255, 0.4) 70%,
+                transparent 100%);
+            box-shadow: 0 0 8px rgba(0, 198, 255, 0.5);
+        }
+
+        .tech-line.horizontal {
+            width: 55px;
+            height: 2px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .tech-line.vertical {
+            width: 2px;
+            height: 55px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .tech-line.top {
+            top: 20%;
+            animation: line-pulse 3s ease-in-out infinite;
+        }
+
+        .tech-line.bottom {
+            bottom: 20%;
+            animation: line-pulse 3s ease-in-out infinite 1.5s;
+        }
+
+        .tech-line.left {
+            left: 20%;
+            animation: line-pulse-vertical 3s ease-in-out infinite 0.75s;
+        }
+
+        .tech-line.right {
+            right: 20%;
+            animation: line-pulse-vertical 3s ease-in-out infinite 2.25s;
+        }
+
+        @keyframes line-pulse {
+            0%, 100% {
+                opacity: 0.3;
+                transform: translateX(-50%) scaleX(0.7);
+            }
+            50% {
+                opacity: 0.8;
+                transform: translateX(-50%) scaleX(1);
+            }
+        }
+
+        @keyframes line-pulse-vertical {
+            0%, 100% {
+                opacity: 0.3;
+                transform: translate(-50%, -50%) scaleY(0.7);
+            }
+            50% {
+                opacity: 0.8;
+                transform: translate(-50%, -50%) scaleY(1);
+            }
+        }
+
+        /* 眨眼动画 */
+        @keyframes blink {
+            0%, 100% { transform: scaleY(1); }
+            50% { transform: scaleY(0.1); }
+        }
+
+        .eye.blinking {
+            animation: blink 0.3s ease;
+        }
+
+        /* 单眼眨眼动画 */
+        @keyframes wink {
+            0%, 100% { transform: scaleY(1); }
+            50% { transform: scaleY(0.05); }
+        }
+
+        .eye.winking {
+            animation: wink 0.2s ease;
+        }
+
+        /* 眉毛动画 */
+        @keyframes eyebrow-raise {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-2px); }
+        }
+
 
         .profile-info h2 {
             font-size: 1.8rem; /* 完全保持不变 */
@@ -615,8 +1051,28 @@
     <div class="container">
         <div class="about-content">
             <div class="profile-section">
-                <div class="profile-image">
-                    <i class="fas fa-user"></i>
+                <div class="profile-image" id="profileImage">
+                    <div class="animated-avatar">
+                        <div class="avatar-face" id="avatarFace">
+                            <!-- 科技感装饰线条 -->
+                            <div class="tech-line horizontal top"></div>
+                            <div class="tech-line horizontal bottom"></div>
+                            <div class="tech-line vertical left"></div>
+                            <div class="tech-line vertical right"></div>
+
+                            <div class="eyes-container">
+                                <div class="eye left-eye" id="leftEye">
+                                    <div class="eyebrow left"></div>
+                                    <div class="eyeball" id="leftEyeball"></div>
+                                </div>
+                                <div class="eye right-eye" id="rightEye">
+                                    <div class="eyebrow right"></div>
+                                    <div class="eyeball" id="rightEyeball"></div>
+                                </div>
+                            </div>
+                            <div class="mouth" id="mouth"></div>
+                        </div>
+                    </div>
                 </div>
                 <div class="profile-info">
                     <h2>Danley.X</h2>
@@ -974,6 +1430,714 @@
                 document.getElementById('email').value = '';
             }
         });
+
+        // 灵动头像交互功能
+        (function() {
+            const avatarFace = document.getElementById('avatarFace');
+            const leftEyeball = document.getElementById('leftEyeball');
+            const rightEyeball = document.getElementById('rightEyeball');
+            const leftEye = document.getElementById('leftEye');
+            const rightEye = document.getElementById('rightEye');
+            const mouth = document.getElementById('mouth');
+            const profileImage = document.getElementById('profileImage');
+
+            if (!avatarFace || !leftEyeball || !rightEyeball) return;
+
+            // 获取头像中心位置
+            function getAvatarCenter() {
+                const rect = profileImage.getBoundingClientRect();
+                return {
+                    x: rect.left + rect.width / 2,
+                    y: rect.top + rect.height / 2
+                };
+            }
+
+            // 计算眼球移动范围（限制在眼睛内）
+            const eyeRadius = 8; // 眼球可移动的最大半径（像素）- 增加范围让眼神更灵动
+            const headRotationLimit = 20; // 头部最大旋转角度（度）- 增加旋转范围
+
+            // 鼠标移动事件
+            let mouseX = 0, mouseY = 0;
+            let targetX = 0, targetY = 0;
+            let currentX = 0, currentY = 0;
+            let headRotationX = 0, headRotationY = 0;
+
+            // 互动状态
+            let lastMouseX = 0, lastMouseY = 0;
+            let mouseSpeed = 0;
+            let hoverTime = 0;
+            let isHovering = false;
+            let lastClickTime = 0;
+            let expressionState = 'normal'; // normal, happy, surprised, wink
+            let eyebrowOffset = 0;
+
+            // 新增互动状态
+            let mouseTrail = []; // 鼠标轨迹
+            let clickCount = 0; // 连击计数
+            let lastClickPosition = {x: 0, y: 0};
+            let mouseDistance = 0; // 鼠标距离
+            let circlePath = []; // 画圈路径
+            let isDrawingCircle = false;
+            let particleSystem = []; // 粒子系统
+            let lastMouseMoveTime = 0;
+
+            // 使用requestAnimationFrame实现平滑动画
+            function animate() {
+                // 平滑插值眼球位置 - 增加响应速度让眼神更灵动
+                currentX += (targetX - currentX) * 0.2;
+                currentY += (targetY - currentY) * 0.2;
+
+                // 限制眼球移动范围
+                const distance = Math.sqrt(currentX * currentX + currentY * currentY);
+                if (distance > eyeRadius) {
+                    currentX = (currentX / distance) * eyeRadius;
+                    currentY = (currentY / distance) * eyeRadius;
+                }
+
+                // 更新左眼球位置
+                leftEyeball.style.transform = `translate(calc(-50% + ${currentX}px), calc(-50% + ${currentY}px))`;
+
+                // 右眼球稍微延迟，增加真实感
+                const rightX = currentX * 0.95;
+                const rightY = currentY * 0.95;
+                rightEyeball.style.transform = `translate(calc(-50% + ${rightX}px), calc(-50% + ${rightY}px))`;
+
+                // 头部旋转（更平滑）
+                const center = getAvatarCenter();
+                const headTargetX = (mouseX - center.x) * 0.02;
+                const headTargetY = (mouseY - center.y) * 0.02;
+
+                // 平滑插值头部旋转 - 增加响应速度
+                headRotationX += (headTargetX - headRotationX) * 0.15;
+                headRotationY += (headTargetY - headRotationY) * 0.15;
+
+                // 限制旋转角度
+                headRotationX = Math.max(-headRotationLimit, Math.min(headRotationLimit, headRotationX));
+                headRotationY = Math.max(-headRotationLimit, Math.min(headRotationLimit, headRotationY));
+
+                avatarFace.style.transform = `perspective(1000px) rotateY(${headRotationX}deg) rotateX(${-headRotationY}deg)`;
+
+                requestAnimationFrame(animate);
+            }
+            animate();
+
+            // 表情变化函数
+            function setExpression(expression) {
+                if (expressionState === expression) return;
+                expressionState = expression;
+
+                const leftEyebrowEl = document.querySelector('.eyebrow.left');
+                const rightEyebrowEl = document.querySelector('.eyebrow.right');
+
+                switch(expression) {
+                    case 'happy':
+                        eyebrowOffset = -3;
+                        mouth.style.height = '14px';
+                        mouth.style.borderRadius = '0 0 50px 50px';
+                        break;
+                    case 'surprised':
+                        eyebrowOffset = 4;
+                        leftEye.style.transform = 'scale(1.15)';
+                        rightEye.style.transform = 'scale(1.15)';
+                        mouth.style.width = '35px';
+                        mouth.style.height = '10px';
+                        mouth.style.borderRadius = '50px';
+                        setTimeout(() => {
+                            leftEye.style.transform = '';
+                            rightEye.style.transform = '';
+                        }, 500);
+                        break;
+                    case 'wink':
+                        leftEye.classList.add('winking');
+                        setTimeout(() => {
+                            leftEye.classList.remove('winking');
+                        }, 200);
+                        break;
+                    default:
+                        eyebrowOffset = 0;
+                        mouth.style.height = '12px';
+                        mouth.style.borderRadius = '0 0 50px 50px';
+                }
+
+                if (leftEyebrowEl && rightEyebrowEl) {
+                    leftEyebrowEl.style.transform = `rotate(${-8 + eyebrowOffset}deg)`;
+                    rightEyebrowEl.style.transform = `rotate(${8 + eyebrowOffset}deg)`;
+                }
+            }
+
+            // 鼠标移动处理 - 添加速度检测和表情变化
+            document.addEventListener('mousemove', function(e) {
+                mouseX = e.clientX;
+                mouseY = e.clientY;
+
+                // 计算鼠标速度
+                const deltaTime = 16; // 假设60fps
+                const dx = mouseX - lastMouseX;
+                const dy = mouseY - lastMouseY;
+                mouseSpeed = Math.sqrt(dx * dx + dy * dy) / deltaTime;
+
+                lastMouseX = mouseX;
+                lastMouseY = mouseY;
+
+                const center = getAvatarCenter();
+                const deltaX = mouseX - center.x;
+                const deltaY = mouseY - center.y;
+                const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+
+                // 根据鼠标速度改变表情
+                if (mouseSpeed > 5 && distance < 150) {
+                    setExpression('surprised');
+                    setTimeout(() => setExpression('normal'), 800);
+                }
+
+                // 鼠标在眼睛附近时的特殊反应
+                const eyeCenterY = center.y - 30;
+                const eyeCenterX = center.x;
+                const eyeDistance = Math.sqrt((mouseX - eyeCenterX) ** 2 + (mouseY - eyeCenterY) ** 2);
+
+                if (eyeDistance < 50 && isHovering) {
+                    // 眼睛稍微放大，表示关注
+                    leftEye.style.transform = 'scale(1.08)';
+                    rightEye.style.transform = 'scale(1.08)';
+                } else if (isHovering) {
+                    leftEye.style.transform = 'scale(1.12)';
+                    rightEye.style.transform = 'scale(1.12)';
+                }
+
+                // 将鼠标位置转换为眼球移动向量
+                const scale = 0.3;
+                targetX = deltaX * scale;
+                targetY = deltaY * scale;
+
+                // 记录鼠标轨迹用于画圈检测
+                const relativeX = mouseX - center.x;
+                const relativeY = mouseY - center.y;
+                mouseTrail.push({x: relativeX, y: relativeY, time: Date.now()});
+
+                // 只保留最近1秒的轨迹
+                mouseTrail = mouseTrail.filter(point => Date.now() - point.time < 1000);
+
+                // 检测画圈动作
+                if (mouseTrail.length > 20 && distance < 120) {
+                    detectCircle();
+                }
+
+                // 根据距离调整反应强度
+                if (distance < 80) {
+                    // 非常近 - 眼睛放大更多
+                    if (!isHovering) {
+                        leftEye.style.transform = 'scale(1.15)';
+                        rightEye.style.transform = 'scale(1.15)';
+                    }
+                } else if (distance < 150) {
+                    // 中等距离 - 正常反应
+                    if (!isHovering) {
+                        leftEye.style.transform = 'scale(1.05)';
+                        rightEye.style.transform = 'scale(1.05)';
+                    }
+                } else {
+                    // 远距离 - 恢复正常
+                    if (!isHovering) {
+                        leftEye.style.transform = 'scale(1)';
+                        rightEye.style.transform = 'scale(1)';
+                    }
+                }
+
+                // 快速移动时创建粒子轨迹
+                if (mouseSpeed > 8 && distance < 200) {
+                    createParticle(mouseX, mouseY);
+                }
+
+                lastMouseMoveTime = Date.now();
+            });
+
+            // 检测画圈动作
+            function detectCircle() {
+                if (mouseTrail.length < 20) return;
+
+                const recentTrail = mouseTrail.slice(-20);
+                const trailCenter = {x: 0, y: 0};
+                recentTrail.forEach(p => {
+                    trailCenter.x += p.x;
+                    trailCenter.y += p.y;
+                });
+                trailCenter.x /= recentTrail.length;
+                trailCenter.y /= recentTrail.length;
+
+                let angles = [];
+                recentTrail.forEach(p => {
+                    const angle = Math.atan2(p.y - trailCenter.y, p.x - trailCenter.x);
+                    angles.push(angle);
+                });
+
+                // 检测角度变化是否接近360度
+                let totalAngleChange = 0;
+                for (let i = 1; i < angles.length; i++) {
+                    let diff = angles[i] - angles[i-1];
+                    if (diff > Math.PI) diff -= 2 * Math.PI;
+                    if (diff < -Math.PI) diff += 2 * Math.PI;
+                    totalAngleChange += diff;
+                }
+
+                if (Math.abs(totalAngleChange) > 5 && !isDrawingCircle) {
+                    isDrawingCircle = true;
+                    setExpression('surprised');
+                    // 创建圆形粒子特效
+                    createCircleEffect();
+                    setTimeout(() => {
+                        isDrawingCircle = false;
+                        setExpression('normal');
+                    }, 1000);
+                }
+            }
+
+            // 创建圆形粒子特效
+            function createCircleEffect() {
+                const center = getAvatarCenter();
+                for (let i = 0; i < 20; i++) {
+                    const angle = (i / 20) * Math.PI * 2;
+                    const radius = 100;
+                    const x = center.x + Math.cos(angle) * radius;
+                    const y = center.y + Math.sin(angle) * radius;
+                    setTimeout(() => createParticle(x, y), i * 30);
+                }
+            }
+
+            // 创建粒子
+            function createParticle(x, y) {
+                const particle = document.createElement('div');
+                const size = Math.random() * 4 + 2;
+                particle.style.cssText = `
+                    position: fixed;
+                    width: ${size}px;
+                    height: ${size}px;
+                    background: radial-gradient(circle, rgba(0, 198, 255, 1), rgba(0, 198, 255, 0));
+                    border-radius: 50%;
+                    pointer-events: none;
+                    left: ${x}px;
+                    top: ${y}px;
+                    transform: translate(-50%, -50%);
+                    z-index: 9999;
+                    box-shadow: 0 0 10px rgba(0, 198, 255, 0.8);
+                    animation: particle-fade 0.8s ease-out forwards;
+                `;
+                document.body.appendChild(particle);
+
+                // 随机方向移动
+                const vx = (Math.random() - 0.5) * 4;
+                const vy = (Math.random() - 0.5) * 4;
+
+                let opacity = 1;
+                let currentX = x;
+                let currentY = y;
+
+                function animateParticle() {
+                    opacity -= 0.02;
+                    currentX += vx;
+                    currentY += vy;
+
+                    particle.style.opacity = opacity;
+                    particle.style.left = currentX + 'px';
+                    particle.style.top = currentY + 'px';
+
+                    if (opacity > 0) {
+                        requestAnimationFrame(animateParticle);
+                    } else {
+                        particle.remove();
+                    }
+                }
+                animateParticle();
+            }
+
+            // 眨眼动画 - 添加随机单眼眨眼
+            let blinkTimeout;
+            function scheduleBlink() {
+                clearTimeout(blinkTimeout);
+                const delay = Math.random() * 3000 + 2000; // 2-5秒随机眨眼
+                blinkTimeout = setTimeout(() => {
+                    // 随机选择单眼或双眼眨眼
+                    if (Math.random() > 0.7 && expressionState === 'normal') {
+                        // 单眼眨眼（30%概率）
+                        const randomEye = Math.random() > 0.5 ? leftEye : rightEye;
+                        randomEye.classList.add('blinking');
+                        setTimeout(() => {
+                            randomEye.classList.remove('blinking');
+                            scheduleBlink();
+                        }, 200);
+                    } else {
+                        // 双眼眨眼
+                        leftEye.classList.add('blinking');
+                        rightEye.classList.add('blinking');
+                        setTimeout(() => {
+                            leftEye.classList.remove('blinking');
+                            rightEye.classList.remove('blinking');
+                            scheduleBlink();
+                        }, 300);
+                    }
+                }, delay);
+            }
+            scheduleBlink();
+
+            // 随机眉毛动作
+            let eyebrowTimeout;
+            function scheduleEyebrowAction() {
+                clearTimeout(eyebrowTimeout);
+                const delay = Math.random() * 5000 + 3000; // 3-8秒随机动作
+                eyebrowTimeout = setTimeout(() => {
+                    if (expressionState === 'normal' && !isHovering) {
+                        const leftEyebrowEl = document.querySelector('.eyebrow.left');
+                        const rightEyebrowEl = document.querySelector('.eyebrow.right');
+
+                        if (leftEyebrowEl && rightEyebrowEl) {
+                            // 眉毛轻微上扬
+                            leftEyebrowEl.style.transform = 'rotate(-5deg) translateY(-2px)';
+                            rightEyebrowEl.style.transform = 'rotate(5deg) translateY(-2px)';
+
+                            setTimeout(() => {
+                                leftEyebrowEl.style.transform = 'rotate(-8deg)';
+                                rightEyebrowEl.style.transform = 'rotate(8deg)';
+                            }, 400);
+                        }
+                    }
+                    scheduleEyebrowAction();
+                }, delay);
+            }
+            scheduleEyebrowAction();
+
+            // 随机头部轻微摆动
+            let idleTimeout;
+            function scheduleIdleMovement() {
+                clearTimeout(idleTimeout);
+                const delay = Math.random() * 4000 + 2000; // 2-6秒随机动作
+                idleTimeout = setTimeout(() => {
+                    if (!isHovering && expressionState === 'normal') {
+                        // 轻微的随机摆动
+                        const randomX = (Math.random() - 0.5) * 5;
+                        const randomY = (Math.random() - 0.5) * 5;
+
+                        avatarFace.style.transform = `perspective(1000px) rotateY(${randomX}deg) rotateX(${-randomY}deg)`;
+
+                        setTimeout(() => {
+                            avatarFace.style.transform = '';
+                        }, 600);
+                    }
+                    scheduleIdleMovement();
+                }, delay);
+            }
+            scheduleIdleMovement();
+
+            // 鼠标靠近时眼睛变大并增强发光（更优雅的互动效果）
+            profileImage.addEventListener('mouseenter', function() {
+                isHovering = true;
+                hoverTime = 0;
+
+                leftEye.style.transform = 'scale(1.12)';
+                rightEye.style.transform = 'scale(1.12)';
+                leftEye.style.boxShadow = `
+                    inset 0 2px 8px rgba(0, 0, 0, 0.1),
+                    inset 0 -2px 8px rgba(0, 198, 255, 0.3),
+                    0 0 35px rgba(0, 198, 255, 0.6),
+                    0 0 70px rgba(0, 198, 255, 0.4)
+                `;
+                rightEye.style.boxShadow = `
+                    inset 0 2px 8px rgba(0, 0, 0, 0.1),
+                    inset 0 -2px 8px rgba(0, 198, 255, 0.3),
+                    0 0 35px rgba(0, 198, 255, 0.6),
+                    0 0 70px rgba(0, 198, 255, 0.4)
+                `;
+                mouth.style.width = '55px';
+                mouth.style.boxShadow = `
+                    0 0 18px rgba(0, 198, 255, 0.6),
+                    inset 0 -2px 4px rgba(0, 198, 255, 0.3)
+                `;
+
+                // 悬停一段时间后显示开心表情
+                setTimeout(() => {
+                    if (isHovering) {
+                        setExpression('happy');
+                    }
+                }, 1500);
+            });
+
+            profileImage.addEventListener('mouseleave', function(e) {
+                isHovering = false;
+                hoverTime = 0;
+
+                // 清除停留计时器
+                if (hoverTimer) {
+                    clearInterval(hoverTimer);
+                    hoverTimer = null;
+                }
+
+                // 告别动画 - 根据离开方向决定
+                const center = getAvatarCenter();
+                const leaveX = e.clientX - center.x;
+                const leaveY = e.clientY - center.y;
+
+                // 眼球看向离开方向
+                const lookX = Math.sign(leaveX) * 8;
+                const lookY = Math.sign(leaveY) * 8;
+                targetX = lookX;
+                targetY = lookY;
+
+                // 告别眨眼
+                setTimeout(() => {
+                    leftEye.classList.add('blinking');
+                    rightEye.classList.add('blinking');
+                    setTimeout(() => {
+                        leftEye.classList.remove('blinking');
+                        rightEye.classList.remove('blinking');
+                    }, 300);
+                }, 200);
+
+                // 创建告别粒子
+                for (let i = 0; i < 5; i++) {
+                    setTimeout(() => {
+                        createParticle(center.x, center.y);
+                    }, i * 100);
+                }
+
+                setTimeout(() => {
+                    setExpression('normal');
+                    leftEye.style.transform = 'scale(1)';
+                    rightEye.style.transform = 'scale(1)';
+                    leftEye.style.boxShadow = `
+                        inset 0 2px 8px rgba(0, 0, 0, 0.1),
+                        inset 0 -2px 8px rgba(0, 198, 255, 0.2),
+                        0 0 25px rgba(0, 198, 255, 0.4),
+                        0 0 50px rgba(0, 198, 255, 0.2)
+                    `;
+                    rightEye.style.boxShadow = `
+                        inset 0 2px 8px rgba(0, 0, 0, 0.1),
+                        inset 0 -2px 8px rgba(0, 198, 255, 0.2),
+                        0 0 25px rgba(0, 198, 255, 0.4),
+                        0 0 50px rgba(0, 198, 255, 0.2)
+                    `;
+                    mouth.style.width = '50px';
+                    mouth.style.boxShadow = `
+                        0 0 12px rgba(0, 198, 255, 0.4),
+                        inset 0 -2px 4px rgba(0, 198, 255, 0.2)
+                    `;
+                }, 800);
+            });
+
+            // 鼠标点击时眨眼并触发特效 - 增强版
+            profileImage.addEventListener('click', function(e) {
+                const currentTime = Date.now();
+                const timeSinceLastClick = currentTime - lastClickTime;
+                const center = getAvatarCenter();
+                const clickDistance = Math.sqrt((e.clientX - center.x) ** 2 + (e.clientY - center.y) ** 2);
+
+                // 检测连击（500ms内连续点击）
+                if (timeSinceLastClick < 500) {
+                    clickCount++;
+                } else {
+                    clickCount = 1;
+                }
+
+                // 双击检测（300ms内）
+                if (timeSinceLastClick < 300) {
+                    // 双击：眨眼 + 开心表情
+                    setExpression('happy');
+                    leftEye.classList.add('blinking');
+                    rightEye.classList.add('blinking');
+
+                    // 创建多个波纹特效
+                    for (let i = 0; i < 3; i++) {
+                        setTimeout(() => {
+                            const ripple = createRipple(e.offsetX, e.offsetY, i * 0.2);
+                            profileImage.appendChild(ripple);
+                            setTimeout(() => ripple.remove(), 800);
+                        }, i * 100);
+                    }
+
+                    setTimeout(() => {
+                        leftEye.classList.remove('blinking');
+                        rightEye.classList.remove('blinking');
+                        setTimeout(() => setExpression('normal'), 1000);
+                    }, 300);
+                } else if (clickCount >= 5) {
+                    // 连击5次以上：特殊反应
+                    setExpression('surprised');
+                    for (let i = 0; i < 10; i++) {
+                        setTimeout(() => {
+                            createParticle(
+                                center.x + (Math.random() - 0.5) * 200,
+                                center.y + (Math.random() - 0.5) * 200
+                            );
+                        }, i * 50);
+                    }
+                    clickCount = 0;
+                    setTimeout(() => setExpression('normal'), 1500);
+                } else {
+                    // 单击：眨眼 + 随机表情
+                    leftEye.classList.add('blinking');
+                    rightEye.classList.add('blinking');
+
+                    // 根据点击位置决定反应
+                    if (clickDistance < 50) {
+                        // 点击眼睛附近
+                        setExpression('surprised');
+                        setTimeout(() => setExpression('normal'), 800);
+                    } else if (clickDistance < 80) {
+                        // 点击脸部
+                        if (Math.random() > 0.5) {
+                            const randomEye = Math.random() > 0.5 ? leftEye : rightEye;
+                            randomEye.classList.add('winking');
+                            setTimeout(() => {
+                                randomEye.classList.remove('winking');
+                            }, 200);
+                        }
+                    }
+
+                    // 创建点击特效
+                    const ripple = createRipple(e.offsetX, e.offsetY, 0);
+                    profileImage.appendChild(ripple);
+
+                    setTimeout(() => {
+                        leftEye.classList.remove('blinking');
+                        rightEye.classList.remove('blinking');
+                        ripple.remove();
+                    }, 300);
+                }
+
+                lastClickTime = currentTime;
+                lastClickPosition = {x: e.clientX, y: e.clientY};
+            });
+
+            // 鼠标滚轮交互
+            profileImage.addEventListener('wheel', function(e) {
+                e.preventDefault();
+                const delta = e.deltaY;
+
+                if (delta > 0) {
+                    // 向下滚动 - 眼睛缩小（害羞）
+                    leftEye.style.transform = 'scale(0.9)';
+                    rightEye.style.transform = 'scale(0.9)';
+                    setExpression('happy');
+                } else {
+                    // 向上滚动 - 眼睛放大（好奇）
+                    leftEye.style.transform = 'scale(1.2)';
+                    rightEye.style.transform = 'scale(1.2)';
+                    setExpression('surprised');
+                }
+
+                setTimeout(() => {
+                    leftEye.style.transform = '';
+                    rightEye.style.transform = '';
+                    setExpression('normal');
+                }, 500);
+            });
+
+            // 键盘交互
+            document.addEventListener('keydown', function(e) {
+                if (e.code === 'Space' && isHovering) {
+                    // 按空格键 - 眨眼
+                    leftEye.classList.add('blinking');
+                    rightEye.classList.add('blinking');
+                    setTimeout(() => {
+                        leftEye.classList.remove('blinking');
+                        rightEye.classList.remove('blinking');
+                    }, 300);
+                } else if (e.key === 'h' || e.key === 'H') {
+                    // 按H键 - 显示开心表情
+                    setExpression('happy');
+                    setTimeout(() => setExpression('normal'), 2000);
+                } else if (e.key === 's' || e.key === 'S') {
+                    // 按S键 - 显示惊讶表情
+                    setExpression('surprised');
+                    setTimeout(() => setExpression('normal'), 1000);
+                }
+            });
+
+            // 创建波纹特效的辅助函数
+            function createRipple(x, y, delay) {
+                const ripple = document.createElement('div');
+                ripple.style.cssText = `
+                    position: absolute;
+                    width: 20px;
+                    height: 20px;
+                    border-radius: 50%;
+                    background: radial-gradient(circle, rgba(0, 198, 255, 0.8), rgba(0, 198, 255, 0.4));
+                    pointer-events: none;
+                    left: ${x}px;
+                    top: ${y}px;
+                    transform: translate(-50%, -50%);
+                    animation: ripple-effect 0.8s ease-out ${delay}s;
+                    z-index: 1000;
+                    box-shadow: 0 0 20px rgba(0, 198, 255, 0.6);
+                `;
+                return ripple;
+            }
+
+            // 添加点击波纹动画和其他动画
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes ripple-effect {
+                    0% {
+                        transform: translate(-50%, -50%) scale(0);
+                        opacity: 1;
+                        box-shadow: 0 0 20px rgba(0, 198, 255, 0.6);
+                    }
+                    50% {
+                        opacity: 0.8;
+                        box-shadow: 0 0 40px rgba(0, 198, 255, 0.4);
+                    }
+                    100% {
+                        transform: translate(-50%, -50%) scale(12);
+                        opacity: 0;
+                        box-shadow: 0 0 60px rgba(0, 198, 255, 0);
+                    }
+                }
+
+                @keyframes happy-bounce {
+                    0%, 100% { transform: translateY(0); }
+                    50% { transform: translateY(-3px); }
+                }
+
+                @keyframes particle-fade {
+                    0% {
+                        opacity: 1;
+                        transform: translate(-50%, -50%) scale(1);
+                    }
+                    100% {
+                        opacity: 0;
+                        transform: translate(-50%, -50%) scale(0);
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+
+            // 长时间停留检测
+            let hoverTimer;
+            profileImage.addEventListener('mouseenter', function() {
+                hoverTimer = setInterval(() => {
+                    hoverTime += 100;
+                    if (hoverTime > 5000 && isHovering) {
+                        // 停留5秒以上 - 特殊反应
+                        setExpression('happy');
+                        // 创建心形粒子效果
+                        const center = getAvatarCenter();
+                        for (let i = 0; i < 15; i++) {
+                            setTimeout(() => {
+                                const angle = (i / 15) * Math.PI * 2;
+                                const radius = 80 + Math.random() * 40;
+                                const x = center.x + Math.cos(angle) * radius;
+                                const y = center.y + Math.sin(angle) * radius;
+                                createParticle(x, y);
+                            }, i * 50);
+                        }
+                        hoverTime = 0; // 重置计时器
+                    }
+                }, 100);
+            });
+
+            // 鼠标离开页面时，眼球和头部回到中心
+            document.addEventListener('mouseleave', function() {
+                targetX = 0;
+                targetY = 0;
+            });
+        })();
     </script>
 </body>
 </html>
