@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>粒子艺术画布 - 交互式视觉体验</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            min-height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+
+        #canvas {
+            display: block;
+            cursor: crosshair;
+            background: radial-gradient(circle at center, #1a1a2e 0%, #0f0c29 100%);
+        }
+
+        .controls {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            min-width: 250px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .controls h2 {
+            margin-bottom: 15px;
+            font-size: 18px;
+            text-align: center;
+            color: #fff;
+            text-shadow: 0 2px 10px rgba(255, 255, 255, 0.3);
+        }
+
+        .control-group {
+            margin-bottom: 15px;
+        }
+
+        .control-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 12px;
+            opacity: 0.9;
+        }
+
+        .control-group input[type="range"] {
+            width: 100%;
+            margin-bottom: 5px;
+        }
+
+        .control-group input[type="color"] {
+            width: 100%;
+            height: 40px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        button {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .info {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 15px;
+            border-radius: 10px;
+            color: white;
+            font-size: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .info p {
+            margin: 5px 0;
+        }
+
+        .value-display {
+            display: inline-block;
+            min-width: 40px;
+            text-align: right;
+            color: #ffd700;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+
+    <div class="controls">
+        <h2>🎨 粒子控制面板</h2>
+
+        <div class="control-group">
+            <label>粒子数量: <span class="value-display" id="particleCount">50</span></label>
+            <input type="range" id="particleSlider" min="10" max="200" value="50">
+        </div>
+
+        <div class="control-group">
+            <label>粒子速度: <span class="value-display" id="speedValue">2</span></label>
+            <input type="range" id="speedSlider" min="0.5" max="5" step="0.1" value="2">
+        </div>
+
+        <div class="control-group">
+            <label>粒子大小: <span class="value-display" id="sizeValue">3</span></label>
+            <input type="range" id="sizeSlider" min="1" max="10" value="3">
+        </div>
+
+        <div class="control-group">
+            <label>连接距离: <span class="value-display" id="distanceValue">150</span></label>
+            <input type="range" id="distanceSlider" min="50" max="300" value="150">
+        </div>
+
+        <div class="control-group">
+            <label>粒子颜色:</label>
+            <input type="color" id="colorPicker" value="#00ffff">
+        </div>
+
+        <div class="button-group">
+            <button id="clearBtn">清除画布</button>
+            <button id="randomBtn">随机模式</button>
+        </div>
+    </div>
+
+    <div class="info">
+        <p><strong>💡 使用提示:</strong></p>
+        <p>• 点击鼠标创建粒子</p>
+        <p>• 移动鼠标绘制轨迹</p>
+        <p>• 粒子会自动连接</p>
+        <p>• 调整参数改变效果</p>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        // 设置画布大小
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        // 粒子类
+        class Particle {
+            constructor(x, y, color) {
+                this.x = x;
+                this.y = y;
+                this.vx = (Math.random() - 0.5) * getSpeed();
+                this.vy = (Math.random() - 0.5) * getSpeed();
+                this.color = color;
+                this.size = getSize();
+                this.life = 1.0;
+                this.decay = Math.random() * 0.02 + 0.005;
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                this.life -= this.decay;
+
+                // 边界反弹
+                if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
+                if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
+
+                // 限制在画布内
+                this.x = Math.max(0, Math.min(canvas.width, this.x));
+                this.y = Math.max(0, Math.min(canvas.height, this.y));
+            }
+
+            draw() {
+                ctx.save();
+                ctx.globalAlpha = this.life;
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+
+                // 添加光晕效果
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = this.color;
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+
+        let particles = [];
+        let mouseX = 0;
+        let mouseY = 0;
+        let isMouseDown = false;
+        let lastParticleTime = 0;
+
+        // 获取控制值
+        function getParticleCount() {
+            return parseInt(document.getElementById('particleSlider').value);
+        }
+
+        function getSpeed() {
+            return parseFloat(document.getElementById('speedSlider').value);
+        }
+
+        function getSize() {
+            return parseInt(document.getElementById('sizeSlider').value);
+        }
+
+        function getDistance() {
+            return parseInt(document.getElementById('distanceSlider').value);
+        }
+
+        function getColor() {
+            return document.getElementById('colorPicker').value;
+        }
+
+        // 创建粒子
+        function createParticles(x, y, count) {
+            const color = getColor();
+            for (let i = 0; i < count; i++) {
+                const angle = (Math.PI * 2 / count) * i;
+                const distance = Math.random() * 20;
+                const px = x + Math.cos(angle) * distance;
+                const py = y + Math.sin(angle) * distance;
+                particles.push(new Particle(px, py, color));
+            }
+        }
+
+        // 绘制连接线
+        function drawConnections() {
+            const maxDistance = getDistance();
+            for (let i = 0; i < particles.length; i++) {
+                for (let j = i + 1; j < particles.length; j++) {
+                    const dx = particles[i].x - particles[j].x;
+                    const dy = particles[i].y - particles[j].y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+
+                    if (distance < maxDistance) {
+                        const opacity = (1 - distance / maxDistance) * 0.3;
+                        ctx.strokeStyle = `rgba(255, 255, 255, ${opacity})`;
+                        ctx.lineWidth = 1;
+                        ctx.beginPath();
+                        ctx.moveTo(particles[i].x, particles[i].y);
+                        ctx.lineTo(particles[j].x, particles[j].y);
+                        ctx.stroke();
+                    }
+                }
+            }
+        }
+
+        // 动画循环
+        function animate() {
+            ctx.fillStyle = 'rgba(15, 12, 41, 0.1)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // 更新和绘制粒子
+            for (let i = particles.length - 1; i >= 0; i--) {
+                particles[i].update();
+                if (particles[i].life > 0) {
+                    particles[i].draw();
+                } else {
+                    particles.splice(i, 1);
+                }
+            }
+
+            // 绘制连接
+            drawConnections();
+
+            // 鼠标移动时创建粒子
+            if (isMouseDown) {
+                const now = Date.now();
+                if (now - lastParticleTime > 50) {
+                    createParticles(mouseX, mouseY, Math.floor(getParticleCount() / 10));
+                    lastParticleTime = now;
+                }
+            }
+
+            requestAnimationFrame(animate);
+        }
+
+        // 事件监听
+        canvas.addEventListener('mousedown', (e) => {
+            isMouseDown = true;
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+            createParticles(mouseX, mouseY, getParticleCount());
+        });
+
+        canvas.addEventListener('mouseup', () => {
+            isMouseDown = false;
+        });
+
+        canvas.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+        });
+
+        canvas.addEventListener('click', (e) => {
+            createParticles(e.clientX, e.clientY, getParticleCount());
+        });
+
+        // 触摸支持
+        canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            const touch = e.touches[0];
+            mouseX = touch.clientX;
+            mouseY = touch.clientY;
+            isMouseDown = true;
+            createParticles(mouseX, mouseY, getParticleCount());
+        });
+
+        canvas.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            const touch = e.touches[0];
+            mouseX = touch.clientX;
+            mouseY = touch.clientY;
+        });
+
+        canvas.addEventListener('touchend', () => {
+            isMouseDown = false;
+        });
+
+        // 控制面板更新
+        document.getElementById('particleSlider').addEventListener('input', (e) => {
+            document.getElementById('particleCount').textContent = e.target.value;
+        });
+
+        document.getElementById('speedSlider').addEventListener('input', (e) => {
+            document.getElementById('speedValue').textContent = parseFloat(e.target.value).toFixed(1);
+            // 更新现有粒子的速度
+            particles.forEach(p => {
+                p.vx = (Math.random() - 0.5) * getSpeed();
+                p.vy = (Math.random() - 0.5) * getSpeed();
+            });
+        });
+
+        document.getElementById('sizeSlider').addEventListener('input', (e) => {
+            document.getElementById('sizeValue').textContent = e.target.value;
+        });
+
+        document.getElementById('distanceSlider').addEventListener('input', (e) => {
+            document.getElementById('distanceValue').textContent = e.target.value;
+        });
+
+        // 清除按钮
+        document.getElementById('clearBtn').addEventListener('click', () => {
+            particles = [];
+        });
+
+        // 随机模式按钮
+        document.getElementById('randomBtn').addEventListener('click', () => {
+            const colors = ['#ff0080', '#00ffff', '#ffff00', '#ff00ff', '#00ff00', '#ff8000'];
+            document.getElementById('colorPicker').value = colors[Math.floor(Math.random() * colors.length)];
+            document.getElementById('particleSlider').value = Math.floor(Math.random() * 100) + 50;
+            document.getElementById('speedSlider').value = (Math.random() * 3 + 1).toFixed(1);
+            document.getElementById('sizeSlider').value = Math.floor(Math.random() * 5) + 2;
+            document.getElementById('distanceSlider').value = Math.floor(Math.random() * 150) + 100;
+
+            // 更新显示
+            document.getElementById('particleCount').textContent = document.getElementById('particleSlider').value;
+            document.getElementById('speedValue').textContent = document.getElementById('speedSlider').value;
+            document.getElementById('sizeValue').textContent = document.getElementById('sizeSlider').value;
+            document.getElementById('distanceValue').textContent = document.getElementById('distanceSlider').value;
+        });
+
+        // 启动动画
+        animate();
+
+        // 初始创建一些粒子
+        for (let i = 0; i < 20; i++) {
+            createParticles(
+                Math.random() * canvas.width,
+                Math.random() * canvas.height,
+                1
+            );
+        }
+    </script>
+</body>
+</html>
