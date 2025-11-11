@@ -476,6 +476,46 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+
+        .view-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .view-actions-group {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding-right: 0.5rem;
+            margin-right: 0.5rem;
+            border-right: 1px solid var(--border-color);
+        }
+
+        .view-actions-group:last-child {
+            border-right: none;
+            padding-right: 0;
+            margin-right: 0;
+        }
+
+        .btn-icon {
+            padding: 0.5rem 0.75rem;
+            min-width: auto;
+        }
+
+        .btn-icon i {
+            margin: 0;
+        }
+
+        .btn-calendar {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
         }
 
         .view-content {
@@ -1603,17 +1643,20 @@
                     <div class="view-header">
                         <h3>{{ currentViewName }}视图</h3>
                         <div class="view-actions">
-                            <button class="btn btn-outline" v-if="currentView === 'gantt'" @click="toggleFullscreen">
+                            <div class="view-actions-group" v-if="currentView === 'gantt' || currentView === 'kanban' || currentView === 'calendar'">
+                                <button class="btn btn-outline btn-icon" @click="printView" title="打印">
+                                    <i class="fas fa-print"></i>
+                            </button>
+                                <button class="btn btn-outline btn-icon" @click="exportToPDF" title="导出PDF">
+                                    <i class="fas fa-file-pdf"></i>
+                            </button>
+                            </div>
+                            <button class="btn btn-outline" v-if="currentView === 'gantt'" @click="toggleFullscreen" title="全屏">
                                 <i class="fas fa-expand"></i> 全屏
                             </button>
-                            <button class="btn btn-outline" v-if="currentView === 'gantt' || currentView === 'kanban' || currentView === 'calendar'" @click="printView">
-                                <i class="fas fa-print"></i> 打印
-                            </button>
-                            <button class="btn btn-outline" v-if="currentView === 'gantt' || currentView === 'kanban' || currentView === 'calendar'" @click="exportToPDF">
-                                <i class="fas fa-file-pdf"></i> 导出PDF
-                            </button>
-                            <button class="btn btn-outline" v-if="currentView === 'calendar'" @click="showCalendarPicker = !showCalendarPicker">
-                                <i class="fas fa-calendar-alt"></i> {{ currentMonth }} {{ currentYear }}
+                            <button class="btn btn-outline btn-calendar" v-if="currentView === 'calendar'" @click="showCalendarPicker = !showCalendarPicker" title="选择月份">
+                                <i class="fas fa-calendar-alt"></i>
+                                <span>{{ currentMonth }} {{ currentYear }}</span>
                             </button>
                         </div>
                     </div>
@@ -1794,14 +1837,28 @@
 
                         <!-- 资源视图 -->
                         <div v-if="currentView === 'resource'" class="resource-container">
+                            <div v-if="!currentProject" class="empty-state" style="width: 100%; height: 100%;">
+                                <i class="fas fa-folder-open"></i>
+                                <p>请先选择一个项目</p>
+                            </div>
+                            <template v-else>
                             <div class="resource-chart" id="resourceChart"></div>
                             <div class="resource-list">
-                                <div v-for="member in teamMembers" :key="member.id" class="resource-item">
-                                    <div class="resource-avatar">
+                                    <div v-for="member in computedTeamMembers" :key="member.id" class="resource-item">
+                                        <div class="resource-avatar" :style="{
+                                            background: member.load > 90 ? 'linear-gradient(135deg, #f94144, #d32f2f)' :
+                                                       member.load > 70 ? 'linear-gradient(135deg, #f8961e, #f57c00)' :
+                                                       'linear-gradient(135deg, var(--primary), var(--secondary))'
+                                        }">
                                         {{ getInitials(member.name) }}
                                     </div>
                                     <div class="resource-info">
-                                        <div class="resource-name">{{ member.name }}</div>
+                                            <div class="resource-name">
+                                                {{ member.name }}
+                                                <span style="font-size: 0.75rem; color: var(--gray); margin-left: 0.5rem;">
+                                                    ({{ member.activeTaskCount }}/{{ member.taskCount }} 任务)
+                                                </span>
+                                            </div>
                                         <div class="resource-skills">
                                             <span v-for="skill in member.skills" :key="skill" class="skill-tag">
                                                 {{ skill }}
@@ -1809,11 +1866,16 @@
                                         </div>
                                     </div>
                                     <div class="resource-load">
-                                        <div class="load-value">{{ member.load }}%</div>
+                                            <div class="load-value" :style="{
+                                                color: member.load > 90 ? '#f94144' :
+                                                       member.load > 70 ? '#f8961e' :
+                                                       'var(--primary)'
+                                            }">{{ member.load }}%</div>
                                         <div class="load-label">负载</div>
                                     </div>
                                 </div>
                             </div>
+                            </template>
                         </div>
                     </div>
                 </div>
@@ -1881,17 +1943,38 @@
                 </div>
 
                 <div class="card">
-                    <h2><i class="fas fa-exclamation-triangle"></i> 风险预警</h2>
-                    <div class="risk-list">
-                        <div v-for="risk in projectRisks" :key="risk.id" class="risk-item" :class="risk.level">
+                    <h2>
+                        <i class="fas fa-exclamation-triangle"></i> 风险预警
+                        <span v-if="computedProjectRisks.length > 0" style="font-size: 0.875rem; color: var(--gray); margin-left: 0.5rem;">
+                            ({{ computedProjectRisks.length }})
+                        </span>
+                    </h2>
+                    <div class="risk-list" v-if="computedProjectRisks.length > 0">
+                        <div v-for="risk in computedProjectRisks" :key="risk.id" class="risk-item" :class="risk.level">
                             <div class="risk-header">
-                                <i class="fas fa-exclamation-circle"></i>
+                                <i class="fas" :class="{
+                                    'fa-exclamation-circle': risk.level === 'high',
+                                    'fa-exclamation-triangle': risk.level === 'medium',
+                                    'fa-info-circle': risk.level === 'low'
+                                }"></i>
                                 <span>{{ risk.task }}</span>
+                                <span style="font-size: 0.7rem; color: var(--gray); margin-left: 0.5rem;">
+                                    {{ risk.type === 'overdue' ? '逾期' :
+                                       risk.type === 'due-soon' ? '即将到期' :
+                                       risk.type === 'progress' ? '进度落后' :
+                                       risk.type === 'overload' ? '资源过载' :
+                                       risk.type === 'dependency' ? '依赖延迟' :
+                                       risk.type === 'high-priority' ? '高优先级' : '' }}
+                                </span>
                             </div>
                             <div class="risk-description">
                                 {{ risk.description }}
                             </div>
                         </div>
+                    </div>
+                    <div v-else class="empty-state" style="padding: 1rem;">
+                        <i class="fas fa-check-circle" style="color: var(--success);"></i>
+                        <p style="margin-top: 0.5rem;">暂无风险预警</p>
                     </div>
                 </div>
             </div>
@@ -2062,6 +2145,39 @@
             </div>
 
             <div class="form-group">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                    <label class="form-label" style="margin: 0;">负责人管理</label>
+                    <button class="btn btn-primary" @click="showMemberModal()" style="padding: 0.4rem 0.75rem; font-size: 0.875rem;">
+                        <i class="fas fa-plus"></i> 添加负责人
+                    </button>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 0.5rem; max-height: 300px; overflow-y: auto;">
+                    <div v-for="member in teamMembers" :key="member.id" style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem; background: #f8f9fa; border-radius: 8px; border: 1px solid var(--border-color);">
+                        <div style="flex: 1;">
+                            <div style="font-weight: 600; margin-bottom: 0.25rem;">{{ member.name }}</div>
+                            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.5rem;">
+                                <span v-for="skill in member.skills" :key="skill" style="font-size: 0.75rem; padding: 0.25rem 0.5rem; background: white; border-radius: 4px; border: 1px solid var(--border-color);">
+                                    {{ skill }}
+                                </span>
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <button class="btn btn-outline" @click="showMemberModal(member)" style="padding: 0.4rem 0.75rem; font-size: 0.875rem;" title="编辑">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-outline" @click="deleteMember(member)" style="padding: 0.4rem 0.75rem; font-size: 0.875rem; color: var(--danger);" title="删除">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div v-if="teamMembers.length === 0" style="text-align: center; padding: 2rem; color: var(--gray);">
+                        <i class="fas fa-users" style="font-size: 2rem; margin-bottom: 0.5rem; opacity: 0.5;"></i>
+                        <p>暂无负责人，请添加</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
                 <label class="form-label">数据管理</label>
                 <div style="display: flex; flex-direction: column; gap: 0.5rem;">
                     <button class="btn btn-outline" @click="exportData">
@@ -2085,6 +2201,74 @@
                     <div style="margin-bottom: 0.5rem;"><strong>Ctrl/Cmd + F:</strong> 搜索</div>
                     <div><strong>Esc:</strong> 关闭模态框</div>
                 </div>
+            </div>
+        </div>
+
+        <!-- 负责人管理模态框 -->
+        <div v-if="isMemberModalVisible" class="modal-overlay" @click.self="closeMemberModal">
+            <div class="modal">
+                <div class="modal-header">
+                    <h3 class="modal-title">{{ editingMember ? '编辑负责人' : '添加负责人' }}</h3>
+                    <button class="modal-close" @click="closeMemberModal">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <form @submit.prevent="saveMember">
+                    <div class="form-group">
+                        <label class="form-label">姓名 *</label>
+                        <input
+                            type="text"
+                            class="form-input"
+                            v-model="newMember.name"
+                            placeholder="请输入负责人姓名"
+                            required
+                        >
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">技能标签</label>
+                        <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
+                            <input
+                                type="text"
+                                class="form-input"
+                                v-model="newSkill"
+                                placeholder="输入技能后按回车添加"
+                                @keydown.enter.prevent="addSkill"
+                                style="flex: 1;"
+                            >
+                            <button type="button" class="btn btn-outline" @click="addSkill">
+                                <i class="fas fa-plus"></i> 添加
+                            </button>
+                        </div>
+                        <div v-if="newMember.skills.length > 0" style="display: flex; flex-wrap: wrap; gap: 0.5rem; padding: 0.75rem; background: #f8f9fa; border-radius: 8px; min-height: 40px;">
+                            <span
+                                v-for="(skill, index) in newMember.skills"
+                                :key="index"
+                                style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 0.75rem; background: white; border-radius: 6px; border: 1px solid var(--border-color); font-size: 0.875rem;"
+                            >
+                                {{ skill }}
+                                <button
+                                    type="button"
+                                    @click="removeSkill(index)"
+                                    style="background: none; border: none; color: var(--danger); cursor: pointer; padding: 0; font-size: 0.875rem;"
+                                    title="删除"
+                                >
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </span>
+                        </div>
+                        <div v-else style="padding: 0.75rem; background: #f8f9fa; border-radius: 8px; text-align: center; color: var(--gray); font-size: 0.875rem;">
+                            暂无技能标签
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-outline" @click="closeMemberModal">
+                            取消
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> {{ editingMember ? '保存' : '创建' }}
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -2197,11 +2381,7 @@
                     currentYear: new Date().getFullYear(),
                     calendarDate: new Date(),
                     dayHeaders: ['日', '一', '二', '三', '四', '五', '六'],
-                    projectRisks: [
-                        { id: 1, task: "前端开发", description: "进度落后计划5天", level: "medium" },
-                        { id: 2, task: "后端开发", description: "资源分配不足", level: "high" },
-                        { id: 3, task: "测试与调试", description: "依赖任务可能延迟", level: "low" }
-                    ],
+                    projectRisks: [],
                     newTask: {
                         name: "",
                         startDate: "",
@@ -2235,7 +2415,15 @@
                     showBulkActions: false,
                     isFullscreen: false,
                     showCalendarPicker: false,
-                    fullscreenElement: null
+                    fullscreenElement: null,
+                    isMemberModalVisible: false,
+                    editingMember: null,
+                    newMember: {
+                        name: "",
+                        skills: []
+                    },
+                    newSkill: "",
+                    nextMemberId: 7
                 };
             },
             computed: {
@@ -2370,6 +2558,197 @@
                     }
 
                     return tasks;
+                },
+                // 计算每个成员的实际工作负载
+                computedTeamMembers() {
+                    if (!this.currentProject) return this.teamMembers;
+
+                    return this.teamMembers.map(member => {
+                        // 获取分配给该成员的所有任务
+                        const memberTasks = this.currentProject.tasks.filter(
+                            task => task.assignee === member.name
+                        );
+
+                        // 计算总工作量（基于任务数量、优先级和进度）
+                        let totalLoad = 0;
+                        memberTasks.forEach(task => {
+                            // 基础工作量：每个任务10分
+                            let taskLoad = 10;
+
+                            // 根据优先级加权
+                            if (task.priority === 'high') taskLoad *= 1.5;
+                            else if (task.priority === 'medium') taskLoad *= 1.2;
+
+                            // 根据任务时长加权（天数）
+                            const taskDuration = Math.ceil(
+                                (new Date(task.endDate) - new Date(task.startDate)) / (1000 * 60 * 60 * 24)
+                            );
+                            taskLoad *= Math.min(taskDuration / 7, 2); // 最多2倍
+
+                            // 未完成的任务计入负载
+                            if (task.status !== 'completed') {
+                                totalLoad += taskLoad;
+                            } else {
+                                // 已完成的任务只计入少量负载（维护工作）
+                                totalLoad += taskLoad * 0.1;
+                            }
+                        });
+
+                        // 转换为百分比（假设每人最大工作量为100分）
+                        const maxLoad = 100;
+                        const loadPercentage = Math.min(Math.round((totalLoad / maxLoad) * 100), 100);
+
+                        return {
+                            ...member,
+                            load: loadPercentage,
+                            taskCount: memberTasks.length,
+                            activeTaskCount: memberTasks.filter(t => t.status !== 'completed').length
+                        };
+                    });
+                },
+                // 计算项目风险预警
+                computedProjectRisks() {
+                    if (!this.currentProject || !this.currentProject.tasks.length) {
+                        return [];
+                    }
+
+                    const risks = [];
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+
+                    // 1. 检查逾期任务
+                    this.currentProject.tasks.forEach(task => {
+                        const endDate = new Date(task.endDate);
+                        endDate.setHours(0, 0, 0, 0);
+                        const daysOverdue = Math.ceil((today - endDate) / (1000 * 60 * 60 * 24));
+
+                        if (daysOverdue > 0 && task.status !== 'completed') {
+                            risks.push({
+                                id: `overdue-${task.id}`,
+                                task: task.name,
+                                description: `任务已逾期 ${daysOverdue} 天`,
+                                level: daysOverdue > 7 ? 'high' : daysOverdue > 3 ? 'medium' : 'low',
+                                type: 'overdue'
+                            });
+                        }
+                    });
+
+                    // 2. 检查即将到期的任务（3天内）
+                    this.currentProject.tasks.forEach(task => {
+                        const endDate = new Date(task.endDate);
+                        endDate.setHours(0, 0, 0, 0);
+                        const daysUntilDue = Math.ceil((endDate - today) / (1000 * 60 * 60 * 24));
+
+                        if (daysUntilDue >= 0 && daysUntilDue <= 3 && task.status !== 'completed') {
+                            const progress = task.progress || 0;
+                            // 如果进度不足，风险更高
+                            const expectedProgress = daysUntilDue === 0 ? 100 :
+                                                   daysUntilDue === 1 ? 90 :
+                                                   daysUntilDue === 2 ? 80 : 70;
+
+                            if (progress < expectedProgress) {
+                                risks.push({
+                                    id: `due-soon-${task.id}`,
+                                    task: task.name,
+                                    description: `任务将在 ${daysUntilDue} 天后到期，但进度仅为 ${progress}%`,
+                                    level: progress < expectedProgress * 0.5 ? 'high' : 'medium',
+                                    type: 'due-soon'
+                                });
+                            }
+                        }
+                    });
+
+                    // 3. 检查进度落后的任务
+                    this.currentProject.tasks.forEach(task => {
+                        if (task.status === 'completed') return;
+
+                        const startDate = new Date(task.startDate);
+                        const endDate = new Date(task.endDate);
+                        const today = new Date();
+                        today.setHours(0, 0, 0, 0);
+
+                        const totalDays = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24));
+                        const elapsedDays = Math.ceil((today - startDate) / (1000 * 60 * 60 * 24));
+
+                        if (elapsedDays > 0 && totalDays > 0) {
+                            const expectedProgress = Math.min((elapsedDays / totalDays) * 100, 100);
+                            const actualProgress = task.progress || 0;
+                            const progressGap = expectedProgress - actualProgress;
+
+                            if (progressGap > 20) {
+                                risks.push({
+                                    id: `progress-${task.id}`,
+                                    task: task.name,
+                                    description: `进度落后 ${Math.round(progressGap)}%，预期 ${Math.round(expectedProgress)}%，实际 ${actualProgress}%`,
+                                    level: progressGap > 40 ? 'high' : 'medium',
+                                    type: 'progress'
+                                });
+                            }
+                        }
+                    });
+
+                    // 4. 检查资源过载
+                    this.computedTeamMembers.forEach(member => {
+                        if (member.load > 90) {
+                            risks.push({
+                                id: `overload-${member.id}`,
+                                task: member.name,
+                                description: `资源负载过高 (${member.load}%)，有 ${member.activeTaskCount} 个进行中的任务`,
+                                level: member.load > 100 ? 'high' : 'medium',
+                                type: 'overload'
+                            });
+                        }
+                    });
+
+                    // 5. 检查依赖任务延迟
+                    this.currentProject.tasks.forEach(task => {
+                        if (!task.dependencies || task.dependencies.length === 0) return;
+                        if (task.status === 'completed') return;
+
+                        task.dependencies.forEach(depId => {
+                            const depTask = this.currentProject.tasks.find(t => t.id === depId);
+                            if (!depTask) return;
+
+                            // 如果依赖任务未完成但已超过其结束日期
+                            const depEndDate = new Date(depTask.endDate);
+                            depEndDate.setHours(0, 0, 0, 0);
+
+                            if (depTask.status !== 'completed' && today > depEndDate) {
+                                const daysDelayed = Math.ceil((today - depEndDate) / (1000 * 60 * 60 * 24));
+                                risks.push({
+                                    id: `dependency-${task.id}-${depId}`,
+                                    task: task.name,
+                                    description: `依赖任务"${depTask.name}"已延迟 ${daysDelayed} 天，可能影响当前任务`,
+                                    level: daysDelayed > 7 ? 'high' : daysDelayed > 3 ? 'medium' : 'low',
+                                    type: 'dependency'
+                                });
+                            }
+                        });
+                    });
+
+                    // 6. 检查高优先级未开始任务
+                    this.currentProject.tasks.forEach(task => {
+                        if (task.priority === 'high' && task.status === 'not-started') {
+                            const startDate = new Date(task.startDate);
+                            startDate.setHours(0, 0, 0, 0);
+
+                            if (today >= startDate) {
+                                risks.push({
+                                    id: `high-priority-${task.id}`,
+                                    task: task.name,
+                                    description: '高优先级任务应已开始但尚未开始',
+                                    level: 'high',
+                                    type: 'high-priority'
+                                });
+                            }
+                        }
+                    });
+
+                    // 按风险等级排序：high > medium > low
+                    const levelOrder = { high: 3, medium: 2, low: 1 };
+                    risks.sort((a, b) => levelOrder[b.level] - levelOrder[a.level]);
+
+                    return risks;
                 }
             },
             mounted() {
@@ -2391,6 +2770,23 @@
 
                 // 监听数据变化，自动保存
                 this.autoSave();
+
+                // 监听任务和项目变化，自动更新资源图表和风险预警
+                this.$watch('currentProject', () => {
+                    this.$nextTick(() => {
+                        if (this.currentView === 'resource') {
+                            this.initResourceChart();
+                        }
+                    });
+                }, { deep: true });
+
+                this.$watch(() => this.currentProject?.tasks, () => {
+                    this.$nextTick(() => {
+                        if (this.currentView === 'resource') {
+                            this.initResourceChart();
+                        }
+                    });
+                }, { deep: true });
 
                 // 监听全屏状态变化
                 document.addEventListener('fullscreenchange', () => {
@@ -2579,10 +2975,20 @@
                         return;
                     }
 
+                    // 使用计算后的团队成员数据
+                    const members = this.computedTeamMembers;
+
+                    // 根据负载设置颜色：高负载(>90%)红色，中负载(70-90%)橙色，低负载绿色
+                    const colors = members.map(member => {
+                        if (member.load > 90) return '#f94144'; // 红色
+                        if (member.load > 70) return '#f8961e'; // 橙色
+                        return '#43aa8b'; // 绿色
+                    });
+
                     const options = {
                         series: [{
                             name: '工作负载',
-                            data: this.teamMembers.map(member => member.load)
+                            data: members.map(member => member.load)
                         }],
                         chart: {
                             height: 300,
@@ -2591,25 +2997,46 @@
                                 show: false
                             }
                         },
-                        colors: ['#4361ee'],
+                        colors: colors,
                         plotOptions: {
                             bar: {
                                 borderRadius: 4,
                                 horizontal: true,
-                                distributed: true
+                                distributed: true,
+                                dataLabels: {
+                                    position: 'top',
+                                    formatter: function(val) {
+                                        return val + '%';
+                                    }
+                                }
                             }
                         },
                         dataLabels: {
-                            enabled: false
+                            enabled: true,
+                            style: {
+                                fontSize: '12px',
+                                fontWeight: 600
+                            }
                         },
                         xaxis: {
-                            categories: this.teamMembers.map(member => member.name),
-                            max: 100
+                            categories: members.map(member => member.name),
+                            max: 100,
+                            title: {
+                                text: '工作负载 (%)'
+                            }
                         },
                         yaxis: {
                             labels: {
                                 style: {
                                     fontSize: '12px'
+                                }
+                            }
+                        },
+                        tooltip: {
+                            y: {
+                                formatter: function(val, { dataPointIndex }) {
+                                    const member = members[dataPointIndex];
+                                    return `${member.name}: ${val}% (${member.activeTaskCount}/${member.taskCount} 任务)`;
                                 }
                             }
                         }
@@ -2640,6 +3067,13 @@
                                     if (task && task.status !== statusId) {
                                         task.status = statusId;
                                         this.showToast('任务状态已更新', 'success');
+                                        this.saveData();
+                                        // 更新资源图表
+                                        this.$nextTick(() => {
+                                            if (this.currentView === 'resource') {
+                                                this.initResourceChart();
+                                            }
+                                        });
                                     }
                                 }
                             });
@@ -2783,6 +3217,12 @@
                         });
                         this.showToast('任务已更新', 'success');
                         this.saveData();
+                        // 更新资源图表
+                        this.$nextTick(() => {
+                            if (this.currentView === 'resource') {
+                                this.initResourceChart();
+                            }
+                        });
                     } else {
                         // 创建新任务
                         const newTask = {
@@ -2801,6 +3241,12 @@
                         this.saveData();
                     }
                     this.closeTaskModal();
+                    // 更新资源图表
+                    this.$nextTick(() => {
+                        if (this.currentView === 'resource') {
+                            this.initResourceChart();
+                        }
+                    });
                 },
                 deleteTask(task) {
                     if (confirm(`确定要删除任务"${task.name}"吗？`)) {
@@ -2812,6 +3258,12 @@
                             }
                             this.showToast('任务已删除', 'success');
                             this.saveData();
+                            // 更新资源图表
+                            this.$nextTick(() => {
+                                if (this.currentView === 'resource') {
+                                    this.initResourceChart();
+                                }
+                            });
                         }
                     }
                 },
@@ -2946,8 +3398,10 @@
                                 startDate: p.startDate.toISOString(),
                                 endDate: p.endDate.toISOString()
                             })),
+                            teamMembers: this.teamMembers,
                             nextTaskId: this.nextTaskId,
                             nextProjectId: this.nextProjectId,
+                            nextMemberId: this.nextMemberId,
                             currentProjectId: this.currentProject?.id,
                             currentView: this.currentView,
                             theme: this.theme
@@ -2975,9 +3429,15 @@
                                 }))
                             }));
 
+                            // 恢复团队成员
+                            if (data.teamMembers && Array.isArray(data.teamMembers)) {
+                                this.teamMembers = data.teamMembers;
+                            }
+
                             // 恢复ID
                             this.nextTaskId = data.nextTaskId || 13;
                             this.nextProjectId = data.nextProjectId || 3;
+                            this.nextMemberId = data.nextMemberId || 7;
 
                             // 恢复当前项目
                             if (data.currentProjectId) {
@@ -3031,6 +3491,10 @@
                         const maxProjectId = Math.max(...this.projects.map(p => p.id || 0));
                         this.nextTaskId = Math.max(maxTaskId + 1, this.nextTaskId);
                         this.nextProjectId = Math.max(maxProjectId + 1, this.nextProjectId);
+                    }
+                    if (this.teamMembers.length > 0) {
+                        const maxMemberId = Math.max(...this.teamMembers.map(m => m.id || 0));
+                        this.nextMemberId = Math.max(maxMemberId + 1, this.nextMemberId);
                     }
                 },
                 // ========== 项目管理 ==========
@@ -3216,6 +3680,9 @@
                             if (this.isProjectModalVisible) {
                                 this.closeProjectModal();
                             }
+                            if (this.isMemberModalVisible) {
+                                this.closeMemberModal();
+                            }
                             if (this.showSettings) {
                                 this.showSettings = false;
                             }
@@ -3283,6 +3750,12 @@
                     this.selectedTasks = [];
                     this.showBulkActions = false;
                     this.saveData();
+                    // 更新资源图表
+                    this.$nextTick(() => {
+                        if (this.currentView === 'resource') {
+                            this.initResourceChart();
+                        }
+                    });
                 },
                 // ========== 全屏功能 ==========
                 toggleFullscreen() {
@@ -3381,6 +3854,101 @@
                     if (confirm('确定要清除所有数据吗？此操作无法撤销！')) {
                         localStorage.removeItem('projectTimelineData');
                         location.reload();
+                    }
+                },
+                // ========== 负责人管理 ==========
+                showMemberModal(member = null) {
+                    if (member) {
+                        // 编辑模式
+                        this.editingMember = member;
+                        this.newMember = {
+                            name: member.name,
+                            skills: [...(member.skills || [])]
+                        };
+                    } else {
+                        // 新建模式
+                        this.editingMember = null;
+                        this.newMember = {
+                            name: "",
+                            skills: []
+                        };
+                    }
+                    this.newSkill = "";
+                    this.isMemberModalVisible = true;
+                },
+                closeMemberModal() {
+                    this.isMemberModalVisible = false;
+                    this.editingMember = null;
+                    this.newMember = {
+                        name: "",
+                        skills: []
+                    };
+                    this.newSkill = "";
+                },
+                addSkill() {
+                    if (this.newSkill.trim() && !this.newMember.skills.includes(this.newSkill.trim())) {
+                        this.newMember.skills.push(this.newSkill.trim());
+                        this.newSkill = "";
+                    }
+                },
+                removeSkill(index) {
+                    this.newMember.skills.splice(index, 1);
+                },
+                saveMember() {
+                    if (!this.newMember.name.trim()) {
+                        this.showToast('请输入负责人姓名', 'error');
+                        return;
+                    }
+
+                    // 检查姓名是否重复（编辑时排除自己）
+                    const existingMember = this.teamMembers.find(
+                        m => m.name === this.newMember.name.trim() &&
+                        (!this.editingMember || m.id !== this.editingMember.id)
+                    );
+                    if (existingMember) {
+                        this.showToast('该姓名已存在', 'error');
+                        return;
+                    }
+
+                    if (this.editingMember) {
+                        // 更新现有负责人
+                        Object.assign(this.editingMember, {
+                            name: this.newMember.name.trim(),
+                            skills: [...this.newMember.skills]
+                        });
+                        this.showToast('负责人已更新', 'success');
+                    } else {
+                        // 创建新负责人
+                        const newMember = {
+                            id: this.nextMemberId++,
+                            name: this.newMember.name.trim(),
+                            skills: [...this.newMember.skills],
+                            load: 0
+                        };
+                        this.teamMembers.push(newMember);
+                        this.showToast('负责人已创建', 'success');
+                    }
+                    this.saveData();
+                    this.closeMemberModal();
+                },
+                deleteMember(member) {
+                    // 检查是否有任务分配给该负责人
+                    const hasTasks = this.projects.some(project =>
+                        project.tasks.some(task => task.assignee === member.name)
+                    );
+
+                    if (hasTasks) {
+                        this.showToast('该负责人还有分配的任务，无法删除', 'error');
+                        return;
+                    }
+
+                    if (confirm(`确定要删除负责人"${member.name}"吗？`)) {
+                        const index = this.teamMembers.findIndex(m => m.id === member.id);
+                        if (index > -1) {
+                            this.teamMembers.splice(index, 1);
+                            this.showToast('负责人已删除', 'success');
+                            this.saveData();
+                        }
                     }
                 }
             }
