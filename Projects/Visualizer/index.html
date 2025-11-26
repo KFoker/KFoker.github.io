@@ -848,6 +848,567 @@
             overflow: auto;
         }
 
+        /* 数据分析视图 - 全新设计 */
+        .analytics-container {
+            height: 100%;
+            min-height: 400px;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 1.5rem;
+        }
+
+        /* 顶部工具栏 */
+        .analytics-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            background: linear-gradient(135deg, rgba(67, 97, 238, 0.05), rgba(63, 55, 201, 0.05));
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        .analytics-header-left {
+            flex: 1;
+        }
+
+        .analytics-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin: 0 0 0.5rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .analytics-subtitle {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--gray);
+            font-size: 0.95rem;
+        }
+
+        .analytics-header-right {
+            display: flex;
+            align-items: center;
+        }
+
+        .analytics-mode-switcher {
+            display: flex;
+            gap: 0.5rem;
+            background: white;
+            padding: 0.25rem;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+        }
+
+        .analytics-mode-btn {
+            padding: 0.6rem 1.25rem;
+            border: none;
+            background: transparent;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--gray);
+            transition: all 0.3s ease;
+        }
+
+        .analytics-mode-btn:hover:not(:disabled) {
+            background: #f8f9fa;
+            color: var(--primary);
+        }
+
+        .analytics-mode-btn.active {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            box-shadow: 0 2px 8px rgba(67, 97, 238, 0.3);
+        }
+
+        .analytics-mode-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* 空状态 */
+        .analytics-empty {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 4rem 2rem;
+            text-align: center;
+            color: var(--gray);
+        }
+
+        .analytics-empty i {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.3;
+        }
+
+        /* 内容区域 */
+        .analytics-content {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        /* 核心指标卡片 */
+        .analytics-metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 1.25rem;
+        }
+
+        .analytics-metric-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            display: flex;
+            gap: 1rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            border-left: 4px solid;
+        }
+
+        .analytics-metric-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
+        }
+
+        .analytics-metric-card.metric-primary {
+            border-left-color: var(--primary);
+            background: linear-gradient(135deg, rgba(67, 97, 238, 0.05), rgba(67, 97, 238, 0.02));
+        }
+
+        .analytics-metric-card.metric-success {
+            border-left-color: var(--success);
+            background: linear-gradient(135deg, rgba(76, 201, 240, 0.05), rgba(76, 201, 240, 0.02));
+        }
+
+        .analytics-metric-card.metric-danger {
+            border-left-color: var(--danger);
+            background: linear-gradient(135deg, rgba(249, 65, 68, 0.05), rgba(249, 65, 68, 0.02));
+        }
+
+        .analytics-metric-card.metric-warning {
+            border-left-color: var(--warning);
+            background: linear-gradient(135deg, rgba(247, 37, 133, 0.05), rgba(247, 37, 133, 0.02));
+        }
+
+        .metric-icon {
+            font-size: 2.5rem;
+            opacity: 0.2;
+            display: flex;
+            align-items: center;
+        }
+
+        .metric-content {
+            flex: 1;
+        }
+
+        .metric-label {
+            font-size: 0.875rem;
+            color: var(--gray);
+            margin-bottom: 0.5rem;
+        }
+
+        .metric-value {
+            font-size: 2.25rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+        }
+
+        .metric-primary .metric-value {
+            color: var(--primary);
+        }
+
+        .metric-success .metric-value {
+            color: var(--success);
+        }
+
+        .metric-danger .metric-value {
+            color: var(--danger);
+        }
+
+        .metric-warning .metric-value {
+            color: var(--warning);
+        }
+
+        .metric-value.value-success {
+            color: var(--success);
+        }
+
+        .metric-value.value-warning {
+            color: var(--warning);
+        }
+
+        .metric-value.value-danger {
+            color: var(--danger);
+        }
+
+        .metric-footer {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .metric-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .metric-badge.badge-success {
+            background: rgba(76, 201, 240, 0.2);
+            color: var(--success);
+        }
+
+        .metric-badge.badge-warning {
+            background: rgba(247, 37, 133, 0.2);
+            color: var(--warning);
+        }
+
+        .metric-badge.badge-danger {
+            background: rgba(249, 65, 68, 0.2);
+            color: var(--danger);
+        }
+
+        .metric-info {
+            font-size: 0.75rem;
+            color: var(--gray);
+        }
+
+        .metric-tag {
+            padding: 0.25rem 0.5rem;
+            border-radius: 6px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+
+        .metric-tag.tag-high {
+            background: rgba(249, 65, 68, 0.15);
+            color: var(--danger);
+        }
+
+        .metric-tag.tag-medium {
+            background: rgba(247, 37, 133, 0.15);
+            color: var(--warning);
+        }
+
+        .metric-tag.tag-low {
+            background: rgba(76, 201, 240, 0.15);
+            color: var(--success);
+        }
+
+        .metric-time {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .metric-time.time-success {
+            color: var(--success);
+        }
+
+        .metric-time.time-warning {
+            color: var(--warning);
+        }
+
+        .metric-time.time-danger {
+            color: var(--danger);
+        }
+
+        /* 图表区域 */
+        .analytics-charts-section {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .analytics-charts-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(480px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .analytics-chart-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+        }
+
+        .analytics-chart-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+        }
+
+        .analytics-chart-card.chart-full {
+            grid-column: 1 / -1;
+        }
+
+        .chart-header {
+            margin-bottom: 1.25rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .chart-title {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .analytics-chart-container {
+            position: relative;
+            width: 100%;
+            height: 320px;
+            min-height: 320px;
+            overflow: hidden;
+        }
+
+        .analytics-chart-container.chart-tall {
+            height: 400px;
+            min-height: 400px;
+        }
+
+        .analytics-chart-container > div {
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        /* 详细信息卡片 */
+        .analytics-details-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 1.25rem;
+        }
+
+        .analytics-detail-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .detail-card-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 1.25rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .detail-card-body {
+            display: flex;
+            flex-direction: column;
+            gap: 0.875rem;
+        }
+
+        .detail-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .detail-item:hover {
+            background: #eef2ff;
+            transform: translateX(4px);
+        }
+
+        .detail-label {
+            font-size: 0.875rem;
+            color: var(--gray);
+        }
+
+        .detail-value {
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .detail-value.value-primary {
+            color: var(--primary);
+        }
+
+        .detail-value.value-success {
+            color: var(--success);
+        }
+
+        .detail-value.value-warning {
+            color: var(--warning);
+        }
+
+        .detail-value.value-danger {
+            color: var(--danger);
+        }
+
+        /* 任务列表 */
+        .analytics-tasks-section {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .analytics-section-header {
+            margin-bottom: 1.25rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .analytics-section-header h3 {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--primary);
+            margin: 0;
+        }
+
+        .analytics-tasks-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .analytics-task-item {
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid;
+            transition: all 0.3s ease;
+        }
+
+        .analytics-task-item:hover {
+            background: #eef2ff;
+            transform: translateX(4px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .task-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.75rem;
+        }
+
+        .task-item-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .task-name {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .task-meta {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            font-size: 0.75rem;
+            color: var(--gray);
+        }
+
+        .task-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .task-progress-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-left: 1rem;
+            flex-shrink: 0;
+        }
+
+        .task-progress-value.progress-success {
+            color: var(--success);
+        }
+
+        .task-progress-value.progress-warning {
+            color: var(--warning);
+        }
+
+        .task-progress-value.progress-danger {
+            color: var(--danger);
+        }
+
+        .task-progress-bar {
+            height: 8px;
+            background: #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .task-progress-fill {
+            height: 100%;
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 1200px) {
+            .analytics-charts-row {
+                grid-template-columns: 1fr;
+            }
+            .analytics-chart-container {
+                height: 300px;
+            }
+            .analytics-chart-container.chart-tall {
+                height: 350px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .analytics-container {
+                padding: 1rem;
+            }
+            .analytics-header {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            .analytics-metrics-grid {
+                grid-template-columns: 1fr;
+            }
+            .analytics-chart-container {
+                height: 280px;
+            }
+            .analytics-chart-container.chart-tall {
+                height: 320px;
+            }
+        }
+
         .resource-chart {
             height: 300px;
             margin-bottom: 2rem;
@@ -1589,26 +2150,26 @@
                                 style="width: 100%;"
                             >
                         </div>
-                        <select class="form-select" v-model="filterStatus" style="width: 120px;">
+                        <select class="form-select" v-model="filterStatus" style="min-width: 120px; max-width: 150px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
                             <option value="all">全部状态</option>
                             <option value="not-started">未开始</option>
                             <option value="in-progress">进行中</option>
                             <option value="completed">已完成</option>
                         </select>
-                        <select class="form-select" v-model="filterPriority" style="width: 120px;">
+                        <select class="form-select" v-model="filterPriority" style="min-width: 120px; max-width: 150px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
                             <option value="all">全部优先级</option>
                             <option value="high">高优先级</option>
                             <option value="medium">中优先级</option>
                             <option value="low">低优先级</option>
                         </select>
-                        <select class="form-select" v-model="filterAssignee" style="width: 120px;">
+                        <select class="form-select" v-model="filterAssignee" style="min-width: 120px; max-width: 150px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
                             <option value="all">全部负责人</option>
-                            <option v-for="member in teamMembers" :key="member.id" :value="member.name">
+                            <option v-for="member in teamMembers" :key="member.id" :value="member.name" :title="member.name">
                                 {{ member.name }}
                             </option>
                         </select>
-                        <button class="btn btn-outline" @click="clearFilters" v-if="searchQuery || filterStatus !== 'all' || filterPriority !== 'all' || filterAssignee !== 'all'">
-                            <i class="fas fa-times"></i> 清除
+                        <button class="btn btn-outline" @click="clearFilters" v-if="searchQuery || filterStatus !== 'all' || filterPriority !== 'all' || filterAssignee !== 'all'" style="white-space: nowrap; flex-shrink: 0;">
+                            <i class="fas fa-times"></i> <span style="overflow: hidden; text-overflow: ellipsis;">清除</span>
                         </button>
                     </div>
                 </div>
@@ -1643,7 +2204,7 @@
                     <div class="view-header">
                         <h3>{{ currentViewName }}视图</h3>
                         <div class="view-actions">
-                            <div class="view-actions-group" v-if="currentView === 'gantt' || currentView === 'kanban' || currentView === 'calendar'">
+                            <div class="view-actions-group" v-if="currentView === 'gantt' || currentView === 'kanban' || currentView === 'calendar' || currentView === 'analytics'">
                                 <button class="btn btn-outline btn-icon" @click="printView" title="打印">
                                     <i class="fas fa-print"></i>
                             </button>
@@ -1876,6 +2437,296 @@
                                 </div>
                             </div>
                             </template>
+                        </div>
+
+                        <!-- 数据分析视图 -->
+                        <div v-if="currentView === 'analytics'" class="analytics-container">
+                            <!-- 顶部工具栏 -->
+                            <div class="analytics-header">
+                                <div class="analytics-header-left">
+                                    <h2 class="analytics-title">
+                                        <i class="fas fa-chart-line"></i>
+                                        <span>{{ analyticsMode === 'project' ? '项目数据分析' : '综合数据分析' }}</span>
+                                    </h2>
+                                    <div class="analytics-subtitle" v-if="analyticsMode === 'project' && currentProject">
+                                        <i class="fas fa-folder"></i>
+                                        <span>{{ currentProject.name }}</span>
+                                    </div>
+                                    <div class="analytics-subtitle" v-else-if="analyticsMode === 'all'">
+                                        <i class="fas fa-th"></i>
+                                        <span>共 {{ projects.length }} 个项目</span>
+                                    </div>
+                                </div>
+                                <div class="analytics-header-right">
+                                    <div class="analytics-mode-switcher">
+                                        <button
+                                            class="analytics-mode-btn"
+                                            :class="{ active: analyticsMode === 'project' }"
+                                            @click="switchAnalyticsMode('project')"
+                                            :disabled="!currentProject"
+                                            title="分析当前项目"
+                                        >
+                                            <i class="fas fa-folder"></i>
+                                            <span>当前项目</span>
+                                        </button>
+                                        <button
+                                            class="analytics-mode-btn"
+                                            :class="{ active: analyticsMode === 'all' }"
+                                            @click="switchAnalyticsMode('all')"
+                                            title="综合分析所有项目"
+                                        >
+                                            <i class="fas fa-th"></i>
+                                            <span>所有项目</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 空状态 -->
+                            <div v-if="analyticsMode === 'project' && !currentProject" class="analytics-empty">
+                                <i class="fas fa-folder-open"></i>
+                                <p>请先选择一个项目进行分析</p>
+                            </div>
+                            <div v-else-if="analyticsMode === 'all' && projects.length === 0" class="analytics-empty">
+                                <i class="fas fa-folder-open"></i>
+                                <p>暂无项目数据</p>
+                            </div>
+
+                            <!-- 数据分析内容 -->
+                            <div v-else class="analytics-content">
+                                <!-- 核心指标卡片 -->
+                                <div class="analytics-metrics-grid">
+                                    <div class="analytics-metric-card metric-primary">
+                                        <div class="metric-icon">
+                                            <i class="fas fa-tasks"></i>
+                                        </div>
+                                        <div class="metric-content">
+                                            <div class="metric-label">总任务数</div>
+                                            <div class="metric-value">{{ totalTasks }}</div>
+                                            <div class="metric-footer">
+                                                <span class="metric-badge" :class="completionRate >= 80 ? 'badge-success' : completionRate >= 50 ? 'badge-warning' : 'badge-danger'">
+                                                    完成率 {{ completionRate }}%
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="analytics-metric-card metric-success">
+                                        <div class="metric-icon">
+                                            <i class="fas fa-check-circle"></i>
+                                        </div>
+                                        <div class="metric-content">
+                                            <div class="metric-label">已完成</div>
+                                            <div class="metric-value">{{ completedTasks }}</div>
+                                            <div class="metric-footer">
+                                                <span class="metric-info">进行中 {{ inProgressTasks }}</span>
+                                                <span class="metric-info">未开始 {{ notStartedTasks }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="analytics-metric-card metric-danger">
+                                        <div class="metric-icon">
+                                            <i class="fas fa-heartbeat"></i>
+                                        </div>
+                                        <div class="metric-content">
+                                            <div class="metric-label">项目健康度</div>
+                                            <div class="metric-value" :class="projectHealth >= 70 ? 'value-success' : projectHealth >= 40 ? 'value-warning' : 'value-danger'">
+                                                {{ projectHealth }}%
+                                            </div>
+                                            <div class="metric-footer">
+                                                <span class="metric-tag tag-high">{{ highRiskCount }} 高</span>
+                                                <span class="metric-tag tag-medium">{{ mediumRiskCount }} 中</span>
+                                                <span class="metric-tag tag-low">{{ lowRiskCount }} 低</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="analytics-metric-card metric-warning">
+                                        <div class="metric-icon">
+                                            <i class="fas fa-clock"></i>
+                                        </div>
+                                        <div class="metric-content">
+                                            <div class="metric-label">时间进度</div>
+                                            <div class="metric-value">{{ timeProgress }}%</div>
+                                            <div class="metric-footer">
+                                                <span class="metric-time" :class="remainingDays < 0 ? 'time-danger' : remainingDays < 7 ? 'time-warning' : 'time-success'">
+                                                    <i class="fas" :class="remainingDays < 0 ? 'fa-exclamation-triangle' : 'fa-calendar-alt'"></i>
+                                                    {{ remainingDays >= 0 ? '剩余 ' + remainingDays + ' 天' : '已超期 ' + Math.abs(remainingDays) + ' 天' }}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- 图表区域 -->
+                                <div class="analytics-charts-section">
+                                    <div class="analytics-charts-row">
+                                        <!-- 任务状态分布饼图 -->
+                                        <div class="analytics-chart-card">
+                                            <div class="chart-header">
+                                                <div class="chart-title">
+                                                    <i class="fas fa-chart-pie"></i>
+                                                    <span>任务状态分布</span>
+                                                </div>
+                                            </div>
+                                            <div id="taskStatusChart" class="analytics-chart-container"></div>
+                                        </div>
+                                        <!-- 优先级分布饼图 -->
+                                        <div class="analytics-chart-card">
+                                            <div class="chart-header">
+                                                <div class="chart-title">
+                                                    <i class="fas fa-flag"></i>
+                                                    <span>优先级分布</span>
+                                                </div>
+                                            </div>
+                                            <div id="priorityChart" class="analytics-chart-container"></div>
+                                        </div>
+                                    </div>
+                                    <div class="analytics-charts-row">
+                                        <!-- 任务进度对比柱状图 -->
+                                        <div class="analytics-chart-card chart-full">
+                                            <div class="chart-header">
+                                                <div class="chart-title">
+                                                    <i class="fas fa-chart-bar"></i>
+                                                    <span>任务进度对比</span>
+                                                </div>
+                                            </div>
+                                            <div id="progressChart" class="analytics-chart-container chart-tall"></div>
+                                        </div>
+                                    </div>
+                                    <div class="analytics-charts-row">
+                                        <!-- 时间线分析 -->
+                                        <div class="analytics-chart-card chart-full">
+                                            <div class="chart-header">
+                                                <div class="chart-title">
+                                                    <i class="fas fa-timeline"></i>
+                                                    <span>时间线分析</span>
+                                                </div>
+                                            </div>
+                                            <div id="timelineChart" class="analytics-chart-container chart-tall"></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- 详细分析信息 -->
+                                <div class="analytics-details-grid">
+                                    <div class="analytics-detail-card">
+                                        <div class="detail-card-header">
+                                            <i class="fas fa-users"></i>
+                                            <span>团队负载分析</span>
+                                        </div>
+                                        <div class="detail-card-body">
+                                            <div class="detail-item" v-if="analyticsMode === 'all'">
+                                                <span class="detail-label">项目总数</span>
+                                                <span class="detail-value">{{ projects.length }} 个</span>
+                                            </div>
+                                            <div class="detail-item">
+                                                <span class="detail-label">团队成员</span>
+                                                <span class="detail-value">{{ teamMembers.length }} 人</span>
+                                            </div>
+                                            <div class="detail-item">
+                                                <span class="detail-label">平均负载</span>
+                                                <span class="detail-value value-primary">{{ averageLoad }}%</span>
+                                            </div>
+                                            <div class="detail-item">
+                                                <span class="detail-label">负载范围</span>
+                                                <span class="detail-value">{{ minLoad }}% - {{ maxLoad }}%</span>
+                                            </div>
+                                            <div class="detail-item">
+                                                <span class="detail-label">过载成员</span>
+                                                <span class="detail-value value-danger">{{ overloadedMembers }} 人</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="analytics-detail-card">
+                                        <div class="detail-card-header">
+                                            <i class="fas fa-calendar-alt"></i>
+                                            <span>时间分析</span>
+                                        </div>
+                                        <div class="detail-card-body">
+                                            <div class="detail-item">
+                                                <span class="detail-label">项目周期</span>
+                                                <span class="detail-value">{{ Math.round(projectDuration) }} 天</span>
+                                            </div>
+                                            <div class="detail-item">
+                                                <span class="detail-label">已用时间</span>
+                                                <span class="detail-value value-primary">{{ elapsedDays }} 天</span>
+                                            </div>
+                                            <div class="detail-item">
+                                                <span class="detail-label">剩余时间</span>
+                                                <span class="detail-value" :class="remainingDays < 0 ? 'value-danger' : remainingDays < 7 ? 'value-warning' : 'value-success'">
+                                                    {{ remainingDays >= 0 ? remainingDays : Math.abs(remainingDays) + ' (超期)' }} 天
+                                                </span>
+                                            </div>
+                                            <div class="detail-item">
+                                                <span class="detail-label">平均任务时长</span>
+                                                <span class="detail-value">{{ averageTaskDuration }} 天</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="analytics-detail-card">
+                                        <div class="detail-card-header">
+                                            <i class="fas fa-exclamation-triangle"></i>
+                                            <span>风险预警</span>
+                                        </div>
+                                        <div class="detail-card-body">
+                                            <div class="detail-item">
+                                                <span class="detail-label">逾期任务</span>
+                                                <span class="detail-value value-danger">{{ overdueTasks }} 个</span>
+                                            </div>
+                                            <div class="detail-item">
+                                                <span class="detail-label">高风险项</span>
+                                                <span class="detail-value value-danger">{{ highRiskCount }} 个</span>
+                                            </div>
+                                            <div class="detail-item">
+                                                <span class="detail-label">中风险项</span>
+                                                <span class="detail-value value-warning">{{ mediumRiskCount }} 个</span>
+                                            </div>
+                                            <div class="detail-item">
+                                                <span class="detail-label">低风险项</span>
+                                                <span class="detail-value value-success">{{ lowRiskCount }} 个</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- 任务进度详情 -->
+                                <div class="analytics-tasks-section">
+                                    <div class="analytics-section-header">
+                                        <h3>
+                                            <i class="fas fa-list-check"></i>
+                                            <span>任务进度详情</span>
+                                        </h3>
+                                    </div>
+                                    <div class="analytics-tasks-list">
+                                        <div v-for="task in sortedTasksByProgress" :key="task.id" class="analytics-task-item" :style="{ borderLeftColor: getPriorityColor(task.priority) }">
+                                            <div class="task-item-header">
+                                                <div class="task-item-info">
+                                                    <div class="task-name">{{ task.name }}</div>
+                                                    <div class="task-meta">
+                                                        <span class="task-meta-item">
+                                                            <i class="fas fa-user"></i>
+                                                            {{ task.assignee || '未分配' }}
+                                                        </span>
+                                                        <span class="task-meta-item">
+                                                            <i class="fas fa-flag" :style="{ color: getPriorityColor(task.priority) }"></i>
+                                                            {{ getPriorityText(task.priority) }}
+                                                        </span>
+                                                        <span class="task-meta-item">
+                                                            <i class="fas fa-calendar"></i>
+                                                            {{ formatDate(task.endDate) }}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <div class="task-progress-value" :class="task.progress >= 80 ? 'progress-success' : task.progress >= 50 ? 'progress-warning' : 'progress-danger'">
+                                                    {{ task.progress }}%
+                                                </div>
+                                            </div>
+                                            <div class="task-progress-bar">
+                                                <div class="task-progress-fill" :style="{ width: task.progress + '%', background: getPriorityColor(task.priority) }"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -2359,6 +3210,7 @@
         ];
 
         const views = [
+            { id: "analytics", name: "数据分析", icon: "fas fa-chart-line" },
             { id: "gantt", name: "甘特图", icon: "fas fa-chart-bar" },
             { id: "kanban", name: "看板", icon: "fas fa-columns" },
             { id: "calendar", name: "日历", icon: "fas fa-calendar-alt" },
@@ -2393,6 +3245,13 @@
                         dependencies: []
                     },
                     resourceChart: null,
+                    analyticsCharts: {
+                        taskStatusChart: null,
+                        priorityChart: null,
+                        progressChart: null,
+                        timelineChart: null
+                    },
+                    analyticsMode: 'project', // 'project' 或 'all'
                     nextTaskId: 13,
                     nextProjectId: 3,
                     toast: null,
@@ -2431,24 +3290,94 @@
                     const view = this.views.find(v => v.id === this.currentView);
                     return view ? view.name : "";
                 },
-                completedTasks() {
+                // 当前项目数据
+                currentProjectCompletedTasks() {
+                    if (!this.currentProject || !this.currentProject.tasks) return 0;
                     return this.currentProject.tasks.filter(task => task.status === "completed").length;
                 },
-                totalTasks() {
+                currentProjectTotalTasks() {
+                    if (!this.currentProject || !this.currentProject.tasks) return 0;
                     return this.currentProject.tasks.length;
                 },
-                overdueTasks() {
+                currentProjectOverdueTasks() {
+                    if (!this.currentProject || !this.currentProject.tasks) return 0;
                     const today = new Date();
                     return this.currentProject.tasks.filter(task =>
                         task.endDate < today && task.status !== "completed"
                     ).length;
                 },
+                // 所有项目数据
+                allProjectsCompletedTasks() {
+                    return this.projects.reduce((sum, project) => {
+                        return sum + project.tasks.filter(task => task.status === "completed").length;
+                    }, 0);
+                },
+                allProjectsTotalTasks() {
+                    return this.projects.reduce((sum, project) => sum + project.tasks.length, 0);
+                },
+                allProjectsOverdueTasks() {
+                    const today = new Date();
+                    return this.projects.reduce((sum, project) => {
+                        return sum + project.tasks.filter(task =>
+                            task.endDate < today && task.status !== "completed"
+                        ).length;
+                    }, 0);
+                },
+                allProjectsInProgressTasks() {
+                    return this.projects.reduce((sum, project) => {
+                        return sum + project.tasks.filter(task => task.status === "in-progress").length;
+                    }, 0);
+                },
+                allProjectsNotStartedTasks() {
+                    return this.projects.reduce((sum, project) => {
+                        return sum + project.tasks.filter(task => task.status === "not-started").length;
+                    }, 0);
+                },
+                allProjectsHighPriorityTasks() {
+                    return this.projects.reduce((sum, project) => {
+                        return sum + project.tasks.filter(task => task.priority === "high").length;
+                    }, 0);
+                },
+                allProjectsMediumPriorityTasks() {
+                    return this.projects.reduce((sum, project) => {
+                        return sum + project.tasks.filter(task => task.priority === "medium").length;
+                    }, 0);
+                },
+                allProjectsLowPriorityTasks() {
+                    return this.projects.reduce((sum, project) => {
+                        return sum + project.tasks.filter(task => task.priority === "low").length;
+                    }, 0);
+                },
+                allProjectsTasks() {
+                    return this.projects.flatMap(project => project.tasks);
+                },
+                // 根据模式返回的数据
+                completedTasks() {
+                    return this.analyticsMode === 'all' ? this.allProjectsCompletedTasks : this.currentProjectCompletedTasks;
+                },
+                totalTasks() {
+                    return this.analyticsMode === 'all' ? this.allProjectsTotalTasks : this.currentProjectTotalTasks;
+                },
+                overdueTasks() {
+                    return this.analyticsMode === 'all' ? this.allProjectsOverdueTasks : this.currentProjectOverdueTasks;
+                },
                 projectDuration() {
+                    if (this.analyticsMode === 'all') {
+                        // 所有项目模式：计算平均项目周期
+                        if (this.projects.length === 0) return 0;
+                        const totalDuration = this.projects.reduce((sum, project) => {
+                            const diffTime = Math.abs(project.endDate - project.startDate);
+                            return sum + Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                        }, 0);
+                        return Math.round(totalDuration / this.projects.length);
+                    }
+                    if (!this.currentProject) return 0;
                     const diffTime = Math.abs(this.currentProject.endDate - this.currentProject.startDate);
                     return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
                 },
                 projectHealth() {
                     // 简单的健康度计算：基于完成进度和逾期任务
+                    if (this.totalTasks === 0) return 0;
                     const progressScore = (this.completedTasks / this.totalTasks) * 70;
                     const overduePenalty = this.overdueTasks * 10;
                     return Math.max(0, Math.min(100, progressScore - overduePenalty));
@@ -2561,11 +3490,13 @@
                 },
                 // 计算每个成员的实际工作负载
                 computedTeamMembers() {
-                    if (!this.currentProject) return this.teamMembers;
+                    // 根据模式选择数据源
+                    const tasks = this.analyticsMode === 'all' ? this.allProjectsTasks :
+                                  (this.currentProject?.tasks || []);
 
                     return this.teamMembers.map(member => {
                         // 获取分配给该成员的所有任务
-                        const memberTasks = this.currentProject.tasks.filter(
+                        const memberTasks = tasks.filter(
                             task => task.assignee === member.name
                         );
 
@@ -2606,18 +3537,160 @@
                         };
                     });
                 },
+                // 数据分析相关计算属性
+                inProgressTasks() {
+                    if (this.analyticsMode === 'all') {
+                        return this.allProjectsInProgressTasks;
+                    }
+                    if (!this.currentProject || !this.currentProject.tasks) return 0;
+                    return this.currentProject.tasks.filter(task => task.status === "in-progress").length;
+                },
+                notStartedTasks() {
+                    if (this.analyticsMode === 'all') {
+                        return this.allProjectsNotStartedTasks;
+                    }
+                    if (!this.currentProject || !this.currentProject.tasks) return 0;
+                    return this.currentProject.tasks.filter(task => task.status === "not-started").length;
+                },
+                completionRate() {
+                    if (this.totalTasks === 0) return 0;
+                    return Math.round((this.completedTasks / this.totalTasks) * 100);
+                },
+                highRiskCount() {
+                    return this.computedProjectRisks.filter(r => r.level === 'high').length;
+                },
+                mediumRiskCount() {
+                    return this.computedProjectRisks.filter(r => r.level === 'medium').length;
+                },
+                lowRiskCount() {
+                    return this.computedProjectRisks.filter(r => r.level === 'low').length;
+                },
+                averageLoad() {
+                    if (this.computedTeamMembers.length === 0) return 0;
+                    const sum = this.computedTeamMembers.reduce((acc, member) => acc + member.load, 0);
+                    return Math.round(sum / this.computedTeamMembers.length);
+                },
+                maxLoad() {
+                    if (this.computedTeamMembers.length === 0) return 0;
+                    return Math.max(...this.computedTeamMembers.map(m => m.load));
+                },
+                minLoad() {
+                    if (this.computedTeamMembers.length === 0) return 0;
+                    return Math.min(...this.computedTeamMembers.map(m => m.load));
+                },
+                overloadedMembers() {
+                    return this.computedTeamMembers.filter(m => m.load > 90).length;
+                },
+                elapsedDays() {
+                    if (this.analyticsMode === 'all') {
+                        // 所有项目模式：计算平均已用时间
+                        if (this.projects.length === 0) return 0;
+                        const today = new Date();
+                        today.setHours(0, 0, 0, 0);
+                        const totalDays = this.projects.reduce((sum, project) => {
+                            const startDate = new Date(project.startDate);
+                            startDate.setHours(0, 0, 0, 0);
+                            const diff = Math.ceil((today - startDate) / (1000 * 60 * 60 * 24));
+                            return sum + Math.max(0, diff);
+                        }, 0);
+                        return Math.round(totalDays / this.projects.length);
+                    }
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    const startDate = new Date(this.currentProject.startDate);
+                    startDate.setHours(0, 0, 0, 0);
+                    const diff = Math.ceil((today - startDate) / (1000 * 60 * 60 * 24));
+                    return Math.max(0, diff);
+                },
+                remainingDays() {
+                    if (this.analyticsMode === 'all') {
+                        // 所有项目模式：计算平均剩余时间
+                        if (this.projects.length === 0) return 0;
+                        const today = new Date();
+                        today.setHours(0, 0, 0, 0);
+                        const totalDays = this.projects.reduce((sum, project) => {
+                            const endDate = new Date(project.endDate);
+                            endDate.setHours(0, 0, 0, 0);
+                            return sum + Math.ceil((endDate - today) / (1000 * 60 * 60 * 24));
+                        }, 0);
+                        return Math.round(totalDays / this.projects.length);
+                    }
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    const endDate = new Date(this.currentProject.endDate);
+                    endDate.setHours(0, 0, 0, 0);
+                    return Math.ceil((endDate - today) / (1000 * 60 * 60 * 24));
+                },
+                timeProgress() {
+                    if (this.analyticsMode === 'all') {
+                        // 所有项目模式：计算平均时间进度
+                        if (this.projects.length === 0) return 0;
+                        const totalProgress = this.projects.reduce((sum, project) => {
+                            const diffTime = Math.abs(project.endDate - project.startDate);
+                            const duration = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                            if (duration === 0) return sum;
+                            const today = new Date();
+                            today.setHours(0, 0, 0, 0);
+                            const startDate = new Date(project.startDate);
+                            startDate.setHours(0, 0, 0, 0);
+                            const elapsed = Math.max(0, Math.ceil((today - startDate) / (1000 * 60 * 60 * 24)));
+                            return sum + Math.min(100, Math.round((elapsed / duration) * 100));
+                        }, 0);
+                        return Math.round(totalProgress / this.projects.length);
+                    }
+                    if (this.projectDuration === 0) return 0;
+                    return Math.min(100, Math.round((this.elapsedDays / this.projectDuration) * 100));
+                },
+                averageTaskDuration() {
+                    const tasks = this.analyticsMode === 'all' ? this.allProjectsTasks : (this.currentProject?.tasks || []);
+                    if (tasks.length === 0) return 0;
+                    const total = tasks.reduce((sum, task) => {
+                        const duration = Math.ceil((new Date(task.endDate) - new Date(task.startDate)) / (1000 * 60 * 60 * 24));
+                        return sum + duration;
+                    }, 0);
+                    return Math.round(total / tasks.length);
+                },
+                highPriorityTasks() {
+                    if (this.analyticsMode === 'all') {
+                        return this.allProjectsHighPriorityTasks;
+                    }
+                    return this.currentProject?.tasks.filter(task => task.priority === "high").length || 0;
+                },
+                mediumPriorityTasks() {
+                    if (this.analyticsMode === 'all') {
+                        return this.allProjectsMediumPriorityTasks;
+                    }
+                    return this.currentProject?.tasks.filter(task => task.priority === "medium").length || 0;
+                },
+                lowPriorityTasks() {
+                    if (this.analyticsMode === 'all') {
+                        return this.allProjectsLowPriorityTasks;
+                    }
+                    return this.currentProject?.tasks.filter(task => task.priority === "low").length || 0;
+                },
+                sortedTasksByProgress() {
+                    if (this.analyticsMode === 'all') {
+                        return [...this.allProjectsTasks].sort((a, b) => b.progress - a.progress);
+                    }
+                    if (!this.currentProject) return [];
+                    return [...this.currentProject.tasks].sort((a, b) => b.progress - a.progress);
+                },
                 // 计算项目风险预警
                 computedProjectRisks() {
-                    if (!this.currentProject || !this.currentProject.tasks.length) {
-                        return [];
-                    }
-
                     const risks = [];
                     const today = new Date();
                     today.setHours(0, 0, 0, 0);
 
+                    // 根据模式选择数据源
+                    const tasks = this.analyticsMode === 'all' ? this.allProjectsTasks :
+                                  (this.currentProject?.tasks || []);
+
+                    if (tasks.length === 0) {
+                        return [];
+                    }
+
                     // 1. 检查逾期任务
-                    this.currentProject.tasks.forEach(task => {
+                    tasks.forEach(task => {
                         const endDate = new Date(task.endDate);
                         endDate.setHours(0, 0, 0, 0);
                         const daysOverdue = Math.ceil((today - endDate) / (1000 * 60 * 60 * 24));
@@ -2634,7 +3707,7 @@
                     });
 
                     // 2. 检查即将到期的任务（3天内）
-                    this.currentProject.tasks.forEach(task => {
+                    tasks.forEach(task => {
                         const endDate = new Date(task.endDate);
                         endDate.setHours(0, 0, 0, 0);
                         const daysUntilDue = Math.ceil((endDate - today) / (1000 * 60 * 60 * 24));
@@ -2659,7 +3732,7 @@
                     });
 
                     // 3. 检查进度落后的任务
-                    this.currentProject.tasks.forEach(task => {
+                    tasks.forEach(task => {
                         if (task.status === 'completed') return;
 
                         const startDate = new Date(task.startDate);
@@ -2701,12 +3774,12 @@
                     });
 
                     // 5. 检查依赖任务延迟
-                    this.currentProject.tasks.forEach(task => {
+                    tasks.forEach(task => {
                         if (!task.dependencies || task.dependencies.length === 0) return;
                         if (task.status === 'completed') return;
 
                         task.dependencies.forEach(depId => {
-                            const depTask = this.currentProject.tasks.find(t => t.id === depId);
+                            const depTask = tasks.find(t => t.id === depId);
                             if (!depTask) return;
 
                             // 如果依赖任务未完成但已超过其结束日期
@@ -2727,7 +3800,7 @@
                     });
 
                     // 6. 检查高优先级未开始任务
-                    this.currentProject.tasks.forEach(task => {
+                    tasks.forEach(task => {
                         if (task.priority === 'high' && task.status === 'not-started') {
                             const startDate = new Date(task.startDate);
                             startDate.setHours(0, 0, 0, 0);
@@ -2759,6 +3832,13 @@
                 this.initResourceChart();
                 this.initKanbanDrag();
 
+                // 如果当前视图是数据分析，初始化图表
+                if (this.currentView === 'analytics') {
+                    this.$nextTick(() => {
+                        this.initAnalyticsCharts();
+                    });
+                }
+
                 // 初始化ID
                 this.initializeIds();
 
@@ -2777,6 +3857,9 @@
                         if (this.currentView === 'resource') {
                             this.initResourceChart();
                         }
+                        if (this.currentView === 'analytics') {
+                            this.initAnalyticsCharts();
+                        }
                     });
                 }, { deep: true });
 
@@ -2785,21 +3868,96 @@
                         if (this.currentView === 'resource') {
                             this.initResourceChart();
                         }
+                        if (this.currentView === 'analytics') {
+                            this.initAnalyticsCharts();
+                        }
                     });
+                }, { deep: true });
+
+                // 监听分析模式变化
+                this.$watch('analyticsMode', () => {
+                    if (this.currentView === 'analytics') {
+                        this.$nextTick(() => {
+                            this.initAnalyticsCharts();
+                        });
+                    }
+                });
+
+                // 监听项目列表变化（综合分析模式）
+                this.$watch('projects', () => {
+                    if (this.currentView === 'analytics' && this.analyticsMode === 'all') {
+                        this.$nextTick(() => {
+                            this.initAnalyticsCharts();
+                        });
+                    }
                 }, { deep: true });
 
                 // 监听全屏状态变化
                 document.addEventListener('fullscreenchange', () => {
                     this.isFullscreen = !!document.fullscreenElement;
+                    if (this.currentView === 'analytics') {
+                        this.$nextTick(() => {
+                            setTimeout(() => {
+                                this.initAnalyticsCharts();
+                            }, 300);
+                        });
+                    }
                 });
                 document.addEventListener('webkitfullscreenchange', () => {
                     this.isFullscreen = !!document.webkitFullscreenElement;
+                    if (this.currentView === 'analytics') {
+                        this.$nextTick(() => {
+                            setTimeout(() => {
+                                this.initAnalyticsCharts();
+                            }, 300);
+                        });
+                    }
                 });
                 document.addEventListener('mozfullscreenchange', () => {
                     this.isFullscreen = !!document.mozFullScreenElement;
+                    if (this.currentView === 'analytics') {
+                        this.$nextTick(() => {
+                            setTimeout(() => {
+                                this.initAnalyticsCharts();
+                            }, 300);
+                        });
+                    }
                 });
                 document.addEventListener('MSFullscreenChange', () => {
                     this.isFullscreen = !!document.msFullscreenElement;
+                    if (this.currentView === 'analytics') {
+                        this.$nextTick(() => {
+                            setTimeout(() => {
+                                this.initAnalyticsCharts();
+                            }, 300);
+                        });
+                    }
+                });
+
+                // 监听窗口大小变化，重新调整图表
+                let resizeTimer = null;
+                window.addEventListener('resize', () => {
+                    if (this.currentView === 'analytics') {
+                        clearTimeout(resizeTimer);
+                        resizeTimer = setTimeout(() => {
+                            Object.values(this.analyticsCharts).forEach(chart => {
+                                if (chart) {
+                                    try {
+                                        chart.updateOptions({
+                                            chart: {
+                                                width: '100%'
+                                            }
+                                        }, false, false, false);
+                                    } catch (e) {
+                                        // 如果更新失败，重新初始化
+                                        this.$nextTick(() => {
+                                            this.initAnalyticsCharts();
+                                        });
+                                    }
+                                }
+                            });
+                        }, 300);
+                    }
                 });
             },
             beforeUnmount() {
@@ -2807,12 +3965,37 @@
                 if (this.resourceChart) {
                     this.resourceChart.destroy();
                 }
+                Object.values(this.analyticsCharts).forEach(chart => {
+                    if (chart) {
+                        chart.destroy();
+                    }
+                });
                 if (this.toastTimer) {
                     clearTimeout(this.toastTimer);
                 }
             },
             methods: {
                 switchView(view) {
+                    // 如果离开数据分析视图，先销毁所有图表
+                    if (this.currentView === 'analytics' && view !== 'analytics') {
+                        Object.values(this.analyticsCharts).forEach(chart => {
+                            if (chart) {
+                                try {
+                                    chart.destroy();
+                                } catch (e) {
+                                    console.warn('销毁图表时出错:', e);
+                                }
+                            }
+                        });
+                        // 清空图表对象
+                        this.analyticsCharts = {
+                            taskStatusChart: null,
+                            priorityChart: null,
+                            progressChart: null,
+                            timelineChart: null
+                        };
+                    }
+
                     this.currentView = view;
                     // 切换视图时重新初始化拖拽功能
                     if (view === 'kanban') {
@@ -2824,6 +4007,23 @@
                     if (view === 'resource') {
                         this.$nextTick(() => {
                             this.initResourceChart();
+                        });
+                    }
+                    // 切换视图时重新初始化数据分析图表
+                    if (view === 'analytics') {
+                        // 先清空图表容器，避免重叠
+                        this.$nextTick(() => {
+                            const chartElements = ['taskStatusChart', 'priorityChart', 'progressChart', 'timelineChart'];
+                            chartElements.forEach(id => {
+                                const el = document.querySelector(`#${id}`);
+                                if (el) {
+                                    el.innerHTML = '';
+                                }
+                            });
+                            // 延迟一下再初始化，确保DOM已更新
+                            setTimeout(() => {
+                                this.initAnalyticsCharts();
+                            }, 100);
                         });
                     }
                 },
@@ -2842,6 +4042,69 @@
                             this.initKanbanDrag();
                         });
                     }
+                    if (this.currentView === 'analytics') {
+                        // 先销毁所有图表，避免重叠
+                        this.destroyAnalyticsCharts();
+                        // 清空图表容器
+                        this.clearAnalyticsChartContainers();
+                        // 延迟初始化，确保DOM已更新
+                        this.$nextTick(() => {
+                            setTimeout(() => {
+                                this.initAnalyticsCharts();
+                            }, 150);
+                        });
+                    }
+                },
+                switchAnalyticsMode(mode) {
+                    if (mode === 'project' && !this.currentProject) {
+                        this.showToast('请先选择一个项目', 'error');
+                        return;
+                    }
+                    // 先销毁所有图表
+                    this.destroyAnalyticsCharts();
+                    // 清空图表容器
+                    this.clearAnalyticsChartContainers();
+                    // 切换模式
+                    this.analyticsMode = mode;
+                    // 延迟初始化
+                    this.$nextTick(() => {
+                        setTimeout(() => {
+                            this.initAnalyticsCharts();
+                        }, 150);
+                    });
+                },
+                destroyAnalyticsCharts() {
+                    Object.values(this.analyticsCharts).forEach(chart => {
+                        if (chart) {
+                            try {
+                                chart.destroy();
+                            } catch (e) {
+                                console.warn('销毁图表时出错:', e);
+                            }
+                        }
+                    });
+                    // 重置图表对象
+                    this.analyticsCharts = {
+                        taskStatusChart: null,
+                        priorityChart: null,
+                        progressChart: null,
+                        timelineChart: null
+                    };
+                },
+                clearAnalyticsChartContainers() {
+                    const chartIds = ['taskStatusChart', 'priorityChart', 'progressChart', 'timelineChart'];
+                    chartIds.forEach(id => {
+                        const el = document.querySelector(`#${id}`);
+                        if (el) {
+                            // 完全清空容器，包括所有子元素
+                            while (el.firstChild) {
+                                el.removeChild(el.firstChild);
+                            }
+                            el.innerHTML = '';
+                            // 确保容器样式重置
+                            el.style.cssText = '';
+                        }
+                    });
                 },
                 selectTask(task) {
                     this.selectedTask = task;
@@ -3044,6 +4307,305 @@
 
                     this.resourceChart = new ApexCharts(chartElement, options);
                     this.resourceChart.render();
+                },
+                initAnalyticsCharts() {
+                    if (this.analyticsMode === 'project' && !this.currentProject) {
+                        console.log('数据分析：当前项目模式但没有选中项目');
+                        return;
+                    }
+                    if (this.analyticsMode === 'all' && this.projects.length === 0) {
+                        console.log('数据分析：所有项目模式但没有项目');
+                        return;
+                    }
+
+                    console.log('开始初始化数据分析图表，模式:', this.analyticsMode);
+
+                    // 确保先销毁和清空
+                    this.destroyAnalyticsCharts();
+                    this.clearAnalyticsChartContainers();
+
+                    // 等待DOM更新完成
+                    this.$nextTick(() => {
+                        // 确保容器可见且有尺寸（放宽检查条件）
+                        const checkContainer = (el) => {
+                            if (!el) {
+                                console.warn('图表容器不存在');
+                                return false;
+                            }
+                            // 如果容器有ID，即使尺寸为0也允许初始化（可能是隐藏状态）
+                            return true;
+                        };
+
+                        // 等待一小段时间确保DOM完全渲染
+                        setTimeout(() => {
+                            // 检查ApexCharts是否可用
+                            if (typeof ApexCharts === 'undefined') {
+                                console.error('ApexCharts未加载！');
+                                this.showToast('图表库加载失败，请刷新页面', 'error');
+                                return;
+                            }
+
+                            // 再次确保容器清空（在初始化前最后一次清空）
+                            const chartIds = ['taskStatusChart', 'priorityChart', 'progressChart', 'timelineChart'];
+                            chartIds.forEach(id => {
+                                const el = document.querySelector(`#${id}`);
+                                if (el) {
+                                    el.innerHTML = '';
+                                }
+                            });
+
+                            // 获取数据
+                            const completed = Number(this.completedTasks) || 0;
+                            const inProgress = Number(this.inProgressTasks) || 0;
+                            const notStarted = Number(this.notStartedTasks) || 0;
+                            const high = Number(this.highPriorityTasks) || 0;
+                            const medium = Number(this.mediumPriorityTasks) || 0;
+                            const low = Number(this.lowPriorityTasks) || 0;
+
+                            console.log('图表数据:', {
+                                completed, inProgress, notStarted,
+                                high, medium, low,
+                                totalTasks: this.totalTasks
+                            });
+
+                            // 1. 任务状态分布饼图
+                            const taskStatusChartEl = document.querySelector('#taskStatusChart');
+                            if (taskStatusChartEl) {
+                                const total = completed + inProgress + notStarted;
+
+                                if (total === 0) {
+                                    taskStatusChartEl.innerHTML = '<div style="display: flex; align-items: center; justify-content: center; height: 100%; color: var(--gray);"><div style="text-align: center;"><i class="fas fa-inbox" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.3;"></i><p>暂无任务数据</p></div></div>';
+                                } else {
+                                    const taskStatusOptions = {
+                                        series: [completed, inProgress, notStarted],
+                                        chart: {
+                                            type: 'donut',
+                                            height: 320,
+                                            width: '100%',
+                                            toolbar: { show: false }
+                                        },
+                                        labels: ['已完成', '进行中', '未开始'],
+                                        colors: ['#43aa8b', '#f8961e', '#6c757d'],
+                                        legend: {
+                                            position: 'bottom'
+                                        },
+                                        dataLabels: {
+                                            enabled: true,
+                                            formatter: function(val) {
+                                                return Math.round(val) + '%';
+                                            }
+                                        }
+                                    };
+
+                                    try {
+                                        this.analyticsCharts.taskStatusChart = new ApexCharts(taskStatusChartEl, taskStatusOptions);
+                                        this.analyticsCharts.taskStatusChart.render();
+                                        console.log('✓ 任务状态图表初始化成功');
+                                    } catch (error) {
+                                        console.error('✗ 任务状态图表初始化失败:', error);
+                                    }
+                                }
+                            }
+
+                            // 2. 优先级分布饼图
+                            const priorityChartEl = document.querySelector('#priorityChart');
+                            if (priorityChartEl) {
+                                const total = high + medium + low;
+
+                                if (total === 0) {
+                                    priorityChartEl.innerHTML = '<div style="display: flex; align-items: center; justify-content: center; height: 100%; color: var(--gray);"><div style="text-align: center;"><i class="fas fa-inbox" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.3;"></i><p>暂无任务数据</p></div></div>';
+                                } else {
+                                    const priorityOptions = {
+                                        series: [high, medium, low],
+                                        chart: {
+                                            type: 'donut',
+                                            height: 320,
+                                            width: '100%',
+                                            toolbar: { show: false }
+                                        },
+                                        labels: ['高优先级', '中优先级', '低优先级'],
+                                        colors: ['#f94144', '#f8961e', '#43aa8b'],
+                                        legend: {
+                                            position: 'bottom'
+                                        },
+                                        dataLabels: {
+                                            enabled: true,
+                                            formatter: function(val) {
+                                                return Math.round(val) + '%';
+                                            }
+                                        }
+                                    };
+
+                                    try {
+                                        this.analyticsCharts.priorityChart = new ApexCharts(priorityChartEl, priorityOptions);
+                                        this.analyticsCharts.priorityChart.render();
+                                        console.log('✓ 优先级图表初始化成功');
+                                    } catch (error) {
+                                        console.error('✗ 优先级图表初始化失败:', error);
+                                    }
+                                }
+                            }
+
+                            // 3. 任务进度对比柱状图
+                            const progressChartEl = document.querySelector('#progressChart');
+                            const tasksForProgress = this.analyticsMode === 'all' ? this.allProjectsTasks : (this.currentProject?.tasks || []);
+                            if (progressChartEl) {
+                                const topTasks = tasksForProgress.length > 0 ? this.sortedTasksByProgress.slice(0, 10) : [];
+
+                                if (topTasks.length === 0) {
+                                    // 如果没有任务，显示空状态提示
+                                    progressChartEl.innerHTML = '<div style="display: flex; align-items: center; justify-content: center; height: 100%; color: var(--gray);"><div style="text-align: center;"><i class="fas fa-inbox" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.3;"></i><p>暂无任务数据</p></div></div>';
+                                } else {
+                            const progressOptions = {
+                                series: [{
+                                    name: '任务进度',
+                                    data: topTasks.map(task => task.progress)
+                                }],
+                                chart: {
+                                    type: 'bar',
+                                    height: 380,
+                                    width: '100%',
+                                    toolbar: { show: false },
+                                    animations: {
+                                        enabled: true,
+                                        easing: 'easeinout',
+                                        speed: 800
+                                    }
+                                },
+                                colors: topTasks.map(task => this.getPriorityColor(task.priority)),
+                                plotOptions: {
+                                    bar: {
+                                        horizontal: true,
+                                        distributed: true,
+                                        borderRadius: 4,
+                                        dataLabels: {
+                                            position: 'top',
+                                            formatter: function(val) {
+                                                return val + '%';
+                                            }
+                                        }
+                                    }
+                                },
+                                dataLabels: {
+                                    enabled: true,
+                                    style: {
+                                        fontSize: '12px',
+                                        fontWeight: 600
+                                    }
+                                },
+                                xaxis: {
+                                    categories: topTasks.map(task => task.name.length > 20 ? task.name.substring(0, 20) + '...' : task.name),
+                                    max: 100,
+                                    title: {
+                                        text: '进度 (%)'
+                                    }
+                                },
+                                yaxis: {
+                                    labels: {
+                                        style: {
+                                            fontSize: '12px'
+                                        }
+                                    }
+                                },
+                                tooltip: {
+                                    y: {
+                                        formatter: function(val, { dataPointIndex }) {
+                                            const task = topTasks[dataPointIndex];
+                                            return `${task.name}: ${val}% (${this.getPriorityText(task.priority)})`;
+                                        }.bind(this)
+                                    }
+                                }
+                                };
+
+                                    try {
+                                        this.analyticsCharts.progressChart = new ApexCharts(progressChartEl, progressOptions);
+                                        this.analyticsCharts.progressChart.render();
+                                        console.log('✓ 进度图表初始化成功');
+                                    } catch (error) {
+                                        console.error('✗ 进度图表初始化失败:', error);
+                                    }
+                                }
+                            }
+
+                            // 4. 时间线分析
+                            const timelineChartEl = document.querySelector('#timelineChart');
+                            if (timelineChartEl) {
+                                const today = new Date();
+                                today.setHours(0, 0, 0, 0);
+
+                                const timelineOptions = {
+                                series: [{
+                                    name: '项目进度',
+                                    data: [
+                                        {
+                                            x: '时间进度',
+                                            y: [this.timeProgress, 100]
+                                        },
+                                        {
+                                            x: '任务完成率',
+                                            y: [this.completionRate, 100]
+                                        },
+                                        {
+                                            x: '项目健康度',
+                                            y: [this.projectHealth, 100]
+                                        }
+                                    ]
+                                }],
+                                chart: {
+                                    type: 'rangeBar',
+                                    height: 380,
+                                    width: '100%',
+                                    toolbar: { show: false },
+                                    animations: {
+                                        enabled: true,
+                                        easing: 'easeinout',
+                                        speed: 800
+                                    }
+                                },
+                                colors: ['#4361ee'],
+                                plotOptions: {
+                                    bar: {
+                                        horizontal: true,
+                                        borderRadius: 4
+                                    }
+                                },
+                                dataLabels: {
+                                    enabled: true,
+                                    formatter: function(val) {
+                                        return Math.round(val[0]) + '%';
+                                    }
+                                },
+                                xaxis: {
+                                    type: 'category',
+                                    categories: ['时间进度', '任务完成率', '项目健康度']
+                                },
+                                yaxis: {
+                                    max: 100,
+                                    title: {
+                                        text: '百分比 (%)'
+                                    }
+                                },
+                                tooltip: {
+                                    y: {
+                                        formatter: function(val) {
+                                            return `${Math.round(val[0])}% / 100%`;
+                                        }
+                                    }
+                                }
+                                };
+
+                                try {
+                                    this.analyticsCharts.timelineChart = new ApexCharts(timelineChartEl, timelineOptions);
+                                    this.analyticsCharts.timelineChart.render();
+                                    console.log('✓ 时间线图表初始化成功');
+                                } catch (error) {
+                                    console.error('✗ 时间线图表初始化失败:', error);
+                                }
+                            }
+
+                            console.log('✓ 所有图表初始化完成');
+                        }, 300);
+                    });
                 },
                 initKanbanDrag() {
                     this.$nextTick(() => {
@@ -4014,5 +5576,7 @@
         // 开始检查Vue是否加载
         checkVueLoaded();
     </script>
+</body>
+</html>
 </body>
 </html>
