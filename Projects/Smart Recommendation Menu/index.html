@@ -204,12 +204,37 @@
             border-radius: 0 5px 5px 0;
             cursor: pointer;
             box-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-            transition: transform 0.2s;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             /* 修正文字方向 */
             writing-mode: horizontal-tb;
+            position: relative;
+            overflow: hidden;
         }
-        .bookmark:hover { transform: translateX(8px); }
+        .bookmark::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s;
+        }
+        .bookmark:hover::before {
+            left: 100%;
+        }
+        .bookmark:hover {
+            transform: translateX(8px) scale(1.05);
+            box-shadow: 4px 4px 8px rgba(0,0,0,0.4);
+        }
+        .bookmark.active {
+            background: rgba(255,255,255,0.9);
+            color: var(--accent);
+            font-weight: bold;
+            box-shadow: 0 0 15px var(--accent);
+        }
         body.skin-scifi .bookmark { color: #000; box-shadow: 0 0 8px var(--accent); }
+        body.skin-scifi .bookmark.active { background: var(--accent); color: #000; }
 
         /* --- 页面系统 (Pages) --- */
         .page {
@@ -330,14 +355,312 @@
         .corner {
             position: absolute; width: 30px; height: 30px;
             border: 2px solid var(--accent); pointer-events: none; opacity: 0.5;
+            transition: opacity 0.3s;
         }
+        .corner:hover { opacity: 0.8; }
         .tl { top: 20px; left: 20px; border-right: none; border-bottom: none; }
         .br { bottom: 20px; right: 20px; border-left: none; border-top: none; }
+
+        /* 加载动画 */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* 脉冲动画 */
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.05); }
+        }
+        .pulse { animation: pulse 2s ease-in-out infinite; }
+
+        /* 淡入动画 */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in { animation: fadeIn 0.5s ease-out; }
+
+        /* 页面编号 */
+        .page-number {
+            position: absolute;
+            bottom: 15px;
+            right: 20px;
+            font-size: 0.75rem;
+            color: var(--text-main);
+            opacity: 0.4;
+            font-weight: bold;
+        }
+
+        /* 营养标签 */
+        .nutrition-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            margin: 2px;
+            background: rgba(0,0,0,0.05);
+            border-radius: 10px;
+            font-size: 0.75rem;
+            border: 1px solid var(--accent);
+        }
+
+        /* 日期选择器 */
+        .date-picker {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        .date-btn {
+            padding: 6px 12px;
+            background: rgba(0,0,0,0.05);
+            border: 1px solid var(--accent);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+        .date-btn:hover { background: var(--accent); color: #fff; }
+        .date-btn.active { background: var(--accent); color: #fff; }
+
+        /* 进度条 */
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: rgba(0,0,0,0.1);
+            border-radius: 3px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        .progress-fill {
+            height: 100%;
+            background: var(--accent);
+            transition: width 0.3s ease;
+            border-radius: 3px;
+        }
+
+        /* 卡片样式 */
+        .card {
+            background: rgba(255,255,255,0.5);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border: 1px solid rgba(0,0,0,0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        /* 空状态 */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            opacity: 0.5;
+        }
+        .empty-state::before {
+            content: "📭";
+            font-size: 3rem;
+            display: block;
+            margin-bottom: 10px;
+        }
 
         /* 适配 */
         @media (max-width: 900px) {
             :root { --book-w: 340px; --book-h: 520px; }
             .face { padding: 25px; }
+            h1 { font-size: 2rem; }
+            h2 { font-size: 1.3rem; }
+            .nav-dock { gap: 20px; }
+            .nav-btn { width: 45px; height: 45px; font-size: 20px; }
+            .skin-bar { top: 10px; padding: 8px 15px; gap: 10px; }
+            .skin-btn { width: 30px; height: 30px; }
+        }
+
+        /* 教学模态框 */
+        .recipe-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(5px);
+            z-index: 10000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.3s ease-out;
+        }
+        .recipe-modal.active {
+            display: flex;
+        }
+        .recipe-content {
+            background: var(--page-bg);
+            color: var(--text-main);
+            width: 90%;
+            max-width: 600px;
+            max-height: 85vh;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            overflow-y: auto;
+            position: relative;
+            animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 2px solid var(--accent);
+        }
+        .recipe-content::-webkit-scrollbar {
+            width: 8px;
+        }
+        .recipe-content::-webkit-scrollbar-thumb {
+            background: var(--accent);
+            border-radius: 4px;
+        }
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+        .recipe-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+        .recipe-close:hover {
+            transform: rotate(90deg) scale(1.1);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+        .recipe-header {
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--accent);
+        }
+        .recipe-title {
+            font-size: 2rem;
+            color: var(--text-main);
+            margin-bottom: 10px;
+            font-family: var(--font-h);
+        }
+        .recipe-meta {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        .recipe-section {
+            margin: 25px 0;
+        }
+        .recipe-section h3 {
+            color: var(--accent);
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .ingredients-list {
+            list-style: none;
+            padding: 0;
+        }
+        .ingredients-list li {
+            padding: 10px 15px;
+            margin: 8px 0;
+            background: rgba(0,0,0,0.03);
+            border-radius: 8px;
+            border-left: 3px solid var(--accent);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .steps-list {
+            list-style: none;
+            padding: 0;
+            counter-reset: step-counter;
+        }
+        .steps-list li {
+            counter-increment: step-counter;
+            padding: 15px;
+            margin: 12px 0;
+            background: rgba(0,0,0,0.03);
+            border-radius: 8px;
+            position: relative;
+            padding-left: 50px;
+        }
+        .steps-list li::before {
+            content: counter(step-counter);
+            position: absolute;
+            left: 15px;
+            top: 15px;
+            width: 28px;
+            height: 28px;
+            background: var(--accent);
+            color: #fff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+        .recipe-tips {
+            background: rgba(255,235,59,0.2);
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        .recipe-tips strong {
+            color: #f57c00;
+        }
+        .view-recipe-btn {
+            background: rgba(0,0,0,0.05);
+            border: 1px solid var(--accent);
+            color: var(--accent);
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-left: 8px;
+        }
+        .view-recipe-btn:hover {
+            background: var(--accent);
+            color: #fff;
+        }
+
+        /* 打印样式 */
+        @media print {
+            body { background: white; }
+            .skin-bar, .nav-dock, .bookmarks-layer { display: none; }
+            .recipe-modal { display: none !important; }
         }
     </style>
 </head>
@@ -363,10 +686,10 @@
 
                 <!-- 书签现在位于封底层，向右偏移，确保不被遮挡 -->
                 <div class="bookmarks-layer">
-                    <div class="bookmark" onclick="jumpTo(1)">推荐</div>
-                    <div class="bookmark" onclick="jumpTo(2)">食材</div>
-                    <div class="bookmark" onclick="jumpTo(3)">计划</div>
-                    <div class="bookmark" onclick="jumpTo(4)">清单</div>
+                    <div class="bookmark" onclick="jumpTo(1)" data-page="1" title="智能推荐">推荐</div>
+                    <div class="bookmark" onclick="jumpTo(2)" data-page="2" title="食材管理">食材</div>
+                    <div class="bookmark" onclick="jumpTo(3)" data-page="3" title="膳食计划">计划</div>
+                    <div class="bookmark" onclick="jumpTo(4)" data-page="4" title="采购清单">清单</div>
                 </div>
             </div>
 
@@ -386,16 +709,22 @@
                     <div class="content-scroll">
                         <div class="corner tl"></div>
                         <div class="corner br"></div>
-                        <h2>📖 指南</h2>
-                        <p>欢迎使用您的智能菜单书。</p>
-                        <ul style="margin: 20px; line-height: 2;">
-                            <li>🥘 <strong>智能推荐</strong>：AI 定制菜单</li>
-                            <li>🧊 <strong>库存管理</strong>：追踪冰箱食材</li>
-                            <li>📅 <strong>膳食日历</strong>：本周饮食计划</li>
-                            <li>🛒 <strong>采购清单</strong>：自动补货</li>
+                        <div class="page-number">1/5</div>
+                        <h2>📖 使用指南</h2>
+                        <p style="text-align: center; margin-bottom: 20px; color: var(--accent); font-weight: bold;">欢迎使用您的智能菜单书</p>
+                        <div class="card fade-in">
+                            <ul style="margin: 0; line-height: 2.2; list-style: none;">
+                                <li>🥘 <strong>智能推荐</strong>：AI 根据偏好定制菜单</li>
+                                <li>🧊 <strong>库存管理</strong>：追踪冰箱食材，智能匹配</li>
+                                <li>📅 <strong>膳食日历</strong>：规划本周饮食计划</li>
+                                <li>🛒 <strong>采购清单</strong>：自动生成补货清单</li>
                         </ul>
-                        <div style="margin-top: auto; text-align: center;">
-                            <button class="btn" style="width: auto; padding: 10px 40px;" onclick="flipNext()">打开书本</button>
+                        </div>
+                        <div style="margin-top: 20px; padding: 15px; background: rgba(0,0,0,0.03); border-radius: 8px; border-left: 3px solid var(--accent);">
+                            <p style="font-size: 0.85rem; margin: 0;"><strong>💡 提示：</strong>使用键盘 ← → 方向键翻页，点击书签快速跳转</p>
+                        </div>
+                        <div style="margin-top: auto; text-align: center; padding-top: 20px;">
+                            <button class="btn pulse" style="width: auto; padding: 12px 50px;" onclick="flipNext()">✨ 开始使用</button>
                         </div>
                     </div>
                 </div>
@@ -406,29 +735,51 @@
                 <div class="face front">
                     <div class="content-scroll">
                         <div class="corner tl"></div>
-                        <h2>🥘 灵感推荐</h2>
-                        <p>今天吃什么？</p>
-                        <label>选择偏好：</label>
-                        <select id="pref">
+                        <div class="page-number">2/5</div>
+                        <h2>🥘 智能推荐</h2>
+                        <p style="text-align: center; margin-bottom: 15px; color: var(--accent);">今天吃什么？</p>
+                        <label style="display: block; margin-bottom: 8px; font-weight: bold;">选择偏好：</label>
+                        <select id="pref" style="margin-bottom: 15px;">
                             <option value="balanced">🥗 均衡膳食</option>
                             <option value="meat">🥩 肉食主义</option>
                             <option value="light">🥬 低卡轻食</option>
+                            <option value="vegan">🌱 素食主义</option>
+                            <option value="quick">⚡ 快速料理</option>
                         </select>
-                        <button class="btn" onclick="genMenu()">✨ 生成菜单</button>
+                        <div style="margin-bottom: 10px;">
+                            <label style="font-size: 0.85rem; opacity: 0.7;">生成数量：</label>
+                            <input type="range" id="menuCount" min="1" max="5" value="3" style="width: 100%; margin-top: 5px;" oninput="document.getElementById('countDisplay').textContent = this.value">
+                            <div style="text-align: center; font-size: 0.8rem; color: var(--accent);"><span id="countDisplay">3</span> 道菜</div>
+                        </div>
+                        <button class="btn" onclick="genMenu()" id="genBtn">
+                            <span id="genBtnText">✨ 生成菜单</span>
+                        </button>
 
-                        <div id="genResult" style="margin-top: 20px; padding: 20px; border: 2px dashed var(--accent); border-radius: 8px; text-align: center; opacity: 0.7;">
-                            等待生成...
+                        <div id="genResult" class="card fade-in" style="margin-top: 20px; text-align: center; min-height: 80px; display: flex; align-items: center; justify-content: center; opacity: 0.7;">
+                            <div>等待生成...</div>
                         </div>
                     </div>
                 </div>
                 <div class="face back">
                     <div class="content-scroll">
+                        <div class="page-number">2/5</div>
                         <h2>📋 菜单详情</h2>
+                        <p style="font-size: 0.9rem; opacity: 0.8; margin-bottom: 15px;">点击查看营养信息</p>
                         <ul id="menuList" class="list">
-                            <li class="item" style="justify-content: center; opacity: 0.5;">请先在左侧生成</li>
+                            <li class="item empty-state" style="justify-content: center; opacity: 0.5; border: none;">
+                                <div>请先在左侧生成菜单</div>
+                            </li>
                         </ul>
-                        <div style="margin-top: auto;">
-                            <button class="btn" onclick="addToPlan()">📅 全部加入计划</button>
+                        <div id="menuNutrition" style="margin-top: 15px; padding: 10px; background: rgba(0,0,0,0.03); border-radius: 6px; font-size: 0.85rem; display: none;">
+                            <strong>总营养：</strong>
+                            <div style="display: flex; gap: 10px; margin-top: 5px; flex-wrap: wrap;">
+                                <span class="nutrition-badge">热量: <span id="totalKcal">0</span> kcal</span>
+                                <span class="nutrition-badge">蛋白质: <span id="totalProtein">0</span>g</span>
+                                <span class="nutrition-badge">碳水: <span id="totalCarb">0</span>g</span>
+                            </div>
+                        </div>
+                        <div style="margin-top: auto; padding-top: 15px;">
+                            <button class="btn" onclick="addToPlan()" id="addPlanBtn" disabled>📅 全部加入计划</button>
                         </div>
                     </div>
                 </div>
@@ -438,24 +789,41 @@
             <div class="page" id="p2">
                 <div class="face front">
                     <div class="content-scroll">
+                        <div class="page-number">3/5</div>
                         <h2>🧊 冰箱库存</h2>
-                        <div style="display: flex; gap: 10px;">
-                            <input type="text" id="ingInput" placeholder="例如：鸡蛋..." onkeypress="if(event.keyCode==13) addIng()">
-                            <button class="btn" style="width: auto; margin-top:0;" onclick="addIng()">+</button>
+                        <p style="font-size: 0.9rem; opacity: 0.7; margin-bottom: 15px; text-align: center;">管理您的食材库存</p>
+                        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                            <input type="text" id="ingInput" placeholder="例如：鸡蛋、番茄..." onkeypress="if(event.keyCode==13) addIng()" ondblclick="quickAddCommon()" style="flex: 1;" title="双击快速添加常用食材">
+                            <button class="btn" style="width: 50px; margin-top:0; padding: 10px;" onclick="addIng()" title="添加食材">+</button>
                         </div>
-                        <div id="ingTags" class="tags">
+                        <div style="margin-bottom: 10px;">
+                            <div style="font-size: 0.85rem; opacity: 0.7; margin-bottom: 5px;">库存数量：<strong id="ingCount">0</strong> 种</div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="ingProgress" style="width: 0%;"></div>
+                            </div>
+                        </div>
+                        <div id="ingTags" class="tags" style="min-height: 40px;">
                             <!-- Tags -->
                         </div>
-                        <p style="margin-top: 20px; font-size: 0.8rem; opacity: 0.6;">点击标签删除</p>
-                        <button class="btn" style="margin-top: auto;" onclick="matchRecipe()">🔍 匹配食谱</button>
+                        <p style="margin-top: 15px; font-size: 0.8rem; opacity: 0.6; text-align: center;">💡 点击标签删除，双击快速添加</p>
+                        <div style="margin-top: auto; padding-top: 15px;">
+                            <button class="btn" onclick="matchRecipe()" id="matchBtn">🔍 匹配食谱</button>
+                            <button class="btn" onclick="clearInventory()" style="margin-top: 10px; background: rgba(255,0,0,0.1); color: var(--accent); border: 1px solid var(--accent);">🗑️ 清空库存</button>
+                        </div>
                     </div>
                 </div>
                 <div class="face back">
                     <div class="content-scroll">
+                        <div class="page-number">3/5</div>
                         <h2>🍳 匹配结果</h2>
-                        <p>基于库存推荐：</p>
+                        <p style="font-size: 0.9rem; opacity: 0.8; margin-bottom: 15px;">基于当前库存推荐：</p>
+                        <div id="matchStats" style="margin-bottom: 15px; padding: 10px; background: rgba(0,0,0,0.03); border-radius: 6px; font-size: 0.85rem; display: none;">
+                            <strong>匹配度：</strong><span id="matchRate">0</span>%
+                        </div>
                         <ul id="matchList" class="list">
-                            <li class="item" style="justify-content: center; opacity: 0.5;">暂无匹配</li>
+                            <li class="item empty-state" style="justify-content: center; opacity: 0.5; border: none;">
+                                <div>暂无匹配，请先添加食材</div>
+                            </li>
                         </ul>
                     </div>
                 </div>
@@ -466,20 +834,46 @@
                 <div class="face front">
                     <div class="content-scroll">
                         <div class="corner tl"></div>
+                        <div class="page-number">4/5</div>
                         <h2>📅 本周计划</h2>
+                        <div class="date-picker">
+                            <span style="font-size: 0.85rem; opacity: 0.7;">选择日期：</span>
+                            <div class="date-btn active" onclick="selectDate('today', this)">今天</div>
+                            <div class="date-btn" onclick="selectDate('tomorrow', this)">明天</div>
+                            <div class="date-btn" onclick="selectDate('week', this)">本周</div>
+                        </div>
+                        <div style="margin-bottom: 15px; padding: 10px; background: rgba(0,0,0,0.03); border-radius: 6px; font-size: 0.85rem;">
+                            <div style="display: flex; justify-content: space-between;">
+                                <span>计划数量：<strong id="planCount">0</strong> 道</span>
+                                <span>总热量：<strong id="calTotal" style="color: var(--accent);">0</strong> kcal</span>
+                            </div>
+                        </div>
                         <ul id="planList" class="list">
-                            <!-- Plan Items -->
+                            <li class="item empty-state" style="justify-content: center; opacity: 0.5; border: none;">
+                                <div>暂无计划，快去添加吧！</div>
+                            </li>
                         </ul>
-                        <p style="text-align: right; margin-top: 15px; font-weight: bold; color: var(--accent);">Total: <span id="calTotal">0</span> kcal</p>
+                        <div style="margin-top: auto; padding-top: 15px;">
+                            <button class="btn" onclick="clearPlan()" style="background: rgba(255,0,0,0.1); color: var(--accent); border: 1px solid var(--accent);">🗑️ 清空计划</button>
+                        </div>
                     </div>
                 </div>
                 <div class="face back">
                     <div class="content-scroll">
+                        <div class="page-number">4/5</div>
                         <h2>🛒 采购清单</h2>
-                        <p style="font-size: 0.9rem; opacity: 0.8;">已自动扣除库存</p>
-                        <button class="btn" style="padding: 5px; font-size: 0.9rem; margin-bottom: 10px;" onclick="genShop()">🔄 刷新清单</button>
+                        <p style="font-size: 0.9rem; opacity: 0.8; margin-bottom: 15px;">已自动扣除库存</p>
+                        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                            <button class="btn" style="padding: 8px; font-size: 0.9rem; margin-bottom: 0; flex: 1;" onclick="genShop()">🔄 刷新清单</button>
+                            <button class="btn" style="padding: 8px; font-size: 0.9rem; margin-bottom: 0; flex: 1; background: rgba(0,255,0,0.1); color: var(--accent); border: 1px solid var(--accent);" onclick="checkAll()">✓ 全选</button>
+                        </div>
+                        <div style="margin-bottom: 10px; padding: 8px; background: rgba(0,0,0,0.03); border-radius: 6px; font-size: 0.85rem;">
+                            待采购：<strong id="shopCount">0</strong> 项
+                        </div>
                         <ul id="shopList" class="list">
-                            <li class="item" style="justify-content: center; opacity: 0.5;">无需采购</li>
+                            <li class="item empty-state" style="justify-content: center; opacity: 0.5; border: none;">
+                                <div>无需采购，库存充足！</div>
+                            </li>
                         </ul>
                     </div>
                 </div>
@@ -489,16 +883,39 @@
             <div class="page" id="p4">
                 <div class="face front">
                     <div class="content-scroll" style="justify-content: center; text-align: center;">
-                        <h2 style="border:none; font-size: 2.5rem;">Enjoy!</h2>
-                        <p>唯有爱与美食不可辜负</p>
-                        <div style="font-size: 2rem; margin-top: 20px;">🥗 🥩 🥑</div>
+                        <div class="page-number" style="color: rgba(255,255,255,0.5);">5/5</div>
+                        <h2 style="border:none; font-size: 2.5rem; margin-bottom: 20px;">Enjoy!</h2>
+                        <p style="font-size: 1.1rem; margin-bottom: 30px; color: var(--accent);">唯有爱与美食不可辜负</p>
+                        <div style="font-size: 3rem; margin: 30px 0; animation: pulse 2s ease-in-out infinite;">🥗 🥩 🥑</div>
+                        <div class="card" style="background: rgba(255,255,255,0.1); margin: 20px; padding: 20px;">
+                            <p style="font-size: 0.9rem; opacity: 0.9; margin-bottom: 10px;">📊 使用统计</p>
+                            <div style="display: flex; justify-content: space-around; margin-top: 15px;">
+                                <div>
+                                    <div style="font-size: 1.5rem; font-weight: bold;" id="statRecipes">0</div>
+                                    <div style="font-size: 0.75rem; opacity: 0.8;">已规划</div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 1.5rem; font-weight: bold;" id="statIngredients">0</div>
+                                    <div style="font-size: 0.75rem; opacity: 0.8;">食材数</div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 1.5rem; font-weight: bold;" id="statDays">0</div>
+                                    <div style="font-size: 0.75rem; opacity: 0.8;">使用天数</div>
+                                </div>
+                            </div>
+                        </div>
+                        <button class="btn" onclick="exportData()" style="width: auto; padding: 10px 30px; margin-top: 20px;">💾 导出数据</button>
                     </div>
                 </div>
                 <div class="face back" style="background:var(--cover-bg); background-image:var(--cover-tex); color:#fff;">
                     <div class="content-scroll" style="justify-content: center; align-items: center;">
-                        <div style="opacity: 0.5; text-align: center;">
-                            <p>Designed by AI</p>
-                            <p style="font-size: 0.8rem;">Ultimate Edition</p>
+                        <div style="opacity: 0.7; text-align: center;">
+                            <p style="font-size: 1.2rem; margin-bottom: 10px;">Designed by AI</p>
+                            <p style="font-size: 0.9rem; opacity: 0.8;">Ultimate Edition</p>
+                            <div style="margin-top: 30px; font-size: 0.85rem; opacity: 0.6;">
+                                <p>感谢使用</p>
+                                <p style="margin-top: 10px;">愿每一餐都充满美好</p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -513,6 +930,14 @@
     <div class="nav-dock">
         <div class="nav-btn" onclick="flipPrev()">❮</div>
         <div class="nav-btn" onclick="flipNext()">❯</div>
+    </div>
+
+    <!-- 菜品教学模态框 -->
+    <div class="recipe-modal" id="recipeModal" onclick="if(event.target.id === 'recipeModal') closeRecipeModal()">
+        <div class="recipe-content">
+            <button class="recipe-close" onclick="closeRecipeModal()">×</button>
+            <div id="recipeDetails"></div>
+        </div>
     </div>
 
     <script>
@@ -533,6 +958,8 @@
                 p.style.zIndex = totalPages - i;
             });
             updateView();
+            // 初始化书签状态
+            updateBookmarkState();
         }
 
         // 核心：防止穿模的层级算法
@@ -568,6 +995,8 @@
                 shadow.style.transform = `rotateX(90deg) translateZ(-20px) scale(1.4)`;
                 shadow.style.opacity = '0.3';
             }
+            // 更新书签状态
+            updateBookmarkState();
         }
 
         function flipNext() {
@@ -610,13 +1039,63 @@
 
         function jumpTo(idx) {
             if(isFlipping) return;
+
+            // 更新书签激活状态
+            document.querySelectorAll('.bookmark').forEach((bm, i) => {
+                if(i + 1 === idx) {
+                    bm.classList.add('active');
+                } else {
+                    bm.classList.remove('active');
+                }
+            });
+
+            // 显示跳转提示
+            const bookmarkNames = ['', '推荐', '食材', '计划', '清单'];
+            if(bookmarkNames[idx]) {
+                showToast(`跳转到：${bookmarkNames[idx]}`, 1000);
+            }
+
             if (idx > currentPage) {
                 let steps = idx - currentPage;
-                for(let i=0; i<steps; i++) setTimeout(flipNext, i*250);
+                // 优化：使用更快的翻页速度，但保持平滑
+                for(let i=0; i<steps; i++) {
+                    setTimeout(() => {
+                        if(i === steps - 1) {
+                            // 最后一页时更新书签状态
+                            setTimeout(() => {
+                                updateBookmarkState();
+                            }, 300);
+                        }
+                        flipNext();
+                    }, i * 200);
+                }
             } else if (idx < currentPage) {
                 let steps = currentPage - idx;
-                for(let i=0; i<steps; i++) setTimeout(flipPrev, i*250);
+                for(let i=0; i<steps; i++) {
+                    setTimeout(() => {
+                        if(i === steps - 1) {
+                            setTimeout(() => {
+                                updateBookmarkState();
+                            }, 300);
+                        }
+                        flipPrev();
+                    }, i * 200);
+                }
+            } else {
+                // 如果已经在目标页，更新书签状态
+                updateBookmarkState();
             }
+        }
+
+        function updateBookmarkState() {
+            document.querySelectorAll('.bookmark').forEach((bm, i) => {
+                const pageNum = parseInt(bm.getAttribute('data-page'));
+                if(pageNum === currentPage) {
+                    bm.classList.add('active');
+                } else {
+                    bm.classList.remove('active');
+                }
+            });
         }
 
         init();
@@ -625,24 +1104,508 @@
            2. 业务功能逻辑
            ========================================= */
         const db = [
-            {n:"香煎牛排", k:450, t:"meat", i:["牛肉","黑胡椒"]},
-            {n:"鸡胸肉沙拉", k:200, t:"light", i:["鸡胸肉","生菜","玉米"]},
-            {n:"番茄罗勒意面", k:380, t:"balanced", i:["意面","番茄","罗勒"]},
-            {n:"三文鱼波奇饭", k:500, t:"balanced", i:["三文鱼","米饭","海苔"]},
-            {n:"蒜蓉西兰花", k:120, t:"light", i:["西兰花","大蒜"]},
-            {n:"照烧鸡腿饭", k:600, t:"meat", i:["鸡腿","米饭"]},
-            {n:"全麦三明治", k:300, t:"light", i:["全麦面包","鸡蛋","火腿"]}
+            {
+                n:"香煎牛排", k:450, t:"meat", i:["牛肉","黑胡椒","黄油"], p:35, c:5,
+                ingredients: [
+                    {name: "牛排", amount: "200g"},
+                    {name: "黑胡椒", amount: "适量"},
+                    {name: "海盐", amount: "适量"},
+                    {name: "黄油", amount: "20g"},
+                    {name: "大蒜", amount: "2瓣"},
+                    {name: "迷迭香", amount: "1枝"}
+                ],
+                steps: [
+                    "牛排提前30分钟从冰箱取出，恢复室温",
+                    "用厨房纸巾擦干表面水分",
+                    "两面均匀撒上黑胡椒和海盐",
+                    "平底锅大火加热，放入黄油",
+                    "油热后放入牛排，每面煎2-3分钟（根据厚度调整）",
+                    "最后30秒加入大蒜和迷迭香增香",
+                    "煎好后静置5分钟再切，锁住肉汁"
+                ],
+                tips: "选择厚度2-3cm的牛排效果最佳，煎制时不要频繁翻面，静置时间很重要！"
+            },
+            {
+                n:"鸡胸肉沙拉", k:200, t:"light", i:["鸡胸肉","生菜","玉米","番茄"], p:25, c:15,
+                ingredients: [
+                    {name: "鸡胸肉", amount: "150g"},
+                    {name: "生菜", amount: "100g"},
+                    {name: "玉米粒", amount: "50g"},
+                    {name: "小番茄", amount: "5个"},
+                    {name: "橄榄油", amount: "1勺"},
+                    {name: "柠檬汁", amount: "1勺"},
+                    {name: "盐", amount: "少许"}
+                ],
+                steps: [
+                    "鸡胸肉用盐和黑胡椒腌制15分钟",
+                    "平底锅少油，中火煎鸡胸肉至两面金黄",
+                    "煎好后切条备用",
+                    "生菜洗净撕成小片",
+                    "小番茄对半切开",
+                    "所有蔬菜混合，加入玉米粒",
+                    "淋上橄榄油和柠檬汁，拌匀",
+                    "最后放上鸡胸肉条即可"
+                ],
+                tips: "鸡胸肉可以提前腌制过夜更入味，煎制时用中火避免外焦里生。"
+            },
+            {
+                n:"番茄罗勒意面", k:380, t:"balanced", i:["意面","番茄","罗勒","大蒜"], p:12, c:65,
+                ingredients: [
+                    {name: "意大利面", amount: "100g"},
+                    {name: "番茄", amount: "2个"},
+                    {name: "新鲜罗勒", amount: "10片"},
+                    {name: "大蒜", amount: "3瓣"},
+                    {name: "橄榄油", amount: "2勺"},
+                    {name: "盐", amount: "适量"},
+                    {name: "黑胡椒", amount: "适量"},
+                    {name: "帕玛森奶酪", amount: "适量"}
+                ],
+                steps: [
+                    "番茄顶部划十字，开水烫30秒后去皮切丁",
+                    "大蒜切片，罗勒洗净",
+                    "大锅煮水，水开后加盐，放入意面煮8-10分钟",
+                    "平底锅热橄榄油，小火炒香大蒜",
+                    "加入番茄丁，中火炒至出汁",
+                    "用铲子压碎番茄，煮至浓稠",
+                    "加入煮好的意面，翻炒均匀",
+                    "关火，加入罗勒叶和黑胡椒",
+                    "装盘，撒上帕玛森奶酪即可"
+                ],
+                tips: "番茄要炒到完全出汁，这样酱汁才浓郁。煮意面的水要加足盐，这样面条才有味道。"
+            },
+            {
+                n:"三文鱼波奇饭", k:500, t:"balanced", i:["三文鱼","米饭","海苔","牛油果"], p:30, c:45,
+                ingredients: [
+                    {name: "三文鱼", amount: "150g"},
+                    {name: "米饭", amount: "150g"},
+                    {name: "牛油果", amount: "1/2个"},
+                    {name: "海苔", amount: "2片"},
+                    {name: "黄瓜", amount: "1/3根"},
+                    {name: "日式酱油", amount: "2勺"},
+                    {name: "芥末", amount: "少许"},
+                    {name: "芝麻", amount: "适量"}
+                ],
+                steps: [
+                    "三文鱼切块，用酱油和芥末腌制10分钟",
+                    "米饭煮熟后放凉",
+                    "牛油果切片，黄瓜切丝",
+                    "海苔剪成细丝",
+                    "碗中铺上米饭",
+                    "依次摆放三文鱼、牛油果、黄瓜",
+                    "撒上海苔丝和芝麻",
+                    "淋上日式酱油即可"
+                ],
+                tips: "三文鱼要新鲜，米饭要温热但不能太烫。可以加入一些日式泡菜增加口感层次。"
+            },
+            {
+                n:"蒜蓉西兰花", k:120, t:"light", i:["西兰花","大蒜","橄榄油"], p:5, c:8,
+                ingredients: [
+                    {name: "西兰花", amount: "300g"},
+                    {name: "大蒜", amount: "4瓣"},
+                    {name: "橄榄油", amount: "1勺"},
+                    {name: "盐", amount: "适量"},
+                    {name: "蚝油", amount: "1勺（可选）"}
+                ],
+                steps: [
+                    "西兰花掰成小朵，用盐水浸泡10分钟",
+                    "大蒜切末",
+                    "锅中烧水，水开后加少许盐和油",
+                    "放入西兰花焯水1-2分钟，捞出过凉",
+                    "热锅下油，小火爆香蒜末",
+                    "加入西兰花大火快炒",
+                    "加盐调味，可加蚝油提鲜",
+                    "炒匀即可出锅"
+                ],
+                tips: "焯水时间不要太长，保持脆嫩口感。蒜末要小火炒，避免炒焦发苦。"
+            },
+            {
+                n:"照烧鸡腿饭", k:600, t:"meat", i:["鸡腿","米饭","照烧酱"], p:40, c:55,
+                ingredients: [
+                    {name: "鸡腿", amount: "2个"},
+                    {name: "米饭", amount: "200g"},
+                    {name: "照烧酱", amount: "3勺"},
+                    {name: "生抽", amount: "2勺"},
+                    {name: "料酒", amount: "1勺"},
+                    {name: "蜂蜜", amount: "1勺"},
+                    {name: "姜", amount: "2片"}
+                ],
+                steps: [
+                    "鸡腿去骨，用刀背拍松",
+                    "用生抽、料酒、姜片腌制30分钟",
+                    "照烧酱、生抽、蜂蜜调成照烧汁",
+                    "平底锅热油，鸡皮朝下煎至金黄",
+                    "翻面继续煎至熟透",
+                    "倒入照烧汁，小火收汁",
+                    "鸡腿切块，放在米饭上",
+                    "淋上剩余照烧汁即可"
+                ],
+                tips: "鸡腿要去骨，这样更容易入味和煎制。照烧汁要收浓，这样才有光泽和味道。"
+            },
+            {
+                n:"全麦三明治", k:300, t:"light", i:["全麦面包","鸡蛋","火腿","生菜"], p:18, c:35,
+                ingredients: [
+                    {name: "全麦面包", amount: "2片"},
+                    {name: "鸡蛋", amount: "1个"},
+                    {name: "火腿片", amount: "2片"},
+                    {name: "生菜", amount: "2片"},
+                    {name: "番茄", amount: "2片"},
+                    {name: "蛋黄酱", amount: "适量"},
+                    {name: "黑胡椒", amount: "少许"}
+                ],
+                steps: [
+                    "鸡蛋煮熟，切片",
+                    "生菜和番茄洗净切片",
+                    "面包片可以稍微烤一下",
+                    "在一片面包上涂蛋黄酱",
+                    "依次放上生菜、番茄、鸡蛋、火腿",
+                    "撒上黑胡椒",
+                    "盖上另一片面包",
+                    "对角切开即可"
+                ],
+                tips: "面包稍微烤一下会更香脆。可以根据喜好加入黄瓜、洋葱等蔬菜。"
+            },
+            {
+                n:"麻婆豆腐", k:280, t:"balanced", i:["豆腐","肉末","豆瓣酱"], p:15, c:12,
+                ingredients: [
+                    {name: "嫩豆腐", amount: "300g"},
+                    {name: "猪肉末", amount: "100g"},
+                    {name: "豆瓣酱", amount: "1勺"},
+                    {name: "花椒粉", amount: "1小勺"},
+                    {name: "葱", amount: "2根"},
+                    {name: "蒜", amount: "2瓣"},
+                    {name: "生抽", amount: "1勺"},
+                    {name: "水淀粉", amount: "适量"}
+                ],
+                steps: [
+                    "豆腐切块，用盐水焯一下去豆腥味",
+                    "热锅下油，炒香肉末",
+                    "加入豆瓣酱炒出红油",
+                    "加入蒜末炒香",
+                    "倒入适量水，加生抽调味",
+                    "放入豆腐，小火煮5分钟",
+                    "用水淀粉勾芡",
+                    "撒上花椒粉和葱花即可"
+                ],
+                tips: "豆腐要用盐水焯一下，这样不容易碎。勾芡要分次加入，慢慢收汁。"
+            },
+            {
+                n:"清蒸鲈鱼", k:250, t:"light", i:["鲈鱼","姜","葱"], p:35, c:2,
+                ingredients: [
+                    {name: "鲈鱼", amount: "1条（约500g）"},
+                    {name: "姜", amount: "1块"},
+                    {name: "葱", amount: "2根"},
+                    {name: "蒸鱼豉油", amount: "2勺"},
+                    {name: "料酒", amount: "1勺"},
+                    {name: "盐", amount: "少许"}
+                ],
+                steps: [
+                    "鲈鱼处理干净，两面划几刀",
+                    "用盐和料酒腌制10分钟",
+                    "姜切片，葱切丝",
+                    "盘底铺姜片，放上鲈鱼",
+                    "鱼身上也放几片姜",
+                    "水开后上锅蒸8-10分钟",
+                    "蒸好后倒掉盘中水",
+                    "撒上葱丝，淋上热油",
+                    "最后淋上蒸鱼豉油即可"
+                ],
+                tips: "蒸鱼时间根据鱼的大小调整，一般8-10分钟即可。蒸好后要倒掉腥水，这样更鲜美。"
+            },
+            {
+                n:"红烧肉", k:650, t:"meat", i:["五花肉","冰糖","生抽"], p:25, c:8,
+                ingredients: [
+                    {name: "五花肉", amount: "500g"},
+                    {name: "冰糖", amount: "30g"},
+                    {name: "生抽", amount: "3勺"},
+                    {name: "老抽", amount: "1勺"},
+                    {name: "料酒", amount: "2勺"},
+                    {name: "姜", amount: "3片"},
+                    {name: "葱", amount: "1根"},
+                    {name: "八角", amount: "2个"}
+                ],
+                steps: [
+                    "五花肉切块，冷水下锅焯水",
+                    "捞出洗净，沥干水分",
+                    "热锅下油，小火炒糖色",
+                    "糖色炒好后下五花肉翻炒",
+                    "加入料酒、生抽、老抽",
+                    "加入姜片、葱段、八角",
+                    "倒入热水没过肉，大火烧开",
+                    "转小火炖1小时",
+                    "最后大火收汁即可"
+                ],
+                tips: "炒糖色要用小火，避免炒焦发苦。炖煮时要用热水，这样肉质更嫩。"
+            },
+            {
+                n:"蔬菜沙拉", k:150, t:"light", i:["生菜","黄瓜","胡萝卜","橄榄油"], p:3, c:10,
+                ingredients: [
+                    {name: "生菜", amount: "100g"},
+                    {name: "黄瓜", amount: "1根"},
+                    {name: "胡萝卜", amount: "1/2根"},
+                    {name: "小番茄", amount: "5个"},
+                    {name: "橄榄油", amount: "2勺"},
+                    {name: "柠檬汁", amount: "1勺"},
+                    {name: "盐", amount: "少许"},
+                    {name: "黑胡椒", amount: "少许"}
+                ],
+                steps: [
+                    "所有蔬菜洗净",
+                    "生菜撕成小片",
+                    "黄瓜切片，胡萝卜切丝",
+                    "小番茄对半切开",
+                    "所有蔬菜混合",
+                    "调油醋汁：橄榄油+柠檬汁+盐+黑胡椒",
+                    "淋上油醋汁，拌匀即可"
+                ],
+                tips: "蔬菜要新鲜，洗净后要沥干水分。油醋汁要现调现用，这样更清爽。"
+            },
+            {
+                n:"蛋炒饭", k:350, t:"quick", i:["米饭","鸡蛋","葱花"], p:12, c:45,
+                ingredients: [
+                    {name: "米饭", amount: "200g"},
+                    {name: "鸡蛋", amount: "2个"},
+                    {name: "葱花", amount: "适量"},
+                    {name: "盐", amount: "适量"},
+                    {name: "生抽", amount: "1勺"},
+                    {name: "油", amount: "2勺"}
+                ],
+                steps: [
+                    "米饭最好用隔夜饭，粒粒分明",
+                    "鸡蛋打散，加少许盐",
+                    "热锅下油，炒熟鸡蛋盛起",
+                    "锅中再下油，倒入米饭炒散",
+                    "加入生抽和盐调味",
+                    "倒入炒好的鸡蛋",
+                    "最后撒上葱花，炒匀即可"
+                ],
+                tips: "用隔夜饭效果最好，米饭要炒散炒干。鸡蛋可以稍微炒老一点，这样更香。"
+            },
+            {
+                n:"宫保鸡丁", k:420, t:"balanced", i:["鸡胸肉","花生","辣椒"], p:30, c:20,
+                ingredients: [
+                    {name: "鸡胸肉", amount: "200g"},
+                    {name: "花生米", amount: "50g"},
+                    {name: "干辣椒", amount: "5个"},
+                    {name: "花椒", amount: "1小勺"},
+                    {name: "生抽", amount: "2勺"},
+                    {name: "醋", amount: "1勺"},
+                    {name: "糖", amount: "1勺"},
+                    {name: "葱", amount: "2根"},
+                    {name: "姜", amount: "2片"},
+                    {name: "蒜", amount: "2瓣"}
+                ],
+                steps: [
+                    "鸡胸肉切丁，用生抽和料酒腌制",
+                    "调宫保汁：生抽+醋+糖+水淀粉",
+                    "花生米炸脆备用",
+                    "热锅下油，炒香花椒和干辣椒",
+                    "下鸡丁炒至变色",
+                    "加入葱姜蒜炒香",
+                    "倒入宫保汁，大火收汁",
+                    "最后加入花生米炒匀即可"
+                ],
+                tips: "鸡丁要切得大小一致，这样受热均匀。花生米要最后放，保持脆度。"
+            },
+            {
+                n:"番茄鸡蛋面", k:320, t:"quick", i:["面条","番茄","鸡蛋"], p:15, c:50,
+                ingredients: [
+                    {name: "面条", amount: "150g"},
+                    {name: "番茄", amount: "2个"},
+                    {name: "鸡蛋", amount: "2个"},
+                    {name: "葱花", amount: "适量"},
+                    {name: "盐", amount: "适量"},
+                    {name: "糖", amount: "1小勺"},
+                    {name: "油", amount: "2勺"}
+                ],
+                steps: [
+                    "番茄顶部划十字，开水烫后去皮切块",
+                    "鸡蛋打散，加少许盐",
+                    "热锅下油，炒熟鸡蛋盛起",
+                    "锅中下油，炒番茄至出汁",
+                    "加少许糖提鲜，加盐调味",
+                    "倒入适量水，煮开",
+                    "下入面条煮熟",
+                    "最后加入炒好的鸡蛋和葱花即可"
+                ],
+                tips: "番茄要炒到出汁，这样汤才浓郁。加一点糖可以中和番茄的酸味。"
+            },
+            {
+                n:"紫菜蛋花汤", k:80, t:"light", i:["紫菜","鸡蛋","葱花"], p:5, c:3,
+                ingredients: [
+                    {name: "紫菜", amount: "10g"},
+                    {name: "鸡蛋", amount: "1个"},
+                    {name: "葱花", amount: "适量"},
+                    {name: "盐", amount: "适量"},
+                    {name: "香油", amount: "几滴"},
+                    {name: "水", amount: "500ml"}
+                ],
+                steps: [
+                    "紫菜用温水泡软",
+                    "鸡蛋打散",
+                    "锅中烧水，水开后下紫菜",
+                    "再次煮开后，慢慢倒入蛋液",
+                    "用筷子快速搅散成蛋花",
+                    "加盐调味",
+                    "关火，撒上葱花",
+                    "最后滴几滴香油即可"
+                ],
+                tips: "蛋液要慢慢倒入，同时快速搅拌，这样蛋花才漂亮。紫菜不要煮太久，保持鲜味。"
+            },
+            {
+                n:"糖醋排骨", k:580, t:"meat", i:["排骨","糖","醋"], p:28, c:15,
+                ingredients: [
+                    {name: "排骨", amount: "500g"},
+                    {name: "糖", amount: "2勺"},
+                    {name: "醋", amount: "3勺"},
+                    {name: "生抽", amount: "2勺"},
+                    {name: "料酒", amount: "1勺"},
+                    {name: "姜", amount: "3片"},
+                    {name: "葱", amount: "1根"},
+                    {name: "白芝麻", amount: "适量"}
+                ],
+                steps: [
+                    "排骨切段，冷水下锅焯水",
+                    "捞出洗净，沥干",
+                    "热锅下油，小火炒糖色",
+                    "下排骨翻炒上色",
+                    "加入料酒、生抽、醋",
+                    "加入姜片和葱段",
+                    "倒入热水没过排骨",
+                    "大火烧开，转小火炖30分钟",
+                    "最后大火收汁，撒上白芝麻"
+                ],
+                tips: "炒糖色是关键，要用小火慢慢炒。糖醋比例可以根据个人口味调整。"
+            },
+            {
+                n:"凉拌黄瓜", k:50, t:"light", i:["黄瓜","蒜","醋"], p:1, c:5,
+                ingredients: [
+                    {name: "黄瓜", amount: "2根"},
+                    {name: "大蒜", amount: "3瓣"},
+                    {name: "醋", amount: "2勺"},
+                    {name: "生抽", amount: "1勺"},
+                    {name: "香油", amount: "几滴"},
+                    {name: "糖", amount: "1小勺"},
+                    {name: "辣椒油", amount: "适量（可选）"}
+                ],
+                steps: [
+                    "黄瓜洗净，用刀拍裂",
+                    "切成小段",
+                    "用盐腌制10分钟，出水后倒掉",
+                    "大蒜切末",
+                    "调汁：醋+生抽+糖+香油+蒜末",
+                    "淋在黄瓜上，拌匀",
+                    "可以加辣椒油增加风味",
+                    "腌制10分钟更入味"
+                ],
+                tips: "黄瓜要拍裂，这样更容易入味。用盐腌制出水，口感更脆。"
+            },
+            {
+                n:"白切鸡", k:300, t:"light", i:["鸡","姜","葱"], p:35, c:2,
+                ingredients: [
+                    {name: "鸡", amount: "1只（约1kg）"},
+                    {name: "姜", amount: "1块"},
+                    {name: "葱", amount: "3根"},
+                    {name: "盐", amount: "适量"},
+                    {name: "料酒", amount: "2勺"},
+                    {name: "香油", amount: "适量"}
+                ],
+                steps: [
+                    "鸡处理干净，用盐和料酒腌制",
+                    "大锅烧水，水开后放入整鸡",
+                    "大火煮5分钟，关火焖30分钟",
+                    "用筷子戳一下，没有血水即可",
+                    "捞出过冰水，保持皮脆",
+                    "姜葱切末，用热油爆香",
+                    "加盐和香油调成蘸料",
+                    "鸡切块，蘸料食用"
+                ],
+                tips: "煮鸡要用焖的方式，这样肉质更嫩。过冰水可以让鸡皮更脆。"
+            },
+            {
+                n:"青椒肉丝", k:380, t:"balanced", i:["青椒","猪肉","生抽"], p:25, c:12,
+                ingredients: [
+                    {name: "猪肉丝", amount: "200g"},
+                    {name: "青椒", amount: "3个"},
+                    {name: "生抽", amount: "2勺"},
+                    {name: "料酒", amount: "1勺"},
+                    {name: "淀粉", amount: "1勺"},
+                    {name: "姜", amount: "2片"},
+                    {name: "蒜", amount: "2瓣"},
+                    {name: "盐", amount: "适量"}
+                ],
+                steps: [
+                    "猪肉切丝，用生抽、料酒、淀粉腌制",
+                    "青椒切丝",
+                    "热锅下油，滑炒肉丝至变色盛起",
+                    "锅中留油，炒香姜蒜",
+                    "下青椒丝炒至断生",
+                    "倒入肉丝，加盐和生抽",
+                    "大火快炒，炒匀即可"
+                ],
+                tips: "肉丝要提前腌制，这样更嫩滑。青椒不要炒太久，保持脆嫩。"
+            },
+            {
+                n:"蒸蛋", k:120, t:"light", i:["鸡蛋","水","盐"], p:8, c:2,
+                ingredients: [
+                    {name: "鸡蛋", amount: "2个"},
+                    {name: "温水", amount: "200ml"},
+                    {name: "盐", amount: "少许"},
+                    {name: "生抽", amount: "1勺"},
+                    {name: "香油", amount: "几滴"},
+                    {name: "葱花", amount: "适量"}
+                ],
+                steps: [
+                    "鸡蛋打散，加盐",
+                    "加入温水，比例1:1.5",
+                    "用筛网过滤，去除气泡",
+                    "盖上保鲜膜，用牙签扎几个孔",
+                    "水开后上锅蒸10-12分钟",
+                    "蒸好后淋上生抽和香油",
+                    "撒上葱花即可"
+                ],
+                tips: "蛋液要用温水，比例要准确。过滤和盖保鲜膜可以让蒸蛋更嫩滑。"
+            }
         ];
 
-        let inventory = ["鸡蛋", "米饭"];
+        let inventory = [];
         let plan = [];
         let tempMenu = [];
+        let selectedDate = 'today';
+        let firstUseDate = null;
 
-        function showToast(msg) {
+        // 数据持久化
+        function saveData() {
+            localStorage.setItem('menuPlanner_inventory', JSON.stringify(inventory));
+            localStorage.setItem('menuPlanner_plan', JSON.stringify(plan));
+            localStorage.setItem('menuPlanner_firstUse', firstUseDate || new Date().toISOString());
+        }
+
+        function loadData() {
+            const savedInv = localStorage.getItem('menuPlanner_inventory');
+            const savedPlan = localStorage.getItem('menuPlanner_plan');
+            const savedDate = localStorage.getItem('menuPlanner_firstUse');
+
+            if (savedInv) inventory = JSON.parse(savedInv);
+            if (savedPlan) plan = JSON.parse(savedPlan);
+            if (savedDate) firstUseDate = savedDate;
+
+            renderInv();
+            renderPlan();
+            updateStats();
+        }
+
+        // 初始化加载数据
+        loadData();
+
+        function showToast(msg, duration = 2000) {
             const t = document.getElementById('toast');
             t.innerText = msg;
             t.style.opacity = 1;
-            setTimeout(() => t.style.opacity = 0, 2000);
+            t.style.transform = 'translateX(-50%) translateY(0)';
+            setTimeout(() => {
+                t.style.opacity = 0;
+                t.style.transform = 'translateX(-50%) translateY(-10px)';
+            }, duration);
         }
 
         function setSkin(name, el) {
@@ -655,21 +1618,91 @@
         // 生成菜单
         function genMenu() {
             const pref = document.getElementById('pref').value;
+            const count = parseInt(document.getElementById('menuCount').value);
+            const genBtn = document.getElementById('genBtn');
+            const genBtnText = document.getElementById('genBtnText');
+
+            // 显示加载状态
+            genBtn.disabled = true;
+            genBtnText.innerHTML = '<span class="loading"></span> 生成中...';
+
+            setTimeout(() => {
             let pool = db.filter(d => d.t === pref || pref === 'balanced');
             if(pool.length === 0) pool = db;
-            tempMenu = pool.sort(() => 0.5 - Math.random()).slice(0, 3);
+                tempMenu = pool.sort(() => 0.5 - Math.random()).slice(0, count);
+
+                if(tempMenu.length === 0) {
+                    showToast("未找到匹配的菜单");
+                    genBtn.disabled = false;
+                    genBtnText.textContent = '✨ 生成菜单';
+                    return;
+                }
 
             document.getElementById('genResult').innerHTML = `
-                <strong style="color:var(--accent); font-size:1.1rem;">${tempMenu[0].n}</strong> 等 ${tempMenu.length} 道菜
-                <div style="font-size:0.8rem; margin-top:5px;">请查看右侧详情</div>
-            `;
-            document.getElementById('menuList').innerHTML = tempMenu.map(x => `
-                <li class="item">
-                    <span>${x.n}</span>
-                    <small>${x.k} kcal</small>
+                    <div style="color:var(--accent); font-size:1.1rem; font-weight:bold; margin-bottom:8px;">
+                        ${tempMenu[0].n}
+                    </div>
+                    <div style="font-size:0.85rem; opacity:0.8;">
+                        共 ${tempMenu.length} 道菜，总热量 ${tempMenu.reduce((a,b) => a+b.k, 0)} kcal
+                    </div>
+                    <div style="font-size:0.75rem; margin-top:8px; opacity:0.6;">👉 查看右侧详情</div>
+                `;
+
+                renderMenuList();
+                updateMenuNutrition();
+
+                document.getElementById('addPlanBtn').disabled = false;
+                genBtn.disabled = false;
+                genBtnText.textContent = '✨ 生成菜单';
+                showToast(`成功生成 ${tempMenu.length} 道菜`);
+            }, 800);
+        }
+
+        function renderMenuList() {
+            const menuList = document.getElementById('menuList');
+            if(tempMenu.length === 0) {
+                menuList.innerHTML = '<li class="item empty-state" style="justify-content: center; opacity: 0.5; border: none;"><div>请先在左侧生成菜单</div></li>';
+                return;
+            }
+
+            menuList.innerHTML = tempMenu.map((x, idx) => `
+                <li class="item fade-in" style="animation-delay: ${idx * 0.1}s;">
+                    <div style="flex: 1;">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span style="font-weight: bold;">${idx + 1}. ${x.n}</span>
+                            <button class="view-recipe-btn" onclick="showRecipe('${x.n}'); event.stopPropagation();" title="查看做法">📖</button>
+                        </div>
+                        <div style="font-size: 0.75rem; opacity: 0.7; margin-top: 3px;">
+                            ${x.i.slice(0, 3).join('、')}${x.i.length > 3 ? '...' : ''}
+                        </div>
+                    </div>
+                    <small style="color: var(--accent); font-weight: bold;">${x.k} kcal</small>
                 </li>
             `).join('');
-            showToast("菜单已生成");
+        }
+
+        function updateMenuNutrition() {
+            if(tempMenu.length === 0) {
+                document.getElementById('menuNutrition').style.display = 'none';
+                return;
+            }
+
+            const total = tempMenu.reduce((acc, m) => ({
+                k: acc.k + (m.k || 0),
+                p: acc.p + (m.p || 0),
+                c: acc.c + (m.c || 0)
+            }), {k: 0, p: 0, c: 0});
+
+            document.getElementById('totalKcal').textContent = total.k;
+            document.getElementById('totalProtein').textContent = total.p;
+            document.getElementById('totalCarb').textContent = total.c;
+            document.getElementById('menuNutrition').style.display = 'block';
+        }
+
+        function showMenuDetail(idx) {
+            const menu = tempMenu[idx];
+            if(!menu) return;
+            showToast(`${menu.n}: ${menu.k} kcal | 蛋白质: ${menu.p}g | 碳水: ${menu.c}g`, 3000);
         }
 
         // 加入计划
@@ -677,69 +1710,397 @@
             if(tempMenu.length === 0) return showToast("请先生成菜单");
             plan = [...plan, ...tempMenu];
             renderPlan();
-            showToast("已加入计划");
-            jumpTo(3);
+            saveData();
+            showToast(`已添加 ${tempMenu.length} 道菜到计划`);
+            setTimeout(() => jumpTo(3), 500);
         }
 
         // 库存管理
         function addIng() {
             const input = document.getElementById('ingInput');
             const val = input.value.trim();
-            if(val && !inventory.includes(val)) {
-                inventory.push(val);
+            if(!val) {
+                showToast("请输入食材名称");
+                return;
+            }
+
+            // 支持批量添加（用逗号或空格分隔）
+            const items = val.split(/[，,、\s]+/).map(i => i.trim()).filter(i => i);
+
+            let added = 0;
+            items.forEach(item => {
+                if(item && !inventory.includes(item)) {
+                    inventory.push(item);
+                    added++;
+                }
+            });
+
+            if(added > 0) {
                 renderInv();
                 input.value = '';
+                saveData();
+                showToast(`已添加 ${added} 种食材`);
             } else {
-                showToast("无效输入或已存在");
+                showToast("食材已存在或无效");
             }
         }
+
         window.removeIng = function(val) {
             inventory = inventory.filter(i => i !== val);
             renderInv();
+            saveData();
+            showToast(`已删除 ${val}`, 1500);
         }
+
+        function clearInventory() {
+            if(inventory.length === 0) return;
+            if(confirm('确定要清空所有库存吗？')) {
+                inventory = [];
+                renderInv();
+                saveData();
+                showToast("库存已清空");
+            }
+        }
+
+        // 快速添加常用食材
+        function quickAddCommon() {
+            const common = ["鸡蛋", "米饭", "番茄", "洋葱", "大蒜", "青椒", "胡萝卜"];
+            const toAdd = common.filter(item => !inventory.includes(item));
+            if(toAdd.length === 0) {
+                showToast("常用食材已全部添加");
+                return;
+            }
+            inventory.push(...toAdd);
+            renderInv();
+            saveData();
+            showToast(`已添加 ${toAdd.length} 种常用食材`);
+        }
+
         function renderInv() {
-            document.getElementById('ingTags').innerHTML = inventory.map(i => `
-                <div class="tag" onclick="removeIng('${i}')">${i} ×</div>
+            const ingTags = document.getElementById('ingTags');
+            const ingCount = document.getElementById('ingCount');
+            const ingProgress = document.getElementById('ingProgress');
+
+            if(inventory.length === 0) {
+                ingTags.innerHTML = '<div class="empty-state" style="width: 100%; padding: 20px; opacity: 0.5;">暂无食材，快添加吧！</div>';
+            } else {
+                ingTags.innerHTML = inventory.map(i => `
+                    <div class="tag fade-in" onclick="removeIng('${i}')" title="点击删除">${i} ×</div>
             `).join('');
         }
+
+            ingCount.textContent = inventory.length;
+            const progress = Math.min((inventory.length / 20) * 100, 100);
+            ingProgress.style.width = progress + '%';
+        }
+
         renderInv();
 
         function matchRecipe() {
-            const matches = db.filter(r => r.i.some(ing => inventory.includes(ing)));
-            document.getElementById('matchList').innerHTML = matches.length ?
-                matches.map(m => `<li class="item"><span>${m.n}</span></li>`).join('') :
-                '<li class="item" style="justify-content:center">暂无匹配</li>';
-            showToast("匹配完成");
+            if(inventory.length === 0) {
+                showToast("请先添加食材");
+                return;
+            }
+
+            const matchBtn = document.getElementById('matchBtn');
+            matchBtn.disabled = true;
+            matchBtn.innerHTML = '<span class="loading"></span> 匹配中...';
+
+            setTimeout(() => {
+                const matches = db.filter(r => {
+                    const matchCount = r.i.filter(ing => inventory.includes(ing)).length;
+                    return matchCount > 0;
+                }).map(r => {
+                    const matchCount = r.i.filter(ing => inventory.includes(ing)).length;
+                    const matchRate = Math.round((matchCount / r.i.length) * 100);
+                    return {...r, matchRate};
+                }).sort((a, b) => b.matchRate - a.matchRate);
+
+                const matchList = document.getElementById('matchList');
+                const matchStats = document.getElementById('matchStats');
+
+                if(matches.length === 0) {
+                    matchList.innerHTML = '<li class="item empty-state" style="justify-content:center; border:none;"><div>暂无匹配</div></li>';
+                    matchStats.style.display = 'none';
+                } else {
+                    const avgRate = Math.round(matches.reduce((a, b) => a + b.matchRate, 0) / matches.length);
+                    matchStats.style.display = 'block';
+                    document.getElementById('matchRate').textContent = avgRate;
+
+                    matchList.innerHTML = matches.map((m, idx) => `
+                        <li class="item fade-in" style="animation-delay: ${idx * 0.1}s;">
+                            <div style="flex: 1;">
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <span style="font-weight: bold;">${m.n}</span>
+                                    <button class="view-recipe-btn" onclick="showRecipe('${m.n}'); event.stopPropagation();" title="查看做法">📖</button>
+                                </div>
+                                <div style="font-size: 0.75rem; opacity: 0.7; margin-top: 3px;">
+                                    需要: ${m.i.join('、')}
+                                </div>
+                            </div>
+                            <div style="text-align: right;">
+                                <div style="color: var(--accent); font-weight: bold; font-size: 0.9rem;">${m.matchRate}%</div>
+                                <small style="opacity: 0.7;">${m.k} kcal</small>
+                            </div>
+                        </li>
+                    `).join('');
+                }
+
+                matchBtn.disabled = false;
+                matchBtn.textContent = '🔍 匹配食谱';
+                showToast(`找到 ${matches.length} 个匹配食谱`);
+            }, 600);
         }
 
         // 计划渲染
         function renderPlan() {
-            document.getElementById('planList').innerHTML = plan.map((p, idx) => `
-                <li class="item">
-                    <span>${idx+1}. ${p.n}</span>
-                    <small>${p.k} kcal</small>
+            const planList = document.getElementById('planList');
+            const planCount = document.getElementById('planCount');
+            const calTotal = document.getElementById('calTotal');
+
+            if(plan.length === 0) {
+                planList.innerHTML = '<li class="item empty-state" style="justify-content: center; opacity: 0.5; border: none;"><div>暂无计划，快去添加吧！</div></li>';
+            } else {
+                planList.innerHTML = plan.map((p, idx) => `
+                    <li class="item fade-in" style="animation-delay: ${idx * 0.05}s;">
+                        <div style="flex: 1;">
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <span style="font-weight: bold;">${idx+1}. ${p.n}</span>
+                                <button class="view-recipe-btn" onclick="showRecipe('${p.n}'); event.stopPropagation();" title="查看做法">📖</button>
+                            </div>
+                            <div style="font-size: 0.75rem; opacity: 0.7; margin-top: 3px;">
+                                ${p.i ? p.i.slice(0, 3).join('、') + (p.i.length > 3 ? '...' : '') : ''}
+                            </div>
+                        </div>
+                        <div style="text-align: right;">
+                            <small style="color: var(--accent); font-weight: bold;">${p.k} kcal</small>
+                            <div style="font-size: 0.7rem; opacity: 0.6; margin-top: 2px; cursor: pointer;" onclick="removeFromPlan(${idx}); event.stopPropagation();" title="删除">
+                                🗑️
+                            </div>
+                        </div>
                 </li>
             `).join('');
-            document.getElementById('calTotal').innerText = plan.reduce((a,b) => a+b.k, 0);
+            }
+
+            planCount.textContent = plan.length;
+            calTotal.textContent = plan.reduce((a,b) => a+(b.k || 0), 0);
+        }
+
+        function removeFromPlan(idx) {
+            if(confirm('确定要删除这道菜吗？')) {
+                plan.splice(idx, 1);
+                renderPlan();
+                saveData();
+                showToast("已删除");
+            }
+        }
+
+        function clearPlan() {
+            if(plan.length === 0) return;
+            if(confirm('确定要清空所有计划吗？')) {
+                plan = [];
+                renderPlan();
+                saveData();
+                showToast("计划已清空");
+            }
+        }
+
+        function selectDate(type, el) {
+            selectedDate = type;
+            document.querySelectorAll('.date-btn').forEach(btn => btn.classList.remove('active'));
+            el.classList.add('active');
+            // 这里可以根据日期筛选计划
+            showToast(`已切换到${el.textContent}`, 1500);
         }
 
         // 清单生成
         function genShop() {
             const needed = new Set();
-            plan.forEach(p => p.i.forEach(ing => needed.add(ing)));
+            plan.forEach(p => {
+                if(p.i) {
+                    p.i.forEach(ing => needed.add(ing));
+                }
+            });
             inventory.forEach(ing => needed.delete(ing));
             const list = Array.from(needed);
-            document.getElementById('shopList').innerHTML = list.length ?
-                list.map(i => `<li class="item"><label><input type="checkbox"> ${i}</label></li>`).join('') :
-                '<li class="item" style="justify-content:center; color:green;">无需采购</li>';
-            showToast("清单已刷新");
+            const shopList = document.getElementById('shopList');
+            const shopCount = document.getElementById('shopCount');
+
+            shopCount.textContent = list.length;
+
+            if(list.length === 0) {
+                shopList.innerHTML = '<li class="item empty-state" style="justify-content:center; border:none; color:green;"><div>✅ 无需采购，库存充足！</div></li>';
+            } else {
+                shopList.innerHTML = list.map((i, idx) => `
+                    <li class="item fade-in" style="animation-delay: ${idx * 0.05}s;">
+                        <label style="cursor: pointer; display: flex; align-items: center; width: 100%;">
+                            <input type="checkbox" style="width: auto; margin-right: 10px;" onchange="updateShopProgress()">
+                            <span>${i}</span>
+                        </label>
+                    </li>
+                `).join('');
+            }
+            showToast(`清单已刷新，共 ${list.length} 项`);
         }
 
-        // 键盘翻页
+        function checkAll() {
+            const checkboxes = document.querySelectorAll('#shopList input[type="checkbox"]');
+            const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+            checkboxes.forEach(cb => cb.checked = !allChecked);
+            updateShopProgress();
+        }
+
+        function updateShopProgress() {
+            const checkboxes = document.querySelectorAll('#shopList input[type="checkbox"]');
+            const checked = Array.from(checkboxes).filter(cb => cb.checked).length;
+            const total = checkboxes.length;
+            if(total > 0) {
+                showToast(`已完成 ${checked}/${total} 项`, 1500);
+            }
+        }
+
+        // 统计信息
+        function updateStats() {
+            const statRecipes = document.getElementById('statRecipes');
+            const statIngredients = document.getElementById('statIngredients');
+            const statDays = document.getElementById('statDays');
+
+            if(statRecipes) statRecipes.textContent = plan.length;
+            if(statIngredients) statIngredients.textContent = inventory.length;
+
+            if(statDays && firstUseDate) {
+                const days = Math.ceil((new Date() - new Date(firstUseDate)) / (1000 * 60 * 60 * 24));
+                statDays.textContent = Math.max(1, days);
+            } else if(statDays) {
+                statDays.textContent = '1';
+            }
+        }
+
+        // 导出数据
+        function exportData() {
+            const data = {
+                inventory: inventory,
+                plan: plan,
+                exportDate: new Date().toISOString(),
+                stats: {
+                    recipes: plan.length,
+                    ingredients: inventory.length,
+                    totalCalories: plan.reduce((a,b) => a+(b.k || 0), 0)
+                }
+            };
+
+            const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `menu-planner-${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast("数据已导出");
+        }
+
+        // 键盘翻页和快捷键
         document.addEventListener('keydown', (e) => {
-            if(e.key === "ArrowRight") flipNext();
-            if(e.key === "ArrowLeft") flipPrev();
+            if(e.key === "ArrowRight" || e.key === "d" || e.key === "D") flipNext();
+            if(e.key === "ArrowLeft" || e.key === "a" || e.key === "A") flipPrev();
+            if(e.key === "Escape" && currentPage > 0) jumpTo(0);
+
+            // 数字键快速跳转
+            if(e.key >= "1" && e.key <= "5") {
+                const pageNum = parseInt(e.key) - 1;
+                if(pageNum !== currentPage) jumpTo(pageNum);
+            }
         });
+
+        // 显示菜品教学
+        function showRecipe(recipeName) {
+            const recipe = db.find(r => r.n === recipeName);
+            if(!recipe) {
+                showToast("未找到该菜品的详细信息");
+                return;
+            }
+
+            const modal = document.getElementById('recipeModal');
+            const details = document.getElementById('recipeDetails');
+
+            // 构建教学内容
+            let html = `
+                <div class="recipe-header">
+                    <h2 class="recipe-title">${recipe.n}</h2>
+                    <div class="recipe-meta">
+                        <span>🔥 ${recipe.k} kcal</span>
+                        <span>💪 蛋白质 ${recipe.p}g</span>
+                        <span>🍚 碳水 ${recipe.c}g</span>
+                        <span>🏷️ ${getTypeName(recipe.t)}</span>
+                    </div>
+                </div>
+            `;
+
+            // 配料表
+            if(recipe.ingredients && recipe.ingredients.length > 0) {
+                html += `
+                    <div class="recipe-section">
+                        <h3>🥘 所需配料</h3>
+                        <ul class="ingredients-list">
+                            ${recipe.ingredients.map(ing => `
+                                <li>
+                                    <span>${ing.name}</span>
+                                    <span style="color: var(--accent); font-weight: bold;">${ing.amount}</span>
+                                </li>
+                            `).join('')}
+                        </ul>
+                    </div>
+                `;
+            }
+
+            // 制作步骤
+            if(recipe.steps && recipe.steps.length > 0) {
+                html += `
+                    <div class="recipe-section">
+                        <h3>👨‍🍳 制作步骤</h3>
+                        <ol class="steps-list">
+                            ${recipe.steps.map(step => `
+                                <li>${step}</li>
+                            `).join('')}
+                        </ol>
+                    </div>
+                `;
+            }
+
+            // 小贴士
+            if(recipe.tips) {
+                html += `
+                    <div class="recipe-tips">
+                        <strong>💡 小贴士：</strong>${recipe.tips}
+                    </div>
+                `;
+            }
+
+            details.innerHTML = html;
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeRecipeModal() {
+            const modal = document.getElementById('recipeModal');
+            modal.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        function getTypeName(type) {
+            const types = {
+                'meat': '🥩 肉食',
+                'light': '🥬 轻食',
+                'balanced': '🥗 均衡',
+                'vegan': '🌱 素食',
+                'quick': '⚡ 快手'
+            };
+            return types[type] || type;
+        }
+
+        // 定期更新统计
+        setInterval(updateStats, 5000);
+        updateStats();
 
     </script>
 </body>
