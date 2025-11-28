@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D 智能膳食管家 - 立体珍藏版</title>
+    <!-- 引入精选字体 -->
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Fredoka:wght@500&family=Noto+Serif+SC:wght@500;700&family=Orbitron:wght@600&family=Lato:wght@400;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* =========================================
+           1. 变量系统与皮肤定义
+           ========================================= */
+        :root {
+            /* 物理尺寸变量 */
+            --book-w: 420px;
+            --book-h: 600px;
+            --thickness: 60px; /* 增加厚度以增强立体感 */
+            --dur: 1.2s;       /* 翻页动画时长 */
+
+            /* 默认占位 */
+            --bg-body: #111;
+        }
+
+        /* --- 皮肤 A: 复古珍藏 (Vintage) --- */
+        body.skin-vintage {
+            --bg-body: #1a1a1a;
+            --bg-img: radial-gradient(circle at 50% 50%, #3e2723 0%, #000 100%);
+            --cover-bg: #4e342e;
+            --cover-tex: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.2'/%3E%3C/svg%3E");
+            --page-bg: #f3e5d0;
+            --page-grad: linear-gradient(to right, rgba(0,0,0,0.1), transparent 10%);
+            --text-main: #3e2723;
+            --accent: #c5a059;
+            --font-h: 'Noto Serif SC', serif;
+            --font-p: 'Lato', serif;
+            --radius: 4px;
+            --spine-grad: linear-gradient(90deg, #3e2723, #5d4037, #3e2723);
+            --shadow-opacity: 0.6;
+        }
+
+        /* --- 皮肤 B: 温馨手账 (Cute) --- */
+        body.skin-cute {
+            --bg-body: #fff0f5;
+            --bg-img: radial-gradient(#f48fb1 15%, transparent 16%), radial-gradient(#f48fb1 15%, transparent 16%);
+            --bg-size: 50px 50px;
+            --bg-pos: 0 0, 25px 25px;
+            --cover-bg: #ffccbc;
+            --cover-tex: none;
+            --page-bg: #fffbf0;
+            --page-grad: linear-gradient(to right, rgba(255,180,180,0.2), transparent 10%);
+            --text-main: #5d4037;
+            --accent: #ff7043;
+            --font-h: 'Fredoka', cursive;
+            --font-p: 'Lato', sans-serif;
+            --radius: 30px;
+            --spine-grad: linear-gradient(90deg, #ffab91, #ffccbc, #ffab91);
+            --shadow-opacity: 0.3;
+        }
+
+        /* --- 皮肤 C: 赛博科幻 (Sci-Fi) --- */
+        body.skin-scifi {
+            --bg-body: #050505;
+            --bg-img:
+                linear-gradient(rgba(0, 255, 255, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 255, 0.1) 1px, transparent 1px);
+            --bg-size: 60px 60px;
+            --cover-bg: #0a0e17;
+            --cover-tex: none;
+            --page-bg: rgba(10, 20, 30, 0.95);
+            --page-grad: linear-gradient(to right, rgba(0,255,255,0.2), transparent 15%);
+            --text-main: #00e5ff;
+            --accent: #f50057;
+            --font-h: 'Orbitron', sans-serif;
+            --font-p: 'Lato', sans-serif;
+            --radius: 2px;
+            --spine-grad: linear-gradient(90deg, #000, #00e5ff, #000);
+            --shadow-opacity: 0.9;
+            border: 1px solid #00e5ff;
+        }
+
+        /* =========================================
+           2. 基础布局
+           ========================================= */
+        * { box-sizing: border-box; margin: 0; padding: 0; outline: none; user-select: none; }
+
+        body {
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: var(--bg-body);
+            background-image: var(--bg-img);
+            background-size: var(--bg-size, auto);
+            background-position: var(--bg-pos, 0 0);
+            font-family: var(--font-p);
+            overflow: hidden;
+            perspective: 2500px; /* 强透视 */
+            transition: background 0.5s;
+        }
+
+        /* 皮肤切换栏 */
+        .skin-bar {
+            position: fixed; top: 20px; z-index: 5000;
+            background: rgba(255,255,255,0.1); backdrop-filter: blur(8px);
+            padding: 10px 20px; border-radius: 40px;
+            display: flex; gap: 15px; border: 1px solid rgba(255,255,255,0.2);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+        .skin-btn {
+            width: 36px; height: 36px; border-radius: 50%; cursor: pointer;
+            border: 2px solid rgba(255,255,255,0.5); transition: 0.3s;
+        }
+        .skin-btn:hover, .skin-btn.active { transform: scale(1.15); border-color: #fff; box-shadow: 0 0 15px #fff; }
+
+        /* =========================================
+           3. 3D 书籍核心结构
+           ========================================= */
+        .scene {
+            width: var(--book-w);
+            height: var(--book-h);
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        .book {
+            width: 100%; height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+        }
+
+        /* 底部动态阴影 (Shadow Floor) */
+        .shadow-floor {
+            position: absolute; top: 100%; left: 0;
+            width: 100%; height: 40px;
+            background: radial-gradient(ellipse at center, rgba(0,0,0,var(--shadow-opacity)) 0%, transparent 70%);
+            transform: rotateX(90deg) translateZ(-20px) scale(0.8);
+            opacity: 0.6;
+            transition: all 0.8s;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* --- 物理厚度部件 (Fixed Back Layer) --- */
+
+        /* 封底容器 - 承载书脊、侧页和书签 */
+        .back-structure {
+            position: absolute; top: 0; left: 0;
+            width: 100%; height: 100%;
+            transform: translateZ(calc(var(--thickness) * -1)); /* 向后推一个厚度 */
+            transform-style: preserve-3d;
+            z-index: -1;
+        }
+
+        /* 封底背面 */
+        .back-cover-skin {
+            position: absolute; top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: var(--cover-bg);
+            background-image: var(--cover-tex);
+            border-radius: 0 var(--radius) var(--radius) 0;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        }
+
+        /* 书脊 (Spine) */
+        .spine {
+            position: absolute; top: 0; left: 0;
+            width: var(--thickness); height: 100%;
+            background: var(--spine-grad);
+            transform: rotateY(-90deg) translateX(calc(var(--thickness) / -2));
+            transform-origin: left;
+            border-radius: 2px 0 0 2px;
+        }
+
+        /* 侧面纸张纹理 (Side Pages) */
+        .side-pages {
+            position: absolute; top: 5px; right: 2px;
+            width: calc(var(--thickness) - 6px); height: calc(100% - 10px);
+            background: repeating-linear-gradient(90deg, #fff 0px, #e0e0e0 1px, #fff 2px);
+            transform: rotateY(90deg);
+            transform-origin: right;
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.1);
+        }
+
+        /* 书签容器 - 关键修复：位于封底层，向右偏移 */
+        .bookmarks-layer {
+            position: absolute;
+            top: 40px;
+            right: -32px; /* 伸出书本边缘 */
+            width: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            transform-style: preserve-3d;
+            z-index: -5; /* 确保不遮挡正面页面 */
+        }
+
+        .bookmark {
+            width: 65px; height: 35px;
+            background: var(--accent); color: #fff;
+            display: flex; align-items: center; padding-left: 12px;
+            font-size: 12px; font-weight: bold;
+            border-radius: 0 5px 5px 0;
+            cursor: pointer;
+            box-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            transition: transform 0.2s;
+            /* 修正文字方向 */
+            writing-mode: horizontal-tb;
+        }
+        .bookmark:hover { transform: translateX(8px); }
+        body.skin-scifi .bookmark { color: #000; box-shadow: 0 0 8px var(--accent); }
+
+        /* --- 页面系统 (Pages) --- */
+        .page {
+            width: 100%; height: 100%;
+            position: absolute; top: 0; left: 0;
+            transform-origin: left center;
+            transform-style: preserve-3d;
+            transition: transform var(--dur) cubic-bezier(0.645, 0.045, 0.355, 1);
+            border-radius: 0 var(--radius) var(--radius) 0;
+        }
+
+        .face {
+            position: absolute; top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-color: var(--page-bg);
+            backface-visibility: hidden;
+            overflow: hidden;
+            border-radius: 0 var(--radius) var(--radius) 0;
+            padding: 35px;
+            /* 物理光影：中缝阴影 */
+            box-shadow: inset 10px 0 25px rgba(0,0,0,0.08);
+        }
+
+        /* 正面 */
+        .front {
+            z-index: 2;
+            background-image: var(--page-grad);
+        }
+
+        /* 背面 */
+        .back {
+            z-index: 1;
+            transform: rotateY(180deg);
+            /* 背面光影反向 */
+            background-image: linear-gradient(to left, rgba(0,0,0,0.1), transparent 10%);
+        }
+
+        /* 翻页状态 */
+        .page.flipped { transform: rotateY(-180deg); }
+
+        /* 内容滚动区域 */
+        .content-scroll {
+            height: 100%; overflow-y: auto; overflow-x: hidden;
+            display: flex; flex-direction: column;
+        }
+        .content-scroll::-webkit-scrollbar { width: 4px; }
+        .content-scroll::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 2px; }
+
+        /* =========================================
+           4. 组件样式
+           ========================================= */
+        h1, h2, h3 { font-family: var(--font-h); color: var(--text-main); margin-bottom: 20px; text-align: center; }
+        h1 { font-size: 3rem; text-shadow: 2px 2px 0 rgba(0,0,0,0.1); }
+        h2 { border-bottom: 2px solid var(--accent); padding-bottom: 10px; margin-top: 0; }
+        p, li { color: var(--text-main); line-height: 1.7; font-size: 0.95rem; margin-bottom: 10px; }
+
+        /* 按钮 */
+        .btn {
+            background: var(--accent); color: #fff;
+            border: none; padding: 12px; width: 100%;
+            border-radius: var(--radius); cursor: pointer;
+            font-family: var(--font-p); font-weight: bold; font-size: 1rem;
+            margin-top: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+            transition: 0.2s;
+        }
+        .btn:hover { transform: translateY(-2px); filter: brightness(1.1); }
+        body.skin-scifi .btn { color: #000; box-shadow: 0 0 10px var(--accent); }
+
+        /* 输入框 */
+        input, select {
+            width: 100%; padding: 10px; margin-bottom: 10px;
+            background: rgba(0,0,0,0.05); border: 1px solid var(--accent);
+            border-radius: 8px; color: var(--text-main); font-family: inherit;
+        }
+
+        /* 标签 */
+        .tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+        .tag {
+            background: var(--accent); color: #fff;
+            padding: 4px 12px; border-radius: 12px; font-size: 0.8rem;
+            cursor: pointer;
+        }
+        body.skin-scifi .tag { color: #000; }
+
+        /* 列表 */
+        .list { list-style: none; padding: 0; }
+        .item {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 10px 0; border-bottom: 1px dashed var(--accent);
+        }
+
+        /* 底部导航 */
+        .nav-dock {
+            position: fixed; bottom: 30px; display: flex; gap: 40px; z-index: 2000;
+        }
+        .nav-btn {
+            width: 55px; height: 55px; border-radius: 50%;
+            background: var(--accent); color: #fff;
+            display: flex; justify-content: center; align-items: center;
+            font-size: 26px; cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3); transition: 0.3s;
+            border: 2px solid rgba(255,255,255,0.4);
+        }
+        .nav-btn:hover { transform: scale(1.15); }
+        body.skin-scifi .nav-btn { color: #000; }
+
+        /* Toast */
+        #toast {
+            position: fixed; top: 90px; left: 50%; transform: translateX(-50%);
+            background: var(--accent); color: #fff;
+            padding: 12px 25px; border-radius: 30px;
+            font-weight: bold; opacity: 0; transition: 0.3s; pointer-events: none;
+            z-index: 9999; box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+        }
+        body.skin-scifi #toast { color: #000; }
+
+        /* 装饰 */
+        .corner {
+            position: absolute; width: 30px; height: 30px;
+            border: 2px solid var(--accent); pointer-events: none; opacity: 0.5;
+        }
+        .tl { top: 20px; left: 20px; border-right: none; border-bottom: none; }
+        .br { bottom: 20px; right: 20px; border-left: none; border-top: none; }
+
+        /* 适配 */
+        @media (max-width: 900px) {
+            :root { --book-w: 340px; --book-h: 520px; }
+            .face { padding: 25px; }
+        }
+    </style>
+</head>
+<body class="skin-vintage">
+
+    <!-- 皮肤切换 -->
+    <div class="skin-bar">
+        <div class="skin-btn active" style="background:#3e2723" onclick="setSkin('skin-vintage', this)"></div>
+        <div class="skin-btn" style="background:#ffab91" onclick="setSkin('skin-cute', this)"></div>
+        <div class="skin-btn" style="background:#000; border-color:#00e5ff" onclick="setSkin('skin-scifi', this)"></div>
+    </div>
+
+    <div id="toast">提示信息</div>
+
+    <div class="scene">
+        <div class="book" id="book">
+
+            <!-- 物理结构层：封底、书脊、侧页、书签 -->
+            <div class="back-structure">
+                <div class="back-cover-skin"></div>
+                <div class="spine"></div>
+                <div class="side-pages"></div>
+
+                <!-- 书签现在位于封底层，向右偏移，确保不被遮挡 -->
+                <div class="bookmarks-layer">
+                    <div class="bookmark" onclick="jumpTo(1)">推荐</div>
+                    <div class="bookmark" onclick="jumpTo(2)">食材</div>
+                    <div class="bookmark" onclick="jumpTo(3)">计划</div>
+                    <div class="bookmark" onclick="jumpTo(4)">清单</div>
+                </div>
+            </div>
+
+            <!-- Page 0: 封面 -->
+            <div class="page" id="p0">
+                <div class="face front" style="background:var(--cover-bg); background-image:var(--cover-tex); color:#fff;">
+                    <div class="content-scroll" style="justify-content: center; align-items: center; overflow: hidden;">
+                        <div style="border: 4px double var(--accent); padding: 50px 20px; width: 90%; text-align: center;">
+                            <h1 style="color:#fff; margin:0;">MENU</h1>
+                            <p style="color:var(--accent); letter-spacing: 6px; margin-top: 10px;">PLANNER</p>
+                            <div style="width: 60px; height: 2px; background:var(--accent); margin: 25px auto;"></div>
+                            <p style="font-size: 0.9rem; opacity: 0.8;">3D 膳食管家</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="face back">
+                    <div class="content-scroll">
+                        <div class="corner tl"></div>
+                        <div class="corner br"></div>
+                        <h2>📖 指南</h2>
+                        <p>欢迎使用您的智能菜单书。</p>
+                        <ul style="margin: 20px; line-height: 2;">
+                            <li>🥘 <strong>智能推荐</strong>：AI 定制菜单</li>
+                            <li>🧊 <strong>库存管理</strong>：追踪冰箱食材</li>
+                            <li>📅 <strong>膳食日历</strong>：本周饮食计划</li>
+                            <li>🛒 <strong>采购清单</strong>：自动补货</li>
+                        </ul>
+                        <div style="margin-top: auto; text-align: center;">
+                            <button class="btn" style="width: auto; padding: 10px 40px;" onclick="flipNext()">打开书本</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Page 1: 推荐 -->
+            <div class="page" id="p1">
+                <div class="face front">
+                    <div class="content-scroll">
+                        <div class="corner tl"></div>
+                        <h2>🥘 灵感推荐</h2>
+                        <p>今天吃什么？</p>
+                        <label>选择偏好：</label>
+                        <select id="pref">
+                            <option value="balanced">🥗 均衡膳食</option>
+                            <option value="meat">🥩 肉食主义</option>
+                            <option value="light">🥬 低卡轻食</option>
+                        </select>
+                        <button class="btn" onclick="genMenu()">✨ 生成菜单</button>
+
+                        <div id="genResult" style="margin-top: 20px; padding: 20px; border: 2px dashed var(--accent); border-radius: 8px; text-align: center; opacity: 0.7;">
+                            等待生成...
+                        </div>
+                    </div>
+                </div>
+                <div class="face back">
+                    <div class="content-scroll">
+                        <h2>📋 菜单详情</h2>
+                        <ul id="menuList" class="list">
+                            <li class="item" style="justify-content: center; opacity: 0.5;">请先在左侧生成</li>
+                        </ul>
+                        <div style="margin-top: auto;">
+                            <button class="btn" onclick="addToPlan()">📅 全部加入计划</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Page 2: 食材 -->
+            <div class="page" id="p2">
+                <div class="face front">
+                    <div class="content-scroll">
+                        <h2>🧊 冰箱库存</h2>
+                        <div style="display: flex; gap: 10px;">
+                            <input type="text" id="ingInput" placeholder="例如：鸡蛋..." onkeypress="if(event.keyCode==13) addIng()">
+                            <button class="btn" style="width: auto; margin-top:0;" onclick="addIng()">+</button>
+                        </div>
+                        <div id="ingTags" class="tags">
+                            <!-- Tags -->
+                        </div>
+                        <p style="margin-top: 20px; font-size: 0.8rem; opacity: 0.6;">点击标签删除</p>
+                        <button class="btn" style="margin-top: auto;" onclick="matchRecipe()">🔍 匹配食谱</button>
+                    </div>
+                </div>
+                <div class="face back">
+                    <div class="content-scroll">
+                        <h2>🍳 匹配结果</h2>
+                        <p>基于库存推荐：</p>
+                        <ul id="matchList" class="list">
+                            <li class="item" style="justify-content: center; opacity: 0.5;">暂无匹配</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Page 3: 计划 -->
+            <div class="page" id="p3">
+                <div class="face front">
+                    <div class="content-scroll">
+                        <div class="corner tl"></div>
+                        <h2>📅 本周计划</h2>
+                        <ul id="planList" class="list">
+                            <!-- Plan Items -->
+                        </ul>
+                        <p style="text-align: right; margin-top: 15px; font-weight: bold; color: var(--accent);">Total: <span id="calTotal">0</span> kcal</p>
+                    </div>
+                </div>
+                <div class="face back">
+                    <div class="content-scroll">
+                        <h2>🛒 采购清单</h2>
+                        <p style="font-size: 0.9rem; opacity: 0.8;">已自动扣除库存</p>
+                        <button class="btn" style="padding: 5px; font-size: 0.9rem; margin-bottom: 10px;" onclick="genShop()">🔄 刷新清单</button>
+                        <ul id="shopList" class="list">
+                            <li class="item" style="justify-content: center; opacity: 0.5;">无需采购</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Page 4: 封底 -->
+            <div class="page" id="p4">
+                <div class="face front">
+                    <div class="content-scroll" style="justify-content: center; text-align: center;">
+                        <h2 style="border:none; font-size: 2.5rem;">Enjoy!</h2>
+                        <p>唯有爱与美食不可辜负</p>
+                        <div style="font-size: 2rem; margin-top: 20px;">🥗 🥩 🥑</div>
+                    </div>
+                </div>
+                <div class="face back" style="background:var(--cover-bg); background-image:var(--cover-tex); color:#fff;">
+                    <div class="content-scroll" style="justify-content: center; align-items: center;">
+                        <div style="opacity: 0.5; text-align: center;">
+                            <p>Designed by AI</p>
+                            <p style="font-size: 0.8rem;">Ultimate Edition</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <!-- 底部动态阴影 -->
+        <div class="shadow-floor"></div>
+    </div>
+
+    <!-- 导航 -->
+    <div class="nav-dock">
+        <div class="nav-btn" onclick="flipPrev()">❮</div>
+        <div class="nav-btn" onclick="flipNext()">❯</div>
+    </div>
+
+    <script>
+        /* =========================================
+           1. 核心 3D 逻辑 (Z-Index 动态算法)
+           ========================================= */
+        let currentPage = 0;
+        const totalPages = 5;
+        const scene = document.querySelector('.scene');
+        const book = document.getElementById('book');
+        const pages = document.querySelectorAll('.page');
+        const shadow = document.querySelector('.shadow-floor');
+        let isFlipping = false;
+
+        function init() {
+            // 初始化堆叠：右侧页码小的在上
+            pages.forEach((p, i) => {
+                p.style.zIndex = totalPages - i;
+            });
+            updateView();
+        }
+
+        // 核心：防止穿模的层级算法
+        function updateZIndexes() {
+            pages.forEach((page, index) => {
+                if (index < currentPage) {
+                    // 左侧 (翻过去的)：Index 越大越在上 (如 P1 盖住 P0)
+                    page.style.zIndex = index + 1;
+                } else if (index === currentPage) {
+                    // 当前操作页：最高优先级
+                    page.style.zIndex = 100;
+                } else {
+                    // 右侧 (未翻的)：Index 越小越在上 (如 P2 盖住 P3)
+                    page.style.zIndex = (totalPages - index) + 1;
+                }
+            });
+        }
+
+        function updateView() {
+            // 书本打开时，整体右移以居中；合上时归位
+            // 同时调整底部阴影大小
+            if (currentPage === 0 || currentPage === totalPages) {
+                scene.style.transform = `translateX(0)`;
+                book.style.transform = `rotateY(-10deg)`; // 合上时微倾斜
+                shadow.style.transform = `rotateX(90deg) translateZ(-20px) scale(0.8)`;
+                shadow.style.opacity = '0.6';
+            } else {
+                if(window.innerWidth > 900) {
+                    scene.style.transform = `translateX(50%)`;
+                }
+                book.style.transform = `rotateY(0deg)`;
+                // 打开时阴影变大变淡
+                shadow.style.transform = `rotateX(90deg) translateZ(-20px) scale(1.4)`;
+                shadow.style.opacity = '0.3';
+            }
+        }
+
+        function flipNext() {
+            if (currentPage < totalPages && !isFlipping) {
+                isFlipping = true;
+                const page = document.getElementById(`p${currentPage}`);
+
+                // 1. 提权
+                page.style.zIndex = 100;
+                // 2. 动画
+                page.classList.add('flipped');
+                currentPage++;
+                updateView();
+
+                // 3. 动画结束后重置层级
+                setTimeout(() => {
+                    updateZIndexes();
+                    isFlipping = false;
+                }, 1000); // 略小于 dur 确保平滑
+            }
+        }
+
+        function flipPrev() {
+            if (currentPage > 0 && !isFlipping) {
+                isFlipping = true;
+                currentPage--;
+                const page = document.getElementById(`p${currentPage}`);
+
+                // 回翻时该页也要提权，盖住右侧
+                page.style.zIndex = 100;
+                page.classList.remove('flipped');
+                updateView();
+
+                setTimeout(() => {
+                    updateZIndexes();
+                    isFlipping = false;
+                }, 1000);
+            }
+        }
+
+        function jumpTo(idx) {
+            if(isFlipping) return;
+            if (idx > currentPage) {
+                let steps = idx - currentPage;
+                for(let i=0; i<steps; i++) setTimeout(flipNext, i*250);
+            } else if (idx < currentPage) {
+                let steps = currentPage - idx;
+                for(let i=0; i<steps; i++) setTimeout(flipPrev, i*250);
+            }
+        }
+
+        init();
+
+        /* =========================================
+           2. 业务功能逻辑
+           ========================================= */
+        const db = [
+            {n:"香煎牛排", k:450, t:"meat", i:["牛肉","黑胡椒"]},
+            {n:"鸡胸肉沙拉", k:200, t:"light", i:["鸡胸肉","生菜","玉米"]},
+            {n:"番茄罗勒意面", k:380, t:"balanced", i:["意面","番茄","罗勒"]},
+            {n:"三文鱼波奇饭", k:500, t:"balanced", i:["三文鱼","米饭","海苔"]},
+            {n:"蒜蓉西兰花", k:120, t:"light", i:["西兰花","大蒜"]},
+            {n:"照烧鸡腿饭", k:600, t:"meat", i:["鸡腿","米饭"]},
+            {n:"全麦三明治", k:300, t:"light", i:["全麦面包","鸡蛋","火腿"]}
+        ];
+
+        let inventory = ["鸡蛋", "米饭"];
+        let plan = [];
+        let tempMenu = [];
+
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.innerText = msg;
+            t.style.opacity = 1;
+            setTimeout(() => t.style.opacity = 0, 2000);
+        }
+
+        function setSkin(name, el) {
+            document.body.className = name;
+            document.querySelectorAll('.skin-btn').forEach(b => b.classList.remove('active'));
+            el.classList.add('active');
+            showToast("主题已切换");
+        }
+
+        // 生成菜单
+        function genMenu() {
+            const pref = document.getElementById('pref').value;
+            let pool = db.filter(d => d.t === pref || pref === 'balanced');
+            if(pool.length === 0) pool = db;
+            tempMenu = pool.sort(() => 0.5 - Math.random()).slice(0, 3);
+
+            document.getElementById('genResult').innerHTML = `
+                <strong style="color:var(--accent); font-size:1.1rem;">${tempMenu[0].n}</strong> 等 ${tempMenu.length} 道菜
+                <div style="font-size:0.8rem; margin-top:5px;">请查看右侧详情</div>
+            `;
+            document.getElementById('menuList').innerHTML = tempMenu.map(x => `
+                <li class="item">
+                    <span>${x.n}</span>
+                    <small>${x.k} kcal</small>
+                </li>
+            `).join('');
+            showToast("菜单已生成");
+        }
+
+        // 加入计划
+        function addToPlan() {
+            if(tempMenu.length === 0) return showToast("请先生成菜单");
+            plan = [...plan, ...tempMenu];
+            renderPlan();
+            showToast("已加入计划");
+            jumpTo(3);
+        }
+
+        // 库存管理
+        function addIng() {
+            const input = document.getElementById('ingInput');
+            const val = input.value.trim();
+            if(val && !inventory.includes(val)) {
+                inventory.push(val);
+                renderInv();
+                input.value = '';
+            } else {
+                showToast("无效输入或已存在");
+            }
+        }
+        window.removeIng = function(val) {
+            inventory = inventory.filter(i => i !== val);
+            renderInv();
+        }
+        function renderInv() {
+            document.getElementById('ingTags').innerHTML = inventory.map(i => `
+                <div class="tag" onclick="removeIng('${i}')">${i} ×</div>
+            `).join('');
+        }
+        renderInv();
+
+        function matchRecipe() {
+            const matches = db.filter(r => r.i.some(ing => inventory.includes(ing)));
+            document.getElementById('matchList').innerHTML = matches.length ?
+                matches.map(m => `<li class="item"><span>${m.n}</span></li>`).join('') :
+                '<li class="item" style="justify-content:center">暂无匹配</li>';
+            showToast("匹配完成");
+        }
+
+        // 计划渲染
+        function renderPlan() {
+            document.getElementById('planList').innerHTML = plan.map((p, idx) => `
+                <li class="item">
+                    <span>${idx+1}. ${p.n}</span>
+                    <small>${p.k} kcal</small>
+                </li>
+            `).join('');
+            document.getElementById('calTotal').innerText = plan.reduce((a,b) => a+b.k, 0);
+        }
+
+        // 清单生成
+        function genShop() {
+            const needed = new Set();
+            plan.forEach(p => p.i.forEach(ing => needed.add(ing)));
+            inventory.forEach(ing => needed.delete(ing));
+            const list = Array.from(needed);
+            document.getElementById('shopList').innerHTML = list.length ?
+                list.map(i => `<li class="item"><label><input type="checkbox"> ${i}</label></li>`).join('') :
+                '<li class="item" style="justify-content:center; color:green;">无需采购</li>';
+            showToast("清单已刷新");
+        }
+
+        // 键盘翻页
+        document.addEventListener('keydown', (e) => {
+            if(e.key === "ArrowRight") flipNext();
+            if(e.key === "ArrowLeft") flipPrev();
+        });
+
+    </script>
+</body>
+</html>
